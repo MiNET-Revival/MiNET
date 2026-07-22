@@ -71,17 +71,24 @@ namespace MiNET.Players
 		{
 			Ticked?.Invoke(this, e);
 		}
+
+		public event EventHandler<PlayerEventCancellable> PlayerChat;
+		
 	}
 
-	public class PlayerEventArgs : EventArgs
+	public class PlayerEventArgs(Player player) : EventArgs
 	{
-		public Player Player { get; }
-		public Level Level { get; }
+		public Player Player { get; } = player;
+		public Level Level { get; } = player?.Level;
+	}
 
-		public PlayerEventArgs(Player player)
-		{
-			Player = player;
-			Level = player?.Level;
-		}
+	public class PlayerEventCancellable(Player player) : PlayerEventArgs(player)
+	{
+		public bool Cancel { get; set; }
+	}
+
+	public class PlayerChat(Player player, string message) : PlayerEventCancellable(player)
+	{
+		public string Message { get; set; } = message;
 	}
 }

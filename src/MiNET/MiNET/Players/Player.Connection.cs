@@ -119,13 +119,21 @@ namespace MiNET.Players
 				throw;
 			}
 		}
-
+		
+		/// <summary>
+		/// Handles the text message.
+		/// </summary>
+		/// <param name="message"></param>
 		public virtual void HandleMcpeText(McpeText message)
 		{
 			string text = message.message;
-
 			if (string.IsNullOrEmpty(text)) return;
-
+			if( message.type == 0x01)
+			{
+				var e = new PlayerChat(this, text);
+				PlayerChat?.Invoke(this, e);
+				if (e.Cancel) return;
+			}
 			Level.BroadcastMessage(text, sender: this);
 		}
 
