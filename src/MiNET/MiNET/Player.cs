@@ -3025,6 +3025,11 @@ namespace MiNET
 						InitializePlayer();
 					}
 				}
+				// Player was never initialized.
+				if (!IsSpawned && packetCount > 0)
+				{
+					InitializePlayer();
+				}
 
 				Log.Debug($"Sent {packetCount} chunks for {chunkPosition} with view distance {MaxViewDistance}");
 			}
