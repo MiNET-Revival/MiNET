@@ -3774,6 +3774,11 @@ namespace MiNET
 		{
 
 		}
+
+		public void HandleMcpeEmoteList(McpeEmoteList message)
+		{
+			
+		}
 	}
 
 	public class PlayerEventArgs : EventArgs

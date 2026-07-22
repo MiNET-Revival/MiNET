@@ -1395,6 +1395,16 @@ namespace MiNET.Net
 			_encodedMessage = encodedMessage;
 		}
 
+		public Emote[] ReadEmotes()
+		{
+			var count = ReadLength();
+			var emotes = new Emote[count];
+
+			for (int i = 0; i < count; i++)
+				emotes[i] = new Emote(ReadUUID());
+			return emotes;
+		}
+
 		public virtual void Reset()
 		{
 			ResetPacket();

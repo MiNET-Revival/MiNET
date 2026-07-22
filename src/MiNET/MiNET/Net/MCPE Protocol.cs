@@ -103,6 +103,7 @@ namespace MiNET.Net
 		void HandleMcpePlayerAuthInput(McpePlayerAuthInput message);
 		void HandleMcpeItemStackRequest(McpeItemStackRequest message);
 		void HandleMcpeUpdatePlayerGameType(McpeUpdatePlayerGameType message);
+		void HandleMcpeEmoteList(McpeEmoteList message);
 		void HandleMcpePacketViolationWarning(McpePacketViolationWarning message);
 		void HandleMcpeUpdateSubChunkBlocksPacket(McpeUpdateSubChunkBlocksPacket message);
 		void HandleMcpeSubChunkRequestPacket(McpeSubChunkRequestPacket message);
@@ -232,6 +233,7 @@ namespace MiNET.Net
 		void HandleMcpeCreativeContent(McpeCreativeContent message);
 		void HandleMcpePlayerEnchantOptions(McpePlayerEnchantOptions message);
 		void HandleMcpeItemStackResponse(McpeItemStackResponse message);
+		void HandleMcpeEmoteList(McpeEmoteList message);
 		void HandleMcpeItemRegistry(McpeItemRegistry message);
 		void HandleMcpeUpdateSubChunkBlocksPacket(McpeUpdateSubChunkBlocksPacket message);
 		void HandleMcpeSubChunkPacket(McpeSubChunkPacket message);
@@ -618,6 +620,9 @@ namespace MiNET.Net
 					break;
 				case McpeItemStackResponse msg:
 					_messageHandler.HandleMcpeItemStackResponse(msg);
+					break;
+				case McpeEmoteList msg:
+					_messageHandler.HandleMcpeEmoteList(msg);
 					break;
 				case McpeItemRegistry msg:
 					_messageHandler.HandleMcpeItemRegistry(msg);
@@ -1026,6 +1031,8 @@ namespace MiNET.Net
 						return McpeItemStackResponse.CreateObject().Decode(buffer);
 					case 0x97:
 						return McpeUpdatePlayerGameType.CreateObject().Decode(buffer);
+					case 0x98:
+						return McpeEmoteList.CreateObject().Decode(buffer);
 					case 0x9c:
 						return McpePacketViolationWarning.CreateObject().Decode(buffer);
 					case 0xa2:
@@ -9625,6 +9632,58 @@ namespace MiNET.Net
 			gameMode = default;
 			playerEntityUniqueId = default;
 			tick = default;
+		}
+
+	}
+
+	public partial class McpeEmoteList : Packet<McpeEmoteList>
+	{
+
+		public long playerRuntimeId;
+		public Emote[] emotes;
+
+		public McpeEmoteList()
+		{
+			Id = 0x98;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			WriteUnsignedVarLong(playerRuntimeId);
+			Write(emotes);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			playerRuntimeId = ReadUnsignedVarLong();
+			emotes = ReadEmotes();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			playerRuntimeId = default;
+			emotes = default;
 		}
 
 	}

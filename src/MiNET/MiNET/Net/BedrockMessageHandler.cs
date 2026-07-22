@@ -234,6 +234,9 @@ namespace MiNET.Net
 				case McpeServerboundLoadingScreen msg:
 					handler.HandleMcpeServerboundLoadingScreen(msg);
 					break;
+				case McpeEmoteList msg:
+					handler.HandleMcpeEmoteList(msg);
+					break;
 
 				default:
 				{

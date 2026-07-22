@@ -1173,7 +1173,14 @@
 		<field name="Player Entity Unique Id" type="ulong" />
 		<field name="Tick" type="UnsignedVarLong" />
 	</pdu>
-
+	
+	<pdu id="0x98" online="false" client="true" server="true" name="MCPE_EMOTE_LIST">
+		<field name="Player Runtime Id" type="UnsignedVarLong" />
+		<!--
+			Until we implements the emote pieces, we will just send the emotes as a string array.
+		-->
+		<field name="Emotes" type="Emote[]" />
+	</pdu>
 	<pdu id="0x9c" online="false" client="true" server="false" name="MCPE_PACKET_VIOLATION_WARNING">
 		<field name="Violation Type" type="SignedVarInt" />
 		<field name="Severity" type="SignedVarInt" />

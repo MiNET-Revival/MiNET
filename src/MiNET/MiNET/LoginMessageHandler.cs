@@ -786,6 +786,9 @@ namespace MiNET
 		public void HandleMcpeContainerRegistryCleanup(McpeContainerRegistryCleanup message)
 		{
 		}
+		public void HandleMcpeEmoteList(McpeEmoteList message)
+		{
+		}
 	}
 
 	public interface IServerManager

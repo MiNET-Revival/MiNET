@@ -667,6 +667,10 @@ namespace MiNET.Client
 		{
 		}
 
+		public virtual void HandleMcpeEmoteList(McpeEmoteList message)
+		{
+		}
+
 		/// <inheritdoc />
 		public virtual void HandleMcpeItemRegistry(McpeItemRegistry message)
 		{
