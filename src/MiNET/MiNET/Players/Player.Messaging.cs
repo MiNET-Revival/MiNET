@@ -318,48 +318,6 @@ namespace MiNET.Players
 
 		// Events
 
-		public event EventHandler<PlayerEventArgs> PlayerJoining;
-
-		protected virtual void OnPlayerJoining(PlayerEventArgs e)
-		{
-			PlayerJoining?.Invoke(this, e);
-		}
-
-		public event EventHandler<PlayerEventArgs> PlayerJoin;
-
-		protected virtual void OnPlayerJoin(PlayerEventArgs e)
-		{
-			PlayerJoin?.Invoke(this, e);
-		}
-
-		public event EventHandler<PlayerEventArgs> LocalPlayerIsInitialized;
-
-		protected virtual void OnLocalPlayerIsInitialized(PlayerEventArgs e)
-		{
-			LocalPlayerIsInitialized?.Invoke(this, e);
-		}
-
-		public event EventHandler<PlayerEventArgs> PlayerLeave;
-
-		protected virtual void OnPlayerLeave(PlayerEventArgs e)
-		{
-			PlayerLeave?.Invoke(this, e);
-		}
-
-		public event EventHandler<PlayerEventArgs> Ticking;
-
-		protected virtual void OnTicking(PlayerEventArgs e)
-		{
-			Ticking?.Invoke(this, e);
-		}
-
-		public event EventHandler<PlayerEventArgs> Ticked;
-
-		protected virtual void OnTicked(PlayerEventArgs e)
-		{
-			Ticked?.Invoke(this, e);
-		}
-
 		public virtual void HandleMcpeNetworkStackLatency(McpeNetworkStackLatency message)
 		{
 			var packet = McpeNetworkStackLatency.CreateObject();
