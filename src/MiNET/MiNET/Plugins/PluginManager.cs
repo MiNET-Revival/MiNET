@@ -69,6 +69,7 @@ namespace MiNET.Plugins
 			if (Config.GetProperty("DebugMode", false))
 			{
 				LoadPlugin(new DebugCommands());
+				LoadPlugin((new VanillaCommands()));
 			}
 		}
 
