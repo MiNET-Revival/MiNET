@@ -1,50 +1,42 @@
-In case you don't find the information you are looking for in the README. Do try the [wiki](https://github.com/NiclasOlofsson/MiNET/wiki)
+               # MiNET
 
-MiNET
-=====
+## Overview
 
-[![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/xCNrhDd) 
-[![Build status](https://github.com/NiclasOlofsson/MiNET/actions/workflows/dotnetcore.yml/badge.svg)](https://github.com/NiclasOlofsson/MiNET/actions/workflows/dotnetcore.yml)
-[![NuGet Version and Downloads count](https://buildstats.info/nuget/MiNET)](https://www.nuget.org/packages/MiNET) 
+MiNET is a Minecraft Bedrock server project written in C#.
 
-## What is this?
+The project is currently experimental. It is not designed for production use, and there is no guarantee of stability, compatibility, or long-term maintenance at this stage.
 
-A basic Minecraft Pocket Edition (MCPE) server written in C#. Current goal is to create a server that has enterprise performance for large Minecraft multi-user gaming providers. Current servers handle 10-100 users per instance, the aim with MiNET is to deal with thousands. Priority is also to create interfaces, and to some extend, ready-made implementations of the most basic enterprise game-management features (users, worlds, etc.). With all likelyhood, MiNET will emerge into a Microsoft Cloud ready product.
+The current goal is to progressively rework the architecture, make the code easier to understand, and prepare a cleaner foundation for future Bedrock protocol and plugin API work.
 
-As part of the project, I also deliver an up-to-date [automatically generated MCPE Protocol Specification](/src/MiNET/MiNET/Net/MCPE%20Protocol%20Documentation.md). This is a synery of that large parts of the communication code being generated using XML and T4 templates.
+## Current Changes
 
-## Why do this?
+Compared to the original fork, the main changes so far are:
 
-This is actually a pet-project - a true father-son project that I do together with my son Oliver 6 years old. He is driving the requirements for this, doing much of prioritization of the order of implementation. He is a great fan of online-MCPE gaming, but still too young to play the "real deal". He also lacks the patience and understanding of laggy under-performant servers, and the consequences of that. He is also not a big fan of the kill-style game-modes around, so a sub-project of this is for him to create new kidz-friendly game-modes that we can implement in MiNET. Oliver was the one originally responsible for creating the scope of our project.
+- reworked and split several large classes to make the code easier to understand;
+- progressively separated responsibilities in `Player` and `Level`;
+- introduced an initial event foundation for `Player`, `Entity`, and `Level`;
+- migrated the project to .NET 10.
 
-And as he really likes to tell his mother these days "Mom, don't disturb daddy. He is working for me now!". 6 years old, but I think you get the picture. I know he does.
+## Goals
 
-Follow me on <a href="https://twitter.com/NiclasOlofsson" class="twitter-follow-button" data-show-count="true" data-size="large" data-dnt="true">Twitter @NiclasOlofsson</a> for news about the project, or simply track the checkins which i tend to comment heavily.
- 
-MiNET is running CI through the fantastic service of AppVeyor. Currently the build status of master is...    
-[![Build status](https://ci.appveyor.com/api/projects/status/gb8ukrnogknic26e/branch/master)](https://ci.appveyor.com/project/NiclasOlofsson/MiNET/branch/master)
+The main goals of the project are:
 
-## Can I do my own plugins?
+- implement all packets required by the targeted Minecraft Bedrock protocol;
+- build a complete event system for players, entities, worlds, server lifecycle, inventories, and plugins;
+- clean up the project and progressively remove old or unused secondary projects such as `TestPlugin`, `Plotter`, `BuilderBase`, and similar legacy folders;
+- properly rework the Bedrock protocol implementation;
+- make the architecture clearer and easier to maintain.
 
-Yes you can! See the [Plugin documention in the wiki](https://github.com/NiclasOlofsson/MiNET/wiki/Plugin-API-Documentation)
+## Contribution
 
-**Please note that the plugin system is always going to be work in progress and the example might be a bit outdated at times.**
+Contributions are welcome.
 
-## Can I contribute?
+AI usage is not forbidden. AI has already been used on this project to help with refactoring, documentation, and code exploration. Contributions are still expected to be reviewed, understandable, and testable.
 
-Of course you can! We just need you to accept the following:
+Before proposing a large change, keep in mind that the project is actively being reworked and that some areas, especially the generated protocol code, may be sensitive.
 
-1. You will use the same coding style as the rest of the code.
-2. You do not copy code from anyone or anywhere, unless you have their permissions.
-3. We can always decide not to include your code, and we might make changes to it. So better ask before you do a pull request to the project.
+## Credits
 
-Also, make sure to join our discord chat for easy communication.    
-[![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/xCNrhDd) 
+This project is based on the original work of Niclas Olofsson and the MiNET project.
 
-## Are there forums for MiNET?
-
-No, but you can ask questions on [stack**overflow**](http://stackoverflow.com/questions/ask?tags=minet) using the tag *MiNET*. 
-
-## Getting started
-
-See the [Getting Started](https://github.com/NiclasOlofsson/MiNET/wiki/Getting-Started) section on the wiki.
+Credits also go to CRPE-Team, from whose project this repository was forked.
