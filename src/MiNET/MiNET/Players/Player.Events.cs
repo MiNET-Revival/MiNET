@@ -24,6 +24,10 @@
 #endregion
 
 using System;
+using MiNET.Entities;
+using MiNET.Entities.World;
+using MiNET.Items;
+using MiNET.Utils.Vectors;
 using MiNET.Worlds;
 
 namespace MiNET.Players
@@ -72,23 +76,146 @@ namespace MiNET.Players
 			Ticked?.Invoke(this, e);
 		}
 
-		public event EventHandler<PlayerEventCancellable> PlayerChat;
-		
+		public event EventHandler<PlayerChatEventArgs> PlayerChat;
+
+		public event EventHandler<PlayerMoveEventArgs> PlayerMove;
+
+		public event EventHandler<PlayerTeleportEventArgs> PlayerTeleport;
+
+		public event EventHandler<PlayerChangeDimensionEventArgs> PlayerChangeDimension;
+
+		public event EventHandler<PlayerDropItemEventArgs> PlayerDropItem;
+
+		public event EventHandler<PlayerPickupItemEventArgs> PlayerPickupItem;
+
+		public event EventHandler<PlayerEntityInteractEventArgs> PlayerEntityInteract;
+
+		public event EventHandler<PlayerEntityAttackEventArgs> PlayerEntityAttack;
+
+		public event EventHandler<PlayerToggleSprintEventArgs> PlayerToggleSprint;
 	}
 
-	public class PlayerEventArgs(Player player) : EventArgs
+	public class PlayerEventArgs : EventArgs
 	{
-		public Player Player { get; } = player;
-		public Level Level { get; } = player?.Level;
+		public Player Player { get; }
+		public Level Level { get; }
+
+		public PlayerEventArgs(Player player)
+		{
+			Player = player;
+			Level = player?.Level;
+		}
 	}
 
-	public class PlayerEventCancellable(Player player) : PlayerEventArgs(player)
+	public class PlayerEventCancellable : PlayerEventArgs
 	{
 		public bool Cancel { get; set; }
+
+		public PlayerEventCancellable(Player player) : base(player)
+		{
+		}
 	}
 
-	public class PlayerChat(Player player, string message) : PlayerEventCancellable(player)
+	public class PlayerChatEventArgs : PlayerEventCancellable
 	{
-		public string Message { get; set; } = message;
+		public string Message { get; set; }
+
+		public PlayerChatEventArgs(Player player, string message) : base(player)
+		{
+			Message = message;
+		}
+	}
+
+	public class PlayerMoveEventArgs : PlayerEventCancellable
+	{
+		public PlayerLocation From { get; }
+		public PlayerLocation To { get; set; }
+		public bool IsOnGround { get; set; }
+		public bool IsFlyingHorizontally { get; set; }
+
+		public PlayerMoveEventArgs(Player player, PlayerLocation from, PlayerLocation to, bool isOnGround, bool isFlyingHorizontally) : base(player)
+		{
+			From = from;
+			To = to;
+			IsOnGround = isOnGround;
+			IsFlyingHorizontally = isFlyingHorizontally;
+		}
+	}
+
+	public class PlayerTeleportEventArgs : PlayerMoveEventArgs
+	{
+		public PlayerTeleportEventArgs(Player player, PlayerLocation from, PlayerLocation to) : base(player, from, to, player?.IsOnGround ?? false, false)
+		{
+		}
+	}
+
+	public class PlayerChangeDimensionEventArgs : PlayerTeleportEventArgs
+	{
+		public Level FromLevel { get; }
+		public Level ToLevel { get; set; }
+		public Dimension FromDimension { get; }
+		public Dimension ToDimension { get; set; }
+
+		public PlayerChangeDimensionEventArgs(Player player, Level fromLevel, Level toLevel, PlayerLocation from, PlayerLocation to, Dimension fromDimension, Dimension toDimension) : base(player, from, to)
+		{
+			FromLevel = fromLevel;
+			ToLevel = toLevel;
+			FromDimension = fromDimension;
+			ToDimension = toDimension;
+		}
+	}
+
+	public class PlayerDropItemEventArgs : PlayerEventCancellable
+	{
+		public Item Item { get; set; }
+		public PlayerLocation Position { get; set; }
+
+		public PlayerDropItemEventArgs(Player player, Item item, PlayerLocation position) : base(player)
+		{
+			Item = item;
+			Position = position;
+		}
+	}
+
+	public class PlayerPickupItemEventArgs : PlayerEventCancellable
+	{
+		public ItemEntity ItemEntity { get; }
+		public Item Item => ItemEntity?.Item;
+
+		public PlayerPickupItemEventArgs(Player player, ItemEntity itemEntity) : base(player)
+		{
+			ItemEntity = itemEntity;
+		}
+	}
+
+	public class PlayerEntityInteractEventArgs : PlayerEventCancellable
+	{
+		public Entity Target { get; }
+		public Item ItemInHand { get; }
+		public int ActionId { get; }
+
+		public PlayerEntityInteractEventArgs(Player player, Entity target, Item itemInHand, int actionId) : base(player)
+		{
+			Target = target;
+			ItemInHand = itemInHand;
+			ActionId = actionId;
+		}
+	}
+
+	public class PlayerEntityAttackEventArgs : PlayerEntityInteractEventArgs
+	{
+		public PlayerEntityAttackEventArgs(Player player, Entity target, Item itemInHand, int actionId) : base(player, target, itemInHand, actionId)
+		{
+		}
+	}
+
+	public class PlayerToggleSprintEventArgs : PlayerEventCancellable
+	{
+		public bool IsSprinting { get; set; }
+
+		public PlayerToggleSprintEventArgs(Player player, bool isSprinting) : base(player)
+		{
+			IsSprinting = isSprinting;
+		}
 	}
 }

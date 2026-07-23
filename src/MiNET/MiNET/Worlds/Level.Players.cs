@@ -196,6 +196,7 @@ namespace MiNET.Worlds
 				if (Entities.TryAdd(entity.EntityId, entity))
 				{
 					entity.SpawnToPlayers(GetAllPlayers());
+					OnEntityAdded(new LevelEntityEventArgs(this, entity));
 				}
 				else
 				{
@@ -210,7 +211,22 @@ namespace MiNET.Worlds
 			{
 				if (!Entities.TryRemove(entity.EntityId, out entity)) return; // It's ok. Holograms destroy this play..
 				entity.DespawnFromPlayers(GetAllPlayers());
+				OnEntityRemoved(new LevelEntityEventArgs(this, entity));
 			}
+		}
+
+		public event EventHandler<LevelEntityEventArgs> EntityAdded;
+
+		protected virtual void OnEntityAdded(LevelEntityEventArgs e)
+		{
+			EntityAdded?.Invoke(this, e);
+		}
+
+		public event EventHandler<LevelEntityEventArgs> EntityRemoved;
+
+		protected virtual void OnEntityRemoved(LevelEntityEventArgs e)
+		{
+			EntityRemoved?.Invoke(this, e);
 		}
 
 

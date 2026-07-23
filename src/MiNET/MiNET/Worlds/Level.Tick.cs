@@ -65,6 +65,20 @@ namespace MiNET.Worlds
 
 		public Profiler _profiler = new Profiler();
 
+		public event EventHandler<LevelTickEventArgs> LevelTicking;
+
+		protected virtual void OnLevelTicking(LevelTickEventArgs e)
+		{
+			LevelTicking?.Invoke(this, e);
+		}
+
+		public event EventHandler<LevelTickEventArgs> LevelTicked;
+
+		protected virtual void OnLevelTicked(LevelTickEventArgs e)
+		{
+			LevelTicked?.Invoke(this, e);
+		}
+
 		private void WorldTick(object sender)
 		{
 			//if (_tickTimer.ElapsedMilliseconds < 40 && LastTickProcessingTime < 50)
@@ -82,6 +96,7 @@ namespace MiNET.Worlds
 			try
 			{
 				TickTime++;
+				OnLevelTicking(new LevelTickEventArgs(this, TickTime));
 
 				Player[] players = GetSpawnedPlayers();
 
@@ -287,6 +302,7 @@ namespace MiNET.Worlds
 				Task.WhenAll(tasks).Wait();
 
 				if (Log.IsDebugEnabled && _tickTimer.ElapsedMilliseconds >= 50) Log.Error($"World tick too too long: {_tickTimer.ElapsedMilliseconds} ms");
+				OnLevelTicked(new LevelTickEventArgs(this, TickTime));
 			}
 			catch (Exception e)
 			{

@@ -94,6 +94,11 @@ namespace MiNET.Players
 
 			try
 			{
+				var teleportEvent = new PlayerTeleportEventArgs(this, (PlayerLocation) KnownPosition.Clone(), newPosition);
+				PlayerTeleport?.Invoke(this, teleportEvent);
+				if (teleportEvent.Cancel) return;
+				newPosition = teleportEvent.To;
+
 				bool oldNoAi = NoAi;
 				SetNoAi(true);
 
@@ -134,6 +139,9 @@ namespace MiNET.Players
 
 		public virtual void ChangeDimension(Level toLevel, PlayerLocation spawnPoint, Dimension dimension, Func<Level> levelFunc = null)
 		{
+			var fromLevel = Level;
+			var fromDimension = Level?.Dimension ?? Dimension.Overworld;
+
 			switch (dimension)
 			{
 				case Dimension.Overworld:
@@ -153,6 +161,18 @@ namespace MiNET.Players
 					}
 					break;
 			}
+
+			if (toLevel == null && levelFunc != null)
+			{
+				toLevel = levelFunc();
+			}
+
+			var changeDimensionEvent = new PlayerChangeDimensionEventArgs(this, fromLevel, toLevel, (PlayerLocation) KnownPosition.Clone(), spawnPoint ?? toLevel?.SpawnPoint, fromDimension, dimension);
+			PlayerChangeDimension?.Invoke(this, changeDimensionEvent);
+			if (changeDimensionEvent.Cancel) return;
+			toLevel = changeDimensionEvent.ToLevel;
+			spawnPoint = changeDimensionEvent.To;
+			dimension = changeDimensionEvent.ToDimension;
 
 			switch (dimension)
 			{
@@ -181,13 +201,6 @@ namespace MiNET.Players
 			}
 
 			Level.RemovePlayer(this);
-
-			Dimension fromDimension = Level.Dimension;
-
-			if (toLevel == null && levelFunc != null)
-			{
-				toLevel = levelFunc();
-			}
 
 			Level = toLevel; // Change level
 			SpawnPosition = spawnPoint ?? Level?.SpawnPoint;

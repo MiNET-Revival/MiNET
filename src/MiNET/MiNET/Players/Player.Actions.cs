@@ -428,6 +428,10 @@ namespace MiNET.Players
 			lock (_sprintLock)
 			{
 				if (isSprinting == IsSprinting) return;
+				var sprintEvent = new PlayerToggleSprintEventArgs(this, isSprinting);
+				PlayerToggleSprint?.Invoke(this, sprintEvent);
+				if (sprintEvent.Cancel) return;
+				isSprinting = sprintEvent.IsSprinting;
 
 				if (isSprinting)
 				{

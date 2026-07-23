@@ -165,6 +165,9 @@ namespace MiNET.Players
 			}
 
 			if (!Level.TryGetEntity(transaction.RuntimeEntityId, out Entity target)) return;
+			var interactEvent = new PlayerEntityInteractEventArgs(this, target, itemInHand, (int) transaction.ActionType);
+			PlayerEntityInteract?.Invoke(this, interactEvent);
+			if (interactEvent.Cancel) return;
 			target.DoItemInteraction(this, itemInHand);
 		}
 
@@ -173,6 +176,9 @@ namespace MiNET.Players
 			DoInteraction((int) transaction.ActionType, this);
 
 			if (!Level.TryGetEntity(transaction.RuntimeEntityId, out Entity target)) return;
+			var interactEvent = new PlayerEntityInteractEventArgs(this, target, Inventory.GetItemInHand(), (int) transaction.ActionType);
+			PlayerEntityInteract?.Invoke(this, interactEvent);
+			if (interactEvent.Cancel) return;
 			target.DoInteraction((int) transaction.ActionType, this);
 		}
 
@@ -185,6 +191,9 @@ namespace MiNET.Players
 			}
 
 			if (!Level.TryGetEntity(transaction.RuntimeEntityId, out Entity target)) return;
+			var attackEvent = new PlayerEntityAttackEventArgs(this, target, itemInHand, (int) transaction.ActionType);
+			PlayerEntityAttack?.Invoke(this, attackEvent);
+			if (attackEvent.Cancel) return;
 
 
 			LastAttackTarget = target;
@@ -387,10 +396,16 @@ namespace MiNET.Players
 
 		public virtual ItemEntity DropItem(Item item)
 		{
+			var dropEvent = new PlayerDropItemEventArgs(this, item, KnownPosition + new PlayerLocation(0f, 1.62f, 0f));
+			PlayerDropItem?.Invoke(this, dropEvent);
+			if (dropEvent.Cancel) return null;
+			item = dropEvent.Item;
+			if (item == null || item.Count == 0) return null;
+
 			var itemEntity = new ItemEntity(Level, item)
 			{
 				Velocity = KnownPosition.GetDirectionVector().Normalize() * 0.3f,
-				KnownPosition = KnownPosition + new Vector3(0f, 1.62f, 0f)
+				KnownPosition = dropEvent.Position
 			};
 			itemEntity.SpawnEntity();
 
@@ -399,6 +414,9 @@ namespace MiNET.Players
 
 		public virtual bool PickUpItem(ItemEntity item)
 		{
+			var pickupEvent = new PlayerPickupItemEventArgs(this, item);
+			PlayerPickupItem?.Invoke(this, pickupEvent);
+			if (pickupEvent.Cancel) return false;
 			return Inventory.SetFirstEmptySlot(item.Item, true);
 		}
 

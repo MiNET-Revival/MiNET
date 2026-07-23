@@ -101,6 +101,13 @@ namespace MiNET.Players
 
 			if (!AcceptPlayerMove(message, isOnGround, isFlyingHorizontally)) return;
 
+			var moveEvent = new PlayerMoveEventArgs(this, (PlayerLocation) KnownPosition.Clone(), newLocation, isOnGround, isFlyingHorizontally);
+			PlayerMove?.Invoke(this, moveEvent);
+			if (moveEvent.Cancel) return;
+			newLocation = moveEvent.To;
+			isOnGround = moveEvent.IsOnGround;
+			isFlyingHorizontally = moveEvent.IsFlyingHorizontally;
+
 			IsFlyingHorizontally = isFlyingHorizontally;
 			IsOnGround = isOnGround;
 

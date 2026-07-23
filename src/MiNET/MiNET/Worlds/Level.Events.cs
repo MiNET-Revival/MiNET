@@ -76,6 +76,30 @@ namespace MiNET.Worlds
 		}
 	}
 
+	public class LevelTickEventArgs : EventArgs
+	{
+		public Level Level { get; }
+		public long TickTime { get; }
+
+		public LevelTickEventArgs(Level level, long tickTime)
+		{
+			Level = level;
+			TickTime = tickTime;
+		}
+	}
+
+	public class LevelEntityEventArgs : EventArgs
+	{
+		public Level Level { get; }
+		public Entity Entity { get; }
+
+		public LevelEntityEventArgs(Level level, Entity entity)
+		{
+			Level = level;
+			Entity = entity;
+		}
+	}
+
 	public class BlockPlaceEventArgs : LevelCancelEventArgs
 	{
 		public Block TargetBlock { get; private set; }

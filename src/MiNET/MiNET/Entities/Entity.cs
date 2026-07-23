@@ -41,7 +41,7 @@ using MiNET.Worlds;
 
 namespace MiNET.Entities
 {
-	public class Entity
+	public partial class Entity
 	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof(Entity));
 
@@ -625,6 +625,10 @@ namespace MiNET.Entities
 
 		public virtual void OnTick(Entity[] entities)
 		{
+			var tickEvent = new EntityTickEventArgs(this, entities);
+			EntityTick?.Invoke(this, tickEvent);
+			if (tickEvent.Cancel) return;
+
 			SeenEntities.Clear();
 			UnseenEntities.Clear();
 			Age++;
@@ -639,6 +643,10 @@ namespace MiNET.Entities
 
 		public virtual void SpawnEntity()
 		{
+			var spawnEvent = new EntitySpawnEventArgs(this);
+			EntitySpawn?.Invoke(this, spawnEvent);
+			if (spawnEvent.Cancel) return;
+
 			Level.AddEntity(this);
 
 			IsSpawned = true;
@@ -717,6 +725,10 @@ namespace MiNET.Entities
 
 		public virtual void DespawnEntity()
 		{
+			var despawnEvent = new EntityDespawnEventArgs(this);
+			EntityDespawn?.Invoke(this, despawnEvent);
+			if (despawnEvent.Cancel) return;
+
 			Level.RemoveEntity(this);
 			IsSpawned = false;
 		}

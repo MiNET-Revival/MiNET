@@ -130,9 +130,10 @@ namespace MiNET.Players
 			if (string.IsNullOrEmpty(text)) return;
 			if( message.type == 0x01)
 			{
-				var e = new PlayerChat(this, text);
+				var e = new PlayerChatEventArgs(this, text);
 				PlayerChat?.Invoke(this, e);
 				if (e.Cancel) return;
+				text = e.Message;
 			}
 			Level.BroadcastMessage(text, sender: this);
 		}
