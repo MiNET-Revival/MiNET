@@ -920,9 +920,32 @@ namespace MiNET.Client
 			//	);
 			//}
 
-			var root = message.namedtag.NbtFile.RootTag;
-			//Log.Debug($"\n{root}");
-			File.WriteAllText(Path.Combine(Path.GetTempPath(), "Biomes_" + Guid.NewGuid() + ".txt"), root.ToString());
+			var output = new StringBuilder();
+			output.AppendLine($"Biome strings: {message.stringList?.Count ?? 0}");
+			if (message.stringList != null)
+			{
+				for (var i = 0; i < message.stringList.Count; i++)
+				{
+					output.AppendLine($"{i}: {message.stringList[i]}");
+				}
+			}
+
+			output.AppendLine();
+			output.AppendLine($"Biome definitions: {message.biomeDefinitions?.Count ?? 0}");
+			if (message.biomeDefinitions != null)
+			{
+				foreach (var biome in message.biomeDefinitions)
+				{
+					var name = message.stringList != null && biome.NameIndex < message.stringList.Count
+						? message.stringList[biome.NameIndex]
+						: $"#{biome.NameIndex}";
+
+					output.AppendLine(
+						$"{name}: id={biome.BiomeId?.ToString() ?? "null"}, temp={biome.Temperature}, downfall={biome.Downfall}, depth={biome.Depth}, scale={biome.Scale}, water=0x{biome.MapWaterColorArgb:X8}, rain={biome.Rain}");
+				}
+			}
+
+			File.WriteAllText(Path.Combine(Path.GetTempPath(), "Biomes_" + Guid.NewGuid() + ".txt"), output.ToString());
 		}
 
 		public override void HandleMcpeNetworkChunkPublisherUpdate(McpeNetworkChunkPublisherUpdate message)
