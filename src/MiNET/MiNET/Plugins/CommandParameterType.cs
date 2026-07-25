@@ -21,21 +21,21 @@
 
 		FullIntegerRange = 23,
 
-		EquipmentSlot = 47,
-		String = 48,
+		EquipmentSlot = 43,
+		String = 44,
 
-		IntPosition = 64,
-		Position = 65,
+		IntPosition = 52,
+		Position = 53,
 
-		Message = 67,
+		Message = 55,
 
-		Rawtext = 70,
+		Rawtext = 58,
 
-		Json = 74,
+		Json = 62,
 
-		BlockStates = 84,
+		BlockStates = 71,
 
-		Command = 87,
+		Command = 74,
 
 
 		EnumFlag = 0x200000,

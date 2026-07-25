@@ -140,11 +140,28 @@ namespace MiNET.Worlds
 			else
 			{
 				BreakBlock(player, block, blockEntity, inHand, face);
+				SendSyncedBreakUpdate(player, blockCoordinates);
 
 				player.Inventory.DamageItemInHand(ItemDamageReason.BlockBreak, null, block);
 				player.HungerManager.IncreaseExhaustion(0.025f);
 				player.ExperienceManager.AddExperience(block.GetExperiencePoints());
 			}
+		}
+
+		private static void SendSyncedBreakUpdate(Player player, BlockCoordinates blockCoordinates)
+		{
+			if (player == null) return;
+
+			var air = new Air {Coordinates = blockCoordinates};
+			var updateBlock = McpeUpdateBlockSynced.CreateObject();
+			updateBlock.coordinates = blockCoordinates;
+			updateBlock.blockRuntimeId = (uint) air.RuntimeId;
+			updateBlock.blockPriority = 0xb;
+			updateBlock.dataLayerId = 0;
+			updateBlock.unknown0 = player.EntityId;
+			updateBlock.unknown1 = 1;
+
+			player.SendPacket(updateBlock);
 		}
 
 		private static void RevertBlockAction(Player player, Block block, BlockEntity blockEntity)

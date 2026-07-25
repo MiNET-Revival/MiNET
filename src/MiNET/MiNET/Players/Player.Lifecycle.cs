@@ -158,6 +158,7 @@ namespace MiNET.Players
 				SendAvailableCommands(); // Don't send this before StartGame!
 
 				SendNetworkChunkPublisherUpdate();
+				MiNetServer.FastThreadPool.QueueUserWorkItem(SendChunksForKnownPosition);
 			}
 			catch (Exception e)
 			{
@@ -190,17 +191,11 @@ namespace MiNET.Players
 
 		public virtual void SendBiomeDefinitionList()
 		{
-			var nbt = new Nbt
-			{
-				NbtFile = new NbtFile
-				{
-					Flavor = NbtFlavor.Bedrock,
-					RootTag = BiomeUtils.BiomesCache,
-				}
-			};
+			var stringList = new BiomeStringList();
 
 			var pk = McpeBiomeDefinitionList.CreateObject();
-			pk.namedtag = nbt;
+			pk.biomeDefinitions = BiomeDefinitions.FromBiomes(BiomeUtils.IdBiomeMap.Values, stringList);
+			pk.stringList = stringList;
 			SendPacket(pk);
 		}
 
@@ -279,6 +274,8 @@ namespace MiNET.Players
 
 		public virtual void InitializePlayer()
 		{
+			if (IsSpawned) return;
+
 			// Send set health
 
 			SendSetEntityData();
@@ -289,7 +286,8 @@ namespace MiNET.Players
 			SendSetTime();
 			IsSpawned = true;
 
-			SetPosition(SpawnPosition);
+			var initializedPosition = _lastClientAuthInputPosition ?? SpawnPosition;
+			SetPosition(initializedPosition);
 
 			LastUpdatedTime = DateTime.UtcNow;
 			_haveJoined = true;

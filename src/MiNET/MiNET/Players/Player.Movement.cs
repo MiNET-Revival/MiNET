@@ -62,6 +62,84 @@ namespace MiNET.Players
 	{
 		private object _moveSyncLock = new object();
 
+		protected virtual void HandlePlayerAuthInputMovement(McpePlayerAuthInput message)
+		{
+			if (!IsSpawned || HealthManager.IsDead)
+			{
+				return;
+			}
+
+			var newLocation = new PlayerLocation
+			{
+				X = message.Position.X,
+				Y = message.Position.Y - 1.62f,
+				Z = message.Position.Z,
+				Pitch = message.Pitch,
+				Yaw = message.Yaw,
+				HeadYaw = message.HeadYaw
+			};
+
+			double distanceTo = KnownPosition.DistanceTo(newLocation);
+
+			CurrentSpeed = distanceTo / ((double) (DateTime.UtcNow - LastUpdatedTime).Ticks / TimeSpan.TicksPerSecond);
+
+			double verticalMove = newLocation.Y - KnownPosition.Y;
+
+			bool isOnGround = IsOnGround;
+			bool isFlyingHorizontally = false;
+			if (Math.Abs(distanceTo) > 0.01)
+			{
+				isOnGround = CheckOnGround(newLocation);
+				isFlyingHorizontally = !(AllowFly || IsOnGround || isOnGround || Math.Abs(verticalMove) > 0.001);
+			}
+
+			var moveEvent = new PlayerMoveEventArgs(this, (PlayerLocation) KnownPosition.Clone(), newLocation, isOnGround, isFlyingHorizontally);
+			PlayerMove?.Invoke(this, moveEvent);
+			if (moveEvent.Cancel)
+			{
+				return;
+			}
+			newLocation = moveEvent.To;
+			isOnGround = moveEvent.IsOnGround;
+			isFlyingHorizontally = moveEvent.IsFlyingHorizontally;
+
+			IsFlyingHorizontally = isFlyingHorizontally;
+			IsOnGround = isOnGround;
+
+			if (!IsGliding) HungerManager.Move(Vector3.Distance(new Vector3(KnownPosition.X, 0, KnownPosition.Z), new Vector3(newLocation.X, 0, newLocation.Z)));
+
+			KnownPosition = newLocation;
+
+			IsFalling = verticalMove < 0 && !IsOnGround;
+
+			if (IsFalling)
+			{
+				if (StartFallY == 0)
+				{
+					StartFallY = KnownPosition.Y;
+				}
+			}
+			else
+			{
+				double damage = Math.Max(0, StartFallY - KnownPosition.Y - 3);
+				if (damage > 0 && !StayInWater(newLocation))
+				{
+					int calculatedDamage = (int) DamageCalculator.CalculatePlayerDamage(null, this, null, damage, DamageCause.Fall);
+					HealthManager.TakeHit(null, calculatedDamage, DamageCause.Fall);
+				}
+
+				StartFallY = 0;
+			}
+
+			LastUpdatedTime = DateTime.UtcNow;
+
+			var chunkPosition = new ChunkCoordinates(KnownPosition);
+			if (_currentChunkPosition != chunkPosition && _currentChunkPosition.DistanceTo(chunkPosition) >= MoveRenderDistance)
+			{
+				MiNetServer.FastThreadPool.QueueUserWorkItem(SendChunksForKnownPosition);
+			}
+		}
+
 		public virtual void HandleMcpeMovePlayer(McpeMovePlayer message)
 		{
 			if (!IsSpawned || HealthManager.IsDead) return;

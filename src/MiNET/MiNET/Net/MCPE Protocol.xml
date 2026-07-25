@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<protocol gameVersion="1.21.70" protocolVersion="786">
+<protocol gameVersion="1.21.80" protocolVersion="800">
 
 	<constants>
 		<constant id="OFFLINE_MESSAGE_DATA_ID" type="byte[]"
@@ -1048,7 +1048,8 @@
 	</pdu>
 
 	<pdu id="0x7a" online="false" client="false" server="true" name="MCPE_BIOME_DEFINITION_LIST">
-		<field name="NamedTag" type="Nbt" />
+		<field name="Biome Definitions" type="BiomeDefinitions" />
+		<field name="String List" type="BiomeStringList" />
 	</pdu>
 
 	<pdu id="0x7b" online="false" client="true" server="true" name="MCPE_LEVEL_SOUND_EVENT">
@@ -1149,6 +1150,8 @@
 			<enum id="Destroy" value="4" />
 			<enum id="Consume" value="5" />
 			<enum id="Create" value="6" />
+			<enum id="Place in container" value="7" />
+			<enum id="Take out container" value="8" />
 			<enum id="Lab table combine" value="9" />
 			<enum id="Beacon payment" value="10" />
 			<enum id="Mine Block" value="11"/>
@@ -1399,6 +1402,30 @@
 		<field name="Update Type" type="byte" />
 		<field name="Int Override Value" type="int" optional="true" />
 		<field name="Float Override Value" type="float" optional="true" />
+	</pdu>
+
+	<pdu id="0x146" online="false" client="false" server="true" name="MCPE_PLAYER_LOCATION">
+		<enums id="Player Location Type">
+			<enum id="Coordinates" value="0" />
+			<enum id="Hide" value="1" />
+		</enums>
+
+		<!-- Protocol v800: Position is present only when Type is Coordinates. The current T4 XML schema has no switch-by-field support. -->
+		<field name="Type" type="int" />
+		<field name="Entity Unique ID" type="SignedVarLong" />
+		<field name="Position" type="Vector3" />
+	</pdu>
+
+	<pdu id="0x147" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_CONTROL_SCHEME_SET">
+		<enums id="Control Scheme">
+			<enum id="Locked Player Relative Strafe" value="0" />
+			<enum id="Camera Relative" value="1" />
+			<enum id="Camera Relative Strafe" value="2" />
+			<enum id="Player Relative" value="3" />
+			<enum id="Player Relative Strafe" value="4" />
+		</enums>
+
+		<field name="Control Scheme" type="byte" />
 	</pdu>
 
 	<pdu id="0xe0" online="false" client="false" server="true" name="MCPE_ALEX_ENTITY_ANIMATION">

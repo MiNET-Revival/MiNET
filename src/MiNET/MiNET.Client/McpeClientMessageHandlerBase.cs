@@ -707,6 +707,10 @@ namespace MiNET.Client
 			
 		}
 
+		public void HandleMcpeClientboundControlSchemeSet(McpeClientboundControlSchemeSet message)
+		{
+		}
+
 		public virtual void HandleMcpeAlexEntityAnimation(McpeAlexEntityAnimation message)
 		{
 		}
@@ -799,6 +803,10 @@ namespace MiNET.Client
 		public void HandleMcpePlayerUpdateEntityOverrides(McpePlayerUpdateEntityOverrides message)
 		{
 
+		}
+
+		public void HandleMcpePlayerLocation(McpePlayerLocation message)
+		{
 		}
 	}
 

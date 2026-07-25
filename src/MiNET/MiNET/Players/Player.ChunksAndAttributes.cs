@@ -97,8 +97,10 @@ namespace MiNET.Players
 			levelSettings.BonusChest = false;
 			levelSettings.MapEnabled = false;
 			levelSettings.PermissionLevel = (byte) PermissionLevel;
-			levelSettings.GameVersion = "*";
+			levelSettings.ServerChunkTickRange = 4;
+			levelSettings.GameVersion = McpeProtocolInfo.GameVersion;
 			levelSettings.HasEduFeaturesEnabled = false;
+			levelSettings.IsNewNether = true;
 			
 			var startGame = McpeStartGame.CreateObject();
 			startGame.levelSettings = levelSettings;
@@ -114,10 +116,13 @@ namespace MiNET.Players
 			startGame.isTrial = false;
 			startGame.currentTick = Level.TickTime;
 			startGame.enchantmentSeed = 123456;
-			startGame.movementType = (int) McpeStartGame.ServerAuthMovementMode.LegacyClientAuthoritativeV1;
+			startGame.movementType = (int) McpeStartGame.ServerAuthMovementMode.ServerAuthoritativeV2;
+			startGame.enableNewBlockBreakSystem = false;
 
-			//startGame.blockPalette = BlockFactory.BlockPalette;
 			startGame.blockNetworkIdsAreHashes = BlockFactory.FactoryProfile.BlockRuntimeIdsAreHashes;
+			startGame.blockPalette = startGame.blockNetworkIdsAreHashes
+				? new ListBlockPalette()
+				: BlockFactory.BlockPalette;
 
 			startGame.enableNewInventorySystem = true;
 			startGame.blockPaletteChecksum = 0;
@@ -147,6 +152,7 @@ namespace MiNET.Players
 		}
 
 		private object _sendChunkSync = new object();
+		private PlayerLocation _lastClientAuthInputPosition;
 
 		private void ForcedSendChunk(PlayerLocation position, bool cache = true)
 		{

@@ -46,7 +46,7 @@ namespace MiNET.Blocks
 			foreach (var record in this)
 			{
 				packet.Write(record.Id);
-				packet.Write(record.StatesCacheNbt);
+				packet.Write(record.StatesNbt);
 			}
 		}
 
@@ -92,7 +92,7 @@ namespace MiNET.Blocks
 			foreach (var record in this.Values)
 			{
 				packet.Write(record.Id);
-				packet.Write(record.StatesCacheNbt);
+				packet.Write(record.StatesNbt);
 			}
 		}
 

@@ -45,8 +45,8 @@ namespace MiNET.Net
 {
 	public class McpeProtocolInfo
 	{
-		public const int ProtocolVersion = 786;
-		public const string GameVersion = "1.21.70";
+		public const int ProtocolVersion = 800;
+		public const string GameVersion = "1.21.80";
 	}
 
 	public interface IMcpeMessageHandler
@@ -256,6 +256,8 @@ namespace MiNET.Net
 		void HandleMcpeSetMovementAuthority(McpeSetMovementAuthority message);
 		void HandleMcpeUpdateClientOptions(McpeUpdateClientOptions message);
 		void HandleMcpePlayerUpdateEntityOverrides(McpePlayerUpdateEntityOverrides message);
+		void HandleMcpePlayerLocation(McpePlayerLocation message);
+		void HandleMcpeClientboundControlSchemeSet(McpeClientboundControlSchemeSet message);
 		void HandleMcpeAlexEntityAnimation(McpeAlexEntityAnimation message);
 		void HandleFtlCreatePlayer(FtlCreatePlayer message);
 	}
@@ -690,6 +692,12 @@ namespace MiNET.Net
 				case McpePlayerUpdateEntityOverrides msg:
 					_messageHandler.HandleMcpePlayerUpdateEntityOverrides(msg);
 					break;
+				case McpePlayerLocation msg:
+					_messageHandler.HandleMcpePlayerLocation(msg);
+					break;
+				case McpeClientboundControlSchemeSet msg:
+					_messageHandler.HandleMcpeClientboundControlSchemeSet(msg);
+					break;
 				case McpeAlexEntityAnimation msg:
 					_messageHandler.HandleMcpeAlexEntityAnimation(msg);
 					break;
@@ -1089,6 +1097,10 @@ namespace MiNET.Net
 						return McpeUpdateClientOptions.CreateObject().Decode(buffer);
 					case 0x145:
 						return McpePlayerUpdateEntityOverrides.CreateObject().Decode(buffer);
+					case 0x146:
+						return McpePlayerLocation.CreateObject().Decode(buffer);
+					case 0x147:
+						return McpeClientboundControlSchemeSet.CreateObject().Decode(buffer);
 					case 0xe0:
 						return McpeAlexEntityAnimation.CreateObject().Decode(buffer);
 				}
@@ -8613,7 +8625,8 @@ namespace MiNET.Net
 	public partial class McpeBiomeDefinitionList : Packet<McpeBiomeDefinitionList>
 	{
 
-		public Nbt namedtag;
+		public BiomeDefinitions biomeDefinitions;
+		public BiomeStringList stringList;
 
 		public McpeBiomeDefinitionList()
 		{
@@ -8627,7 +8640,8 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
-			Write(namedtag);
+			Write(biomeDefinitions);
+			Write(stringList);
 
 			AfterEncode();
 		}
@@ -8641,7 +8655,8 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
-			namedtag = ReadNbt();
+			biomeDefinitions = ReadBiomeDefinitions();
+			stringList = ReadBiomeStringList();
 
 			AfterDecode();
 		}
@@ -8653,7 +8668,8 @@ namespace MiNET.Net
 		{
 			base.ResetPacket();
 
-			namedtag = default;
+			biomeDefinitions = default;
+			stringList = default;
 		}
 
 	}
@@ -9474,6 +9490,8 @@ namespace MiNET.Net
 			Destroy = 4,
 			Consume = 5,
 			Create = 6,
+			PlaceInContainer = 7,
+			TakeOutContainer = 8,
 			LabTableCombine = 9,
 			BeaconPayment = 10,
 			MineBlock = 11,
@@ -11288,6 +11306,123 @@ namespace MiNET.Net
 			updateType = default;
 			intOverrideValue = default;
 			floatOverrideValue = default;
+		}
+
+	}
+
+	public partial class McpePlayerLocation : Packet<McpePlayerLocation>
+	{
+		public enum PlayerLocationType
+		{
+			Coordinates = 0,
+			Hide = 1,
+		}
+
+		public int type;
+		public long entityUniqueId;
+		public Vector3 position;
+
+		public McpePlayerLocation()
+		{
+			Id = 0x146;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(type);
+			WriteSignedVarLong(entityUniqueId);
+			Write(position);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			type = ReadInt();
+			entityUniqueId = ReadSignedVarLong();
+			position = ReadVector3();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			type = default;
+			entityUniqueId = default;
+			position = default;
+		}
+
+	}
+
+	public partial class McpeClientboundControlSchemeSet : Packet<McpeClientboundControlSchemeSet>
+	{
+		public enum ControlScheme
+		{
+			LockedPlayerRelativeStrafe = 0,
+			CameraRelative = 1,
+			CameraRelativeStrafe = 2,
+			PlayerRelative = 3,
+			PlayerRelativeStrafe = 4,
+		}
+
+		public byte controlScheme;
+
+		public McpeClientboundControlSchemeSet()
+		{
+			Id = 0x147;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(controlScheme);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			controlScheme = ReadByte();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			controlScheme = default;
 		}
 
 	}

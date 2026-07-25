@@ -41,7 +41,7 @@ namespace MiNET.Net
 
 		public void Write(Packet packet)
 		{
-			packet.WriteVarInt(RequestId);
+			packet.WriteSignedVarInt(RequestId);
 
 			packet.WriteLength(Count);
 			foreach (var action in this)
@@ -62,7 +62,7 @@ namespace MiNET.Net
 		{
 			var actions = new ItemStackActionList()
 			{
-				RequestId = packet.ReadVarInt()
+				RequestId = packet.ReadSignedVarInt()
 			};
 
 			var actionsCount = packet.ReadLength();
@@ -107,6 +107,8 @@ namespace MiNET.Net
 				McpeItemStackRequest.ActionType.Destroy => DestroyAction.ReadData(packet),
 				McpeItemStackRequest.ActionType.Consume => ConsumeAction.ReadData(packet),
 				McpeItemStackRequest.ActionType.Create => CreateAction.ReadData(packet),
+				McpeItemStackRequest.ActionType.PlaceInContainer => PlaceAction.ReadData(packet),
+				McpeItemStackRequest.ActionType.TakeOutContainer => TakeAction.ReadData(packet),
 				//McpeItemStackRequest.ActionType.LabTableCombine => LabTableCombineAction.ReadData(packet), // nothing
 				McpeItemStackRequest.ActionType.BeaconPayment => BeaconPaymentAction.ReadData(packet),
 				McpeItemStackRequest.ActionType.MineBlock => MineBlockAction.ReadData(packet),
@@ -136,7 +138,7 @@ namespace MiNET.Net
 		{
 			packet.Write(ContainerName);
 			packet.Write(Slot);
-			packet.WriteVarInt(StackNetworkId);
+			packet.WriteSignedVarInt(StackNetworkId);
 		}
 
 		public static StackRequestSlotInfo Read(Packet packet)
@@ -145,7 +147,7 @@ namespace MiNET.Net
 			{
 				ContainerName = FullContainerName.Read(packet),
 				Slot = packet.ReadByte(),
-				StackNetworkId = packet.ReadVarInt()
+				StackNetworkId = packet.ReadSignedVarInt()
 			};
 		}
 	}
@@ -325,18 +327,18 @@ namespace MiNET.Net
 
 		protected override void WriteData(Packet packet)
 		{
-			packet.WriteVarInt(HotbarSlot);
-			packet.WriteVarInt(PredictedDurability);
-			packet.WriteVarInt(StackNetworkId);
+			packet.WriteSignedVarInt(HotbarSlot);
+			packet.WriteSignedVarInt(PredictedDurability);
+			packet.WriteSignedVarInt(StackNetworkId);
 		}
 
 		internal static ItemStackAction ReadData(Packet packet)
 		{
 			return new MineBlockAction()
 			{
-				HotbarSlot = packet.ReadVarInt(),
-				PredictedDurability = packet.ReadVarInt(),
-				StackNetworkId = packet.ReadVarInt()
+				HotbarSlot = packet.ReadSignedVarInt(),
+				PredictedDurability = packet.ReadSignedVarInt(),
+				StackNetworkId = packet.ReadSignedVarInt()
 			};
 		}
 	}
@@ -349,16 +351,16 @@ namespace MiNET.Net
 
 		protected override void WriteData(Packet packet)
 		{
-			packet.WriteVarInt(PrimaryEffect);
-			packet.WriteVarInt(SecondaryEffect);
+			packet.WriteSignedVarInt(PrimaryEffect);
+			packet.WriteSignedVarInt(SecondaryEffect);
 		}
 
 		internal static ItemStackAction ReadData(Packet packet)
 		{
 			return new BeaconPaymentAction()
 			{
-				PrimaryEffect = packet.ReadVarInt(),
-				SecondaryEffect = packet.ReadVarInt()
+				PrimaryEffect = packet.ReadSignedVarInt(),
+				SecondaryEffect = packet.ReadSignedVarInt()
 			};
 		}
 	}
@@ -586,7 +588,7 @@ namespace MiNET.Net
 		public void Write(Packet packet)
 		{
 			packet.Write((byte) Result);
-			packet.WriteVarInt(RequestId);
+			packet.WriteSignedVarInt(RequestId);
 
 			if (Result != StackResponseStatus.Ok) return;
 
@@ -602,7 +604,7 @@ namespace MiNET.Net
 			var response = new ItemStackResponse()
 			{
 				Result = (StackResponseStatus) packet.ReadByte(),
-				RequestId = packet.ReadVarInt()
+				RequestId = packet.ReadSignedVarInt()
 			};
 
 			if (response.Result != StackResponseStatus.Ok) return response;

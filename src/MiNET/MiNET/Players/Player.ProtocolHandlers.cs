@@ -86,7 +86,47 @@ namespace MiNET.Players
 		/// <inheritdoc />
 		public void HandleMcpePlayerAuthInput(McpePlayerAuthInput message)
 		{
-			
+			_lastClientAuthInputPosition = new PlayerLocation
+			{
+				X = message.Position.X,
+				Y = message.Position.Y - 1.62f,
+				Z = message.Position.Z,
+				Pitch = message.Pitch,
+				Yaw = message.Yaw,
+				HeadYaw = message.HeadYaw
+			};
+
+			if (!IsSpawned && Level?.Players.ContainsKey(EntityId) == true)
+			{
+				InitializePlayer();
+			}
+
+			HandlePlayerAuthInputMovement(message);
+
+			if (message.ItemInteraction != null)
+			{
+				HandleItemUseTransaction((ItemUseTransaction) message.ItemInteraction);
+			}
+
+			if (message.ItemStackRequests != null)
+			{
+				var itemStackRequest = McpeItemStackRequest.CreateObject();
+				itemStackRequest.requests = message.ItemStackRequests;
+				HandleMcpeItemStackRequest(itemStackRequest);
+			}
+
+			foreach (var blockAction in message.BlockActions)
+			{
+				if (!blockAction.HasBlockPosition && blockAction.Action != PlayerAction.StopBreak) continue;
+
+				var playerAction = McpePlayerAction.CreateObject();
+				playerAction.runtimeEntityId = EntityId;
+				playerAction.actionId = (int) blockAction.Action;
+				playerAction.coordinates = blockAction.Coordinates;
+				playerAction.face = blockAction.Face;
+
+				HandleMcpePlayerAction(playerAction);
+			}
 		}
 
 		public void HandleMcpeItemStackRequest(McpeItemStackRequest message)
