@@ -2214,6 +2214,10 @@ namespace MiNET.Net
 
 	public partial class McpeDisconnect : Packet<McpeDisconnect>
 	{
+		public enum DisconnectFailReason
+		{
+			AsyncJoinTaskDenied = 118,
+		}
 
 		public int reason;
 
@@ -2618,7 +2622,7 @@ namespace MiNET.Net
 	{
 		public enum ServerAuthMovementMode
 		{
-			LegacyClientAuthoritativeV1 = 0,
+			LegacyClientAuthoritativeV1Deprecated = 0,
 			ServerAuthoritativeV2 = 1,
 			ServerAuthoritativeV3 = 2,
 		}
@@ -11312,15 +11316,8 @@ namespace MiNET.Net
 
 	public partial class McpePlayerLocation : Packet<McpePlayerLocation>
 	{
-		public enum PlayerLocationType
-		{
-			Coordinates = 0,
-			Hide = 1,
-		}
 
-		public int type;
-		public long entityUniqueId;
-		public Vector3 position;
+		public PlayerLocationData location;
 
 		public McpePlayerLocation()
 		{
@@ -11334,9 +11331,7 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
-			Write(type);
-			WriteSignedVarLong(entityUniqueId);
-			Write(position);
+			Write(location);
 
 			AfterEncode();
 		}
@@ -11350,9 +11345,7 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
-			type = ReadInt();
-			entityUniqueId = ReadSignedVarLong();
-			position = ReadVector3();
+			location = ReadPlayerLocationData();
 
 			AfterDecode();
 		}
@@ -11364,9 +11357,7 @@ namespace MiNET.Net
 		{
 			base.ResetPacket();
 
-			type = default;
-			entityUniqueId = default;
-			position = default;
+			location = default;
 		}
 
 	}

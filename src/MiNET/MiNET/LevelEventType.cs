@@ -666,5 +666,15 @@ namespace MiNET
 		OpenLong = 543,
 		Close = 544,
 		CloseLong = 545,
+		ImitatePhantom = 546,
+		ImitateZoglin = 547,
+		ImitateGuardian = 548,
+		ImitateRavager = 549,
+		ImitatePillager = 550,
+		PlaceInWater = 551,
+		StateChange = 552,
+		ImitateHappyGhast = 553,
+		ArmorUnequipGeneric = 554,
+		UndefinedV800 = 555,
 	}
 }

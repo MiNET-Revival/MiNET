@@ -113,6 +113,7 @@ namespace MiNET.Entities
 		BreezeWindChargeProjectile = 141,
 		Bogged = 144,
 		Creaking = 146,
+		HappyGhast = 147,
 
 		Chicken = 10,
 		Cow = 11,
@@ -266,6 +267,7 @@ namespace MiNET.Entities
 			{ EntityType.Bogged , "minecraft:bogged" },
 			{ EntityType.OminousItemSpawner , "minecraft:ominous_item_spawner" },
 			{ EntityType.Creaking , "minecraft:creaking" },
+			{ EntityType.HappyGhast , "minecraft:happy_ghast" },
 			{ EntityType.TraderLlama , "minecraft:trader_llama" },
 			{ EntityType.ChestBoat , "minecraft:chest_boat" },
 		};

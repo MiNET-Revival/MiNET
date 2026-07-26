@@ -4,6 +4,7 @@
 	{
 		NonEditor = 0,
 		Project = 1,
-		TestLevel = 2
+		TestLevel = 2,
+		EditorRealmsUpload = 3
 	}
 }
