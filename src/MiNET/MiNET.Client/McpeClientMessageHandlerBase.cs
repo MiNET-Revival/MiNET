@@ -707,6 +707,10 @@ namespace MiNET.Client
 			
 		}
 
+		public void HandleMcpeDeathInfo(McpeDeathInfo message)
+		{
+		}
+
 		public void HandleMcpeClientboundControlSchemeSet(McpeClientboundControlSchemeSet message)
 		{
 		}
@@ -806,6 +810,10 @@ namespace MiNET.Client
 		}
 
 		public void HandleMcpePlayerLocation(McpePlayerLocation message)
+		{
+		}
+
+		public void HandleMcpeServerScriptDebugDrawer(McpeServerScriptDebugDrawer message)
 		{
 		}
 	}

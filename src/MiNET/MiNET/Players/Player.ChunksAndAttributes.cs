@@ -116,7 +116,6 @@ namespace MiNET.Players
 			startGame.isTrial = false;
 			startGame.currentTick = Level.TickTime;
 			startGame.enchantmentSeed = 123456;
-			startGame.movementType = (int) McpeStartGame.ServerAuthMovementMode.ServerAuthoritativeV2;
 			startGame.enableNewBlockBreakSystem = false;
 
 			startGame.blockNetworkIdsAreHashes = BlockFactory.FactoryProfile.BlockRuntimeIdsAreHashes;

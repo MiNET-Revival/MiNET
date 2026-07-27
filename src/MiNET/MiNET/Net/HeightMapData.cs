@@ -20,8 +20,8 @@ public class HeightMapData
 		return Heights[((z & 0xf) << 4) | (x & 0xf)];
 	}
 
-	public bool IsAllTooLow => Heights.Any(x => x > 0);
-	public bool IsAllTooHigh => Heights.Any(x => x <= 15);
+	public bool IsAllTooLow => Heights.All(x => x < 0);
+	public bool IsAllTooHigh => Heights.All(x => x > 15);
 }
 
 public enum SubChunkPacketHeightMapType : byte
@@ -29,7 +29,8 @@ public enum SubChunkPacketHeightMapType : byte
 	NoData = 0,
 	Data = 1,
 	AllTooHigh = 2,
-	AllTooLow = 3
+	AllTooLow = 3,
+	AllCopied = 4
 }
 
 public enum SubChunkRequestResult : byte

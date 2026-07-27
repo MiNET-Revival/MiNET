@@ -45,8 +45,8 @@ namespace MiNET.Net
 {
 	public class McpeProtocolInfo
 	{
-		public const int ProtocolVersion = 800;
-		public const string GameVersion = "1.21.80";
+		public const int ProtocolVersion = 818;
+		public const string GameVersion = "1.21.90";
 	}
 
 	public interface IMcpeMessageHandler
@@ -240,6 +240,7 @@ namespace MiNET.Net
 		void HandleMcpeDimensionData(McpeDimensionData message);
 		void HandleMcpeUpdateAbilities(McpeUpdateAbilities message);
 		void HandleMcpeUpdateAdventureSettings(McpeUpdateAdventureSettings message);
+		void HandleMcpeDeathInfo(McpeDeathInfo message);
 		void HandleMcpeCameraInstruction(McpeCameraInstruction message);
 		void HandleMcpeTrimData(McpeTrimData message);
 		void HandleMcpeOpenSign(McpeOpenSign message);
@@ -258,6 +259,7 @@ namespace MiNET.Net
 		void HandleMcpePlayerUpdateEntityOverrides(McpePlayerUpdateEntityOverrides message);
 		void HandleMcpePlayerLocation(McpePlayerLocation message);
 		void HandleMcpeClientboundControlSchemeSet(McpeClientboundControlSchemeSet message);
+		void HandleMcpeServerScriptDebugDrawer(McpeServerScriptDebugDrawer message);
 		void HandleMcpeAlexEntityAnimation(McpeAlexEntityAnimation message);
 		void HandleFtlCreatePlayer(FtlCreatePlayer message);
 	}
@@ -644,6 +646,9 @@ namespace MiNET.Net
 				case McpeUpdateAdventureSettings msg:
 					_messageHandler.HandleMcpeUpdateAdventureSettings(msg);
 					break;
+				case McpeDeathInfo msg:
+					_messageHandler.HandleMcpeDeathInfo(msg);
+					break;
 				case McpeCameraInstruction msg:
 					_messageHandler.HandleMcpeCameraInstruction(msg);
 					break;
@@ -697,6 +702,9 @@ namespace MiNET.Net
 					break;
 				case McpeClientboundControlSchemeSet msg:
 					_messageHandler.HandleMcpeClientboundControlSchemeSet(msg);
+					break;
+				case McpeServerScriptDebugDrawer msg:
+					_messageHandler.HandleMcpeServerScriptDebugDrawer(msg);
 					break;
 				case McpeAlexEntityAnimation msg:
 					_messageHandler.HandleMcpeAlexEntityAnimation(msg);
@@ -1059,6 +1067,8 @@ namespace MiNET.Net
 						return McpeUpdateAdventureSettings.CreateObject().Decode(buffer);
 					case 0xb8:
 						return McpeRequestAbility.CreateObject().Decode(buffer);
+					case 0xbd:
+						return McpeDeathInfo.CreateObject().Decode(buffer);
 					case 0xc1:
 						return McpeRequestNetworkSettings.CreateObject().Decode(buffer);
 					case 0x12c:
@@ -1101,6 +1111,8 @@ namespace MiNET.Net
 						return McpePlayerLocation.CreateObject().Decode(buffer);
 					case 0x147:
 						return McpeClientboundControlSchemeSet.CreateObject().Decode(buffer);
+					case 0x148:
+						return McpeServerScriptDebugDrawer.CreateObject().Decode(buffer);
 					case 0xe0:
 						return McpeAlexEntityAnimation.CreateObject().Decode(buffer);
 				}
@@ -2217,6 +2229,9 @@ namespace MiNET.Net
 		public enum DisconnectFailReason
 		{
 			AsyncJoinTaskDenied = 118,
+			RealmsTimelineRequired = 119,
+			GuestWithoutHost = 120,
+			FailedToJoinExperience = 121,
 		}
 
 		public int reason;
@@ -2270,6 +2285,7 @@ namespace MiNET.Net
 		public bool mustAccept;
 		public bool hasAddons;
 		public bool hasScripts;
+		public bool forceDisableVibrantVisuals;
 		public UUID worldTemplateId;
 		public string worldTemplateVersion;
 		public ResourcePackInfos resourcePacks;
@@ -2289,6 +2305,7 @@ namespace MiNET.Net
 			Write(mustAccept);
 			Write(hasAddons);
 			Write(hasScripts);
+			Write(forceDisableVibrantVisuals);
 			Write(worldTemplateId);
 			Write(worldTemplateVersion);
 			Write(resourcePacks);
@@ -2308,6 +2325,7 @@ namespace MiNET.Net
 			mustAccept = ReadBool();
 			hasAddons = ReadBool();
 			hasScripts = ReadBool();
+			forceDisableVibrantVisuals = ReadBool();
 			worldTemplateId = ReadUUID();
 			worldTemplateVersion = ReadString();
 			resourcePacks = ReadResourcePackInfos();
@@ -2325,6 +2343,7 @@ namespace MiNET.Net
 			mustAccept = default;
 			hasAddons = default;
 			hasScripts = default;
+			forceDisableVibrantVisuals = default;
 			worldTemplateId = default;
 			worldTemplateVersion = default;
 			resourcePacks = default;
@@ -10206,6 +10225,58 @@ namespace MiNET.Net
 
 	}
 
+	public partial class McpeDeathInfo : Packet<McpeDeathInfo>
+	{
+
+		public string messageTranslationKey;
+		public string[] messageParameters;
+
+		public McpeDeathInfo()
+		{
+			Id = 0xbd;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(messageTranslationKey);
+			Write(messageParameters);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			messageTranslationKey = ReadString();
+			messageParameters = ReadStrings();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			messageTranslationKey = default;
+			messageParameters = default;
+		}
+
+	}
+
 	public partial class McpeRequestNetworkSettings : Packet<McpeRequestNetworkSettings>
 	{
 
@@ -11414,6 +11485,54 @@ namespace MiNET.Net
 			base.ResetPacket();
 
 			controlScheme = default;
+		}
+
+	}
+
+	public partial class McpeServerScriptDebugDrawer : Packet<McpeServerScriptDebugDrawer>
+	{
+
+		public PacketShapeData[] shapes;
+
+		public McpeServerScriptDebugDrawer()
+		{
+			Id = 0x148;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(shapes);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			shapes = ReadPacketShapeDatas();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			shapes = default;
 		}
 
 	}

@@ -215,6 +215,29 @@ namespace MiNET.Net
 			return ulongs;
 		}
 
+		public void Write(string[] values)
+		{
+			WriteLength(values?.Length ?? 0);
+			if (values == null) return;
+
+			foreach (string value in values)
+			{
+				Write(value ?? string.Empty);
+			}
+		}
+
+		public string[] ReadStrings()
+		{
+			int count = ReadLength();
+			var values = new string[count];
+			for (int i = 0; i < count; i++)
+			{
+				values[i] = ReadString();
+			}
+
+			return values;
+		}
+
 		public void Write(short value, bool bigEndian = false)
 		{
 			if (bigEndian) _writer.Write(BinaryPrimitives.ReverseEndianness(value));
@@ -1302,9 +1325,18 @@ namespace MiNET.Net
 			}
 		}
 
-		public HeightMapData ReadHeightMapData()
+		public HeightMapData ReadHeightMapData(HeightMapData copiedData = null, bool allowAllCopied = false)
 		{
 			SubChunkPacketHeightMapType type = (SubChunkPacketHeightMapType) ReadByte();
+
+			if (allowAllCopied && type == SubChunkPacketHeightMapType.AllCopied)
+				return copiedData;
+
+			if (type == SubChunkPacketHeightMapType.AllTooHigh)
+				return new HeightMapData(Enumerable.Repeat((short) 16, 256).ToArray());
+
+			if (type == SubChunkPacketHeightMapType.AllTooLow)
+				return new HeightMapData(Enumerable.Repeat((short) -1, 256).ToArray());
 
 			if (type != SubChunkPacketHeightMapType.Data)
 				return null;
@@ -1317,6 +1349,17 @@ namespace MiNET.Net
 			}
 
 			return new HeightMapData(heights);
+		}
+
+		public void WriteRenderHeightMapData(HeightMapData data)
+		{
+			if (data == null)
+			{
+				Write((byte) SubChunkPacketHeightMapType.AllCopied);
+				return;
+			}
+
+			Write(data);
 		}
 
 		public void Write(SubChunkPositionOffset offset)

@@ -141,6 +141,8 @@ namespace MiNET.Net
 
 		public string ScenarioIdentifier { get; set; }
 
+		public string OwnerIdentifier { get; set; } = string.Empty;
+
 		public void Write(Packet packet)
 		{
 			packet.Write(Seed);
@@ -200,6 +202,7 @@ namespace MiNET.Net
 			packet.Write(ServerIdentifier);
 			packet.Write(WorldIdentifier);
 			packet.Write(ScenarioIdentifier);
+			packet.Write(OwnerIdentifier);
 		}
 
 		public static LevelSettings Read(Packet packet)
@@ -259,6 +262,7 @@ namespace MiNET.Net
 				ServerIdentifier = packet.ReadString(),
 				WorldIdentifier = packet.ReadString(),
 				ScenarioIdentifier = packet.ReadString(),
+				OwnerIdentifier = packet.ReadString(),
 			};
 		}
 	}
@@ -277,7 +281,6 @@ namespace MiNET.Net
 		public string worldName; // = null;
 		public string premiumWorldTemplateId; // = null;
 		public bool isTrial; // = null;
-		public int movementType; // = null;
 		public int movementRewindHistorySize; // = null;
 		public bool enableNewBlockBreakSystem; // = null;
 		public long currentTick; // = null;
@@ -312,7 +315,6 @@ namespace MiNET.Net
 			Write(isTrial);
 			
 			//Player movement settings
-			WriteSignedVarInt(movementType);
 			WriteSignedVarInt(movementRewindHistorySize);
 			Write(enableNewBlockBreakSystem);
 			
@@ -348,7 +350,6 @@ namespace MiNET.Net
 			isTrial = ReadBool();
 			
 			//Player movement settings
-			movementType = ReadSignedVarInt();
 			movementRewindHistorySize = ReadSignedVarInt();
 			enableNewBlockBreakSystem = ReadBool();
 			
@@ -389,7 +390,6 @@ namespace MiNET.Net
 			worldName=default(string);
 			premiumWorldTemplateId=default(string);
 			isTrial=default(bool);
-			movementType=default(int);
 			movementRewindHistorySize=default(int);
 			enableNewBlockBreakSystem=default(bool);
 			currentTick=default(long);

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<protocol gameVersion="1.21.80" protocolVersion="800">
+<protocol gameVersion="1.21.90" protocolVersion="818">
 
 	<constants>
 		<constant id="OFFLINE_MESSAGE_DATA_ID" type="byte[]"
@@ -148,6 +148,9 @@
 	<pdu id="0x05" online="false" client="false" server="true" name="MCPE_DISCONNECT">
 		<enums id="Disconnect Fail Reason">
 			<enum id="Async Join Task Denied" value="118" />
+			<enum id="Realms Timeline Required" value="119" />
+			<enum id="Guest Without Host" value="120" />
+			<enum id="Failed To Join Experience" value="121" />
 		</enums>
 		<field name="Reason" type="VarInt" />
 	</pdu>
@@ -156,6 +159,7 @@
 		<field name="Must Accept" type="bool" />
 		<field name="Has Addons" type="bool" />
 		<field name="Has Scripts" type="bool" />
+		<field name="Force Disable Vibrant Visuals" type="bool" />
 		<field name="World Template Id" type="UUID" />
 		<field name="World Template Version" type="string" />
 		<field name="Resource Packs" type="ResourcePackInfos" />
@@ -1243,6 +1247,14 @@
 	<pdu id="0xb8" online="false" client="true" server="false" name="MCPE_REQUEST_ABILITY">
 		<field name="Ability" type="VarInt" />
 	</pdu>
+
+	<!-- Added in protocol v534 (Bedrock 1.19.10). The client expects this when
+	     a player dies so it can populate the death screen. This is a historical
+	     MiNET protocol gap discovered while validating death handling on v818. -->
+	<pdu id="0xbd" online="false" client="false" server="true" name="MCPE_DEATH_INFO">
+		<field name="Message Translation Key" type="string" />
+		<field name="Message Parameters" type="string[]" />
+	</pdu>
 	
 	<pdu id="0xc1" online="false" client="true" server="false" name="MCPE_REQUEST_NETWORK_SETTINGS">
 		<field name="Protocol Version" type="int" endianess="BE" />
@@ -1381,6 +1393,7 @@
 		<field name="Tick" type="UnsignedVarLong" />
 	</pdu>
 
+	<!-- Protocol v818: removed from active use but ID 319 is retained as deprecated. -->
 	<pdu id="0x13f" online="false" client="false" server="true" name="MCPE_SET_MOVEMENT_AUTHORITY">
 		<field name="Mode" type="byte" />
 	</pdu>
@@ -1427,6 +1440,10 @@
 		</enums>
 
 		<field name="Control Scheme" type="byte" />
+	</pdu>
+
+	<pdu id="0x148" online="false" client="false" server="true" name="MCPE_SERVER_SCRIPT_DEBUG_DRAWER">
+		<field name="Shapes" type="PacketShapeData[]" />
 	</pdu>
 
 	<pdu id="0xe0" online="false" client="false" server="true" name="MCPE_ALEX_ENTITY_ANIMATION">

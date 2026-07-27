@@ -133,6 +133,12 @@ namespace MiNET
 
 		public virtual void OnTick()
 		{
+			if (Player.HealthManager.IsDead)
+			{
+				_ticker = 0;
+				return;
+			}
+
 			if (Hunger <= 0)
 			{
 				_ticker++;
