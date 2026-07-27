@@ -603,6 +603,7 @@ namespace MiNET
 
 		public void HandleMcpePacketViolationWarning(McpePacketViolationWarning message)
 		{
+			Log.Error($"Client reported a level {message.severity} packet violation of type {message.violationType} for packet 0x{message.packetId:X2}: {message.reason}");
 		}
 
 		/// <inheritdoc />

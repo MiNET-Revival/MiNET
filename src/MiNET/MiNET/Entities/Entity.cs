@@ -247,8 +247,10 @@ namespace MiNET.Entities
 			VisibleMobEffects = 131,
 			FilteredName = 132,
 			BedEnterPosition = 133,
+			SeatThirdPersonCameraRadius = 134,
+			SeatCameraRelaxDistanceSmoothing = 135,
 
-			Count = 134,
+			Count = 136,
 	}
 
 		public virtual MetadataDictionary GetMetadata()
@@ -560,8 +562,9 @@ namespace MiNET.Entities
 			BodyRotationAxisAligned = 120,
 			Collidable = 121,
 			WasdAirControlled = 122,
+			DoesServerAuthOnlyDismount = 123,
 
-			Count = 123
+			Count = 124
 		}
 
 		protected virtual BitArray GetFlags()

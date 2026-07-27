@@ -253,7 +253,7 @@ namespace MiNET.Net
 				LimitedWorldLength = packet.ReadInt(),
 				IsNewNether = packet.ReadBool(),
 				EduSharedUriResource = packet.ReadEducationUriResource(),
-				ExperimentalGameplayOverride = packet.ReadBool() && packet.ReadBool(),
+				ExperimentalGameplayOverride = packet.ReadBool(),
 				ChatRestrictionLevel = packet.ReadByte(),
 				IsDisablePlayerInteractions = packet.ReadBool(),
 				ServerIdentifier = packet.ReadString(),

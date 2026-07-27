@@ -71,11 +71,19 @@ namespace MiNET.Players
 
 			{
 				SendResourcePacksInfo();
+				if (!_serverHaveResources)
+				{
+					SendResourcePackStack();
+				}
 			}
 
 			//MiNetServer.FastThreadPool.QueueUserWorkItem(() => { Start(null); });
 		}
 
+		public void HandleMcpePlayerLocation(McpePlayerLocation message)
+		{
+			
+		}
 		public void HandleMcpeRequestNetworkSettings(McpeRequestNetworkSettings message)
 		{
 		}

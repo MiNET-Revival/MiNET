@@ -60,6 +60,8 @@ namespace MiNET.Players
 {
 	public partial class Player
 	{
+		private BlockCoordinates? _lastBreakCrackCoordinates;
+
 		public virtual void HandleMcpePlayerInput(McpePlayerInput message)
 		{
 			Log.Debug($"Player input: x={message.motionX}, z={message.motionZ}, jumping={message.jumping}, sneaking={message.sneaking}");
@@ -216,7 +218,8 @@ namespace MiNET.Players
 		/// <param name="message">The message.</param>
 		public virtual void HandleMcpePlayerAction(McpePlayerAction message)
 		{
-			switch ((PlayerAction) message.actionId)
+			var action = (PlayerAction) message.actionId;
+			switch (action)
 			{
 				case PlayerAction.StartBreak:
 				{
@@ -233,28 +236,45 @@ namespace MiNET.Players
 
 					if (GameMode == GameMode.Survival)
 					{
-						Block target = Level.GetBlock(message.coordinates);
-						var drops = target.GetDrops(Level, Inventory.GetItemInHand());
-						float tooltypeFactor = drops == null || drops.Length == 0 ? 5f : 1.5f; // 1.5 if proper tool
-						double breakTime = Math.Ceiling(target.Hardness * tooltypeFactor * 20);
-
-						if (breakTime > 0)
-						{
-							McpeLevelEvent breakEvent = McpeLevelEvent.CreateObject();
-							breakEvent.eventId = 3600;
-							breakEvent.position = message.coordinates;
-							breakEvent.data = (int) (65535 / breakTime);
-							Log.Debug("Break speed: " + breakEvent.data);
-							Level.RelayBroadcast(breakEvent);
-						}
+						SendBlockBreakSpeedEvent(message.coordinates, LevelEventType.StartBlockCracking);
 					}
 
+					break;
+				}
+				case PlayerAction.ContinueDestroyBlock:
+				{
+					if (GameMode == GameMode.Survival)
+					{
+						SendBlockBreakSpeedEvent(message.coordinates, LevelEventType.StartBlockCracking);
+					}
+
+					break;
+				}
+				case PlayerAction.PredictDestroyBlock:
+				{
+					if (GameMode != GameMode.Survival && GameMode != GameMode.Creative)
+					{
+						break;
+					}
+
+					Block target = Level.GetBlock(message.coordinates);
+					if (target is Air)
+					{
+						break;
+					}
+
+					Level.BreakBlock(this, message.coordinates, (BlockFace) message.face);
+					_lastBreakCrackCoordinates = null;
 					break;
 				}
 				case PlayerAction.Breaking:
 				{
 					Block target = Level.GetBlock(message.coordinates);
-					int data = ((int) target.RuntimeId) | ((byte) (message.face << 24));
+					if (target is Air)
+					{
+						break;
+					}
+					int data = unchecked((int) ((uint) target.RuntimeId | ((uint) message.face << 24)));
 
 					McpeLevelEvent breakEvent = McpeLevelEvent.CreateObject();
 					breakEvent.eventId = 2014;
@@ -266,10 +286,12 @@ namespace MiNET.Players
 				case PlayerAction.AbortBreak:
 				case PlayerAction.StopBreak:
 				{
+					var crackCoordinates = ResolveBreakCrackStopCoordinates(message.coordinates);
 					McpeLevelEvent breakEvent = McpeLevelEvent.CreateObject();
 					breakEvent.eventId = 3601;
-					breakEvent.position = message.coordinates;
+					breakEvent.position = crackCoordinates;
 					Level.RelayBroadcast(breakEvent);
+					_lastBreakCrackCoordinates = null;
 					break;
 				}
 				case PlayerAction.StartSleeping:
@@ -396,8 +418,6 @@ namespace MiNET.Players
 				case PlayerAction.StopSwimming:
 				case PlayerAction.StartSpinAttack:
 				case PlayerAction.StopSpinAttack:
-				case PlayerAction.PredictDestroyBlock:
-				case PlayerAction.ContinueDestroyBlock:
 				case PlayerAction.StopItemUse:
 				case PlayerAction.HandledTeleport:
 				case PlayerAction.MissedSwing:
@@ -418,6 +438,41 @@ namespace MiNET.Players
 			IsUsingItem = false;
 
 			BroadcastSetEntityData();
+		}
+
+		private void SendBlockBreakSpeedEvent(BlockCoordinates coordinates, LevelEventType eventType)
+		{
+			Block target = Level.GetBlock(coordinates);
+			double breakTime = CalculateBreakTimeTicks(target);
+
+			if (target is Air || breakTime <= 0)
+			{
+				return;
+			}
+
+			McpeLevelEvent breakEvent = McpeLevelEvent.CreateObject();
+			breakEvent.eventId = (int) eventType;
+			breakEvent.position = coordinates;
+			breakEvent.data = (int) (65535 / breakTime);
+			_lastBreakCrackCoordinates = coordinates;
+			Level.RelayBroadcast(breakEvent);
+		}
+
+		private double CalculateBreakTimeTicks(Block target)
+		{
+			var drops = target.GetDrops(Level, Inventory.GetItemInHand());
+			float tooltypeFactor = drops == null || drops.Length == 0 ? 5f : 1.5f; // 1.5 if proper tool
+			return Math.Ceiling(target.Hardness * tooltypeFactor * 20);
+		}
+
+		private BlockCoordinates ResolveBreakCrackStopCoordinates(BlockCoordinates coordinates)
+		{
+			if (_lastBreakCrackCoordinates.HasValue)
+			{
+				return _lastBreakCrackCoordinates.Value;
+			}
+
+			return coordinates;
 		}
 
 		private float _baseSpeed;

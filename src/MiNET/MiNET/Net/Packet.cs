@@ -802,7 +802,7 @@ namespace MiNET.Net
 
 				if (stack.UniqueId != 0)
 				{
-					WriteVarInt(stack.UniqueId);
+					WriteSignedVarInt(stack.UniqueId);
 				}
 			}
 
@@ -856,7 +856,7 @@ namespace MiNET.Net
 
 			if (readUniqueId)
 			{
-				if (ReadBool()) uniqueId = ReadVarInt();
+				if (ReadBool()) uniqueId = ReadSignedVarInt();
 			}
 
 			var blockRuntimeId = ReadSignedVarInt();

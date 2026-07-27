@@ -545,7 +545,7 @@ namespace MiNET.Net
 			catch (Exception e)
 			{
 				Log.Error("Sending commands", e);
-				//throw;
+				throw;
 			}
 		}
 	}

@@ -62,6 +62,8 @@ namespace MiNET.Utils
 		public bool IsHost { get; set; } = false;
 
 		public bool IsSubClient { get; set; } = false;
+
+		public uint PlayerColorArgb { get; set; } = 0xFFFFFFFF;
 	}
 
 	public abstract class PlayerRecords : List<PlayerRecord>, IPacketDataObject
@@ -154,6 +156,7 @@ namespace MiNET.Utils
 				packet.Write(record.IsTeacher);
 				packet.Write(record.IsHost);
 				packet.Write(record.IsSubClient);
+				packet.Write(record.PlayerColorArgb);
 			}
 
 			foreach (var record in this)
@@ -193,7 +196,8 @@ namespace MiNET.Utils
 				Skin = packet.ReadSkin(),
 				IsTeacher = packet.ReadBool(),
 				IsHost = packet.ReadBool(),
-				IsSubClient = packet.ReadBool()
+				IsSubClient = packet.ReadBool(),
+				PlayerColorArgb = packet.ReadUint()
 			};
 		}
 	}
