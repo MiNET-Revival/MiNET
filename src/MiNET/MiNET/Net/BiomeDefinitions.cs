@@ -139,11 +139,9 @@ namespace MiNET.Net
 		public void Write(Packet packet)
 		{
 			packet.Write(NameIndex);
-			packet.Write(BiomeId.HasValue);
-			if (BiomeId.HasValue)
-			{
-				packet.Write(BiomeId.Value);
-			}
+			// Protocol v827 made the biome ID unconditional. Vanilla biome
+			// definitions use 0xffff (-1 as a signed little-endian short).
+			packet.Write(BiomeId ?? ushort.MaxValue);
 
 			packet.Write(Temperature);
 			packet.Write(Downfall);
@@ -167,10 +165,8 @@ namespace MiNET.Net
 				NameIndex = packet.ReadUshort()
 			};
 
-			if (packet.ReadBool())
-			{
-				definition.BiomeId = packet.ReadUshort();
-			}
+			var biomeId = packet.ReadUshort();
+			definition.BiomeId = biomeId == ushort.MaxValue ? null : biomeId;
 
 			definition.Temperature = packet.ReadFloat();
 			definition.Downfall = packet.ReadFloat();

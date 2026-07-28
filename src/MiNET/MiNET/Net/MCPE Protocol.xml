@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<protocol gameVersion="1.21.90" protocolVersion="818">
+<protocol gameVersion="1.21.100" protocolVersion="827">
 
 	<constants>
 		<constant id="OFFLINE_MESSAGE_DATA_ID" type="byte[]"
@@ -151,6 +151,7 @@
 			<enum id="Realms Timeline Required" value="119" />
 			<enum id="Guest Without Host" value="120" />
 			<enum id="Failed To Join Experience" value="121" />
+			<enum id="Nether Net Data Channel Closed" value="122" />
 		</enums>
 		<field name="Reason" type="VarInt" />
 	</pdu>
@@ -1202,6 +1203,22 @@
 		<field name="Reason" type="string" />
 	</pdu>
 
+	<!-- Protocol v827: rotation and optional vehicle angular velocity are now
+	     written for both prediction types instead of only for vehicles. -->
+	<pdu id="0xa1" online="false" client="false" server="true" name="MCPE_CORRECT_PLAYER_MOVE_PREDICTION">
+		<enums id="Prediction Type">
+			<enum id="Player" value="0" />
+			<enum id="Vehicle" value="1" />
+		</enums>
+		<field name="Prediction Type" type="byte" />
+		<field name="Position" type="Vector3" />
+		<field name="Delta" type="Vector3" />
+		<field name="Vehicle Rotation" type="Vector2" />
+		<field name="Vehicle Angular Velocity" type="float" optional="true" />
+		<field name="On Ground" type="bool" />
+		<field name="Tick" type="UnsignedVarLong" />
+	</pdu>
+
 	<pdu id="0xa2" online="false" client="false" server="true" name="MCPE_ITEM_REGISTRY">
 		<field name="Item States" type="ItemStates" />
 	</pdu>
@@ -1375,6 +1392,7 @@
 		<field name="Distance" type="float" />
 		<field name="Target Mode" type="byte" />
 		<field name="Action Type" type="byte" />
+		<field name="Show Debug Render" type="bool" />
 	</pdu>
 
 	<pdu id="0x13d" online="false" client="true" server="false" name="MCPE_CONTAINER_REGISTRY_CLEANUP">

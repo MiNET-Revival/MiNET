@@ -45,8 +45,8 @@ namespace MiNET.Net
 {
 	public class McpeProtocolInfo
 	{
-		public const int ProtocolVersion = 818;
-		public const string GameVersion = "1.21.90";
+		public const int ProtocolVersion = 827;
+		public const string GameVersion = "1.21.100";
 	}
 
 	public interface IMcpeMessageHandler
@@ -234,6 +234,7 @@ namespace MiNET.Net
 		void HandleMcpePlayerEnchantOptions(McpePlayerEnchantOptions message);
 		void HandleMcpeItemStackResponse(McpeItemStackResponse message);
 		void HandleMcpeEmoteList(McpeEmoteList message);
+		void HandleMcpeCorrectPlayerMovePrediction(McpeCorrectPlayerMovePrediction message);
 		void HandleMcpeItemRegistry(McpeItemRegistry message);
 		void HandleMcpeUpdateSubChunkBlocksPacket(McpeUpdateSubChunkBlocksPacket message);
 		void HandleMcpeSubChunkPacket(McpeSubChunkPacket message);
@@ -627,6 +628,9 @@ namespace MiNET.Net
 					break;
 				case McpeEmoteList msg:
 					_messageHandler.HandleMcpeEmoteList(msg);
+					break;
+				case McpeCorrectPlayerMovePrediction msg:
+					_messageHandler.HandleMcpeCorrectPlayerMovePrediction(msg);
 					break;
 				case McpeItemRegistry msg:
 					_messageHandler.HandleMcpeItemRegistry(msg);
@@ -1051,6 +1055,8 @@ namespace MiNET.Net
 						return McpeEmoteList.CreateObject().Decode(buffer);
 					case 0x9c:
 						return McpePacketViolationWarning.CreateObject().Decode(buffer);
+					case 0xa1:
+						return McpeCorrectPlayerMovePrediction.CreateObject().Decode(buffer);
 					case 0xa2:
 						return McpeItemRegistry.CreateObject().Decode(buffer);
 					case 0xac:
@@ -2232,6 +2238,7 @@ namespace MiNET.Net
 			RealmsTimelineRequired = 119,
 			GuestWithoutHost = 120,
 			FailedToJoinExperience = 121,
+			NetherNetDataChannelClosed = 122,
 		}
 
 		public int reason;
@@ -9789,6 +9796,90 @@ namespace MiNET.Net
 
 	}
 
+	public partial class McpeCorrectPlayerMovePrediction : Packet<McpeCorrectPlayerMovePrediction>
+	{
+		public enum PredictionType
+		{
+			Player = 0,
+			Vehicle = 1,
+		}
+
+		public byte predictionType;
+		public Vector3 position;
+		public Vector3 delta;
+		public Vector2 vehicleRotation;
+		public float? vehicleAngularVelocity;
+		public bool onGround;
+		public long tick;
+
+		public McpeCorrectPlayerMovePrediction()
+		{
+			Id = 0xa1;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(predictionType);
+			Write(position);
+			Write(delta);
+			Write(vehicleRotation);
+			Write(vehicleAngularVelocity.HasValue); // is optional
+			if (vehicleAngularVelocity.HasValue)
+			{
+				Write(vehicleAngularVelocity.Value);
+			}
+			Write(onGround);
+			WriteUnsignedVarLong(tick);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			predictionType = ReadByte();
+			position = ReadVector3();
+			delta = ReadVector3();
+			vehicleRotation = ReadVector2();
+			if (ReadBool())
+			{
+				vehicleAngularVelocity = ReadFloat();
+			}
+			onGround = ReadBool();
+			tick = ReadUnsignedVarLong();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			predictionType = default;
+			position = default;
+			delta = default;
+			vehicleRotation = default;
+			vehicleAngularVelocity = default;
+			onGround = default;
+			tick = default;
+		}
+
+	}
+
 	public partial class McpeItemRegistry : Packet<McpeItemRegistry>
 	{
 
@@ -11021,6 +11112,7 @@ namespace MiNET.Net
 		public float distance;
 		public byte targetMode;
 		public byte actionType;
+		public bool showDebugRender;
 
 		public McpeCameraAimAssist()
 		{
@@ -11039,6 +11131,7 @@ namespace MiNET.Net
 			Write(distance);
 			Write(targetMode);
 			Write(actionType);
+			Write(showDebugRender);
 
 			AfterEncode();
 		}
@@ -11057,6 +11150,7 @@ namespace MiNET.Net
 			distance = ReadFloat();
 			targetMode = ReadByte();
 			actionType = ReadByte();
+			showDebugRender = ReadBool();
 
 			AfterDecode();
 		}
@@ -11073,6 +11167,7 @@ namespace MiNET.Net
 			distance = default;
 			targetMode = default;
 			actionType = default;
+			showDebugRender = default;
 		}
 
 	}
