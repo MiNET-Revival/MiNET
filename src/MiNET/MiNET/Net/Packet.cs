@@ -979,6 +979,36 @@ namespace MiNET.Net
 			return GameRules.Read(this);
 		}
 
+		public void Write(GameRulesI32 gameRules)
+		{
+			gameRules?.Write(this);
+		}
+
+		public GameRulesI32 ReadGameRulesI32()
+		{
+			return GameRulesI32.Read(this);
+		}
+
+		public ArmorSlotAndDamagePairs ReadArmorSlotAndDamagePairs()
+		{
+			return ArmorSlotAndDamagePairs.Read(this);
+		}
+
+		public PackSetting ReadPackSetting()
+		{
+			return PackSetting.Read(this);
+		}
+
+		public CameraInstructionData ReadCameraInstructionData()
+		{
+			return CameraInstructionData.Read(this);
+		}
+
+		public GraphicsOverrideParameters ReadGraphicsOverrideParameters()
+		{
+			return GraphicsOverrideParameters.Read(this);
+		}
+
 		public EntityAttributes ReadEntityAttributes()
 		{
 			return EntityAttributes.Read(this);

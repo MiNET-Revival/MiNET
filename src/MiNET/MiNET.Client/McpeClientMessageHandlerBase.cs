@@ -667,6 +667,10 @@ namespace MiNET.Client
 		{
 		}
 
+		public virtual void HandleMcpePlayerArmorDamage(McpePlayerArmorDamage message)
+		{
+		}
+
 		public virtual void HandleMcpeEmoteList(McpeEmoteList message)
 		{
 		}
@@ -767,6 +771,10 @@ namespace MiNET.Client
 		public void HandleMcpeCameraInstruction(McpeCameraInstruction message)
 		{
 			
+		}
+
+		public virtual void HandleMcpeGraphicsOverrideParameter(McpeGraphicsOverrideParameter message)
+		{
 		}
 
 		public void HandleMcpeServerboundLoadingScreen(McpeServerboundLoadingScreen message)

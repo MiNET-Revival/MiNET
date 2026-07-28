@@ -27,13 +27,13 @@ namespace MiNET.Net
 {
 	public partial class McpeAnimate : Packet<McpeAnimate>
 	{
-		public float unknownFloat;
+		public float rowingTime;
 
 		partial void AfterDecode()
 		{
 			if (actionId == 0x80 || actionId == 0x81)
 			{
-				unknownFloat = ReadFloat();
+				rowingTime = ReadFloat();
 			}
 		}
 
@@ -41,7 +41,7 @@ namespace MiNET.Net
 		{
 			if (actionId == 0x80 || actionId == 0x81)
 			{
-				Write(unknownFloat);
+				Write(rowingTime);
 			}
 		}
 	}

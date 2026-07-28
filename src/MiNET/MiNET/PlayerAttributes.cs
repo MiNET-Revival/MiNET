@@ -208,4 +208,40 @@ namespace MiNET
 			return gameRules;
 		}
 	}
+
+	/// <summary>
+	/// Protocol v844 representation used by GameRulesChangedPacket. Integer
+	/// values are fixed little-endian int32 instead of the signed varints used
+	/// by the otherwise identical StartGame representation.
+	/// </summary>
+	public class GameRulesI32 : GameRules
+	{
+		public static GameRulesI32 From(GameRules rules)
+		{
+			var result = new GameRulesI32();
+			if (rules != null) result.UnionWith(rules);
+			return result;
+		}
+
+		public new void Write(Packet packet)
+		{
+			packet.WriteVarInt(Count);
+			foreach (var rule in this)
+			{
+				rule.Write(packet, true);
+			}
+		}
+
+		public new static GameRulesI32 Read(Packet packet)
+		{
+			var gameRules = new GameRulesI32();
+			var count = packet.ReadVarInt();
+			for (var i = 0; i < count; i++)
+			{
+				gameRules.Add(GameRule.Read(packet, true));
+			}
+
+			return gameRules;
+		}
+	}
 }

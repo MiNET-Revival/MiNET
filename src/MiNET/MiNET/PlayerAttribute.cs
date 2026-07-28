@@ -185,15 +185,20 @@ namespace MiNET
 
 		public void Write(Packet packet)
 		{
+			Write(packet, false);
+		}
+
+		internal void Write(Packet packet, bool fixedWidthInteger)
+		{
 			packet.Write(Name.ToLower());
 			packet.Write(IsPlayerModifiable); // bool isPlayerModifiable
 
-			WriteData(packet);
+			WriteData(packet, fixedWidthInteger);
 		}
 
-		protected virtual void WriteData(Packet packet) { }
+		protected virtual void WriteData(Packet packet, bool fixedWidthInteger) { }
 
-		public static GameRule Read(Packet packet)
+		public static GameRule Read(Packet packet, bool fixedWidthInteger = false)
 		{
 			var name = packet.ReadString();
 			var isPlayerModifiable = packet.ReadBool();
@@ -201,7 +206,7 @@ namespace MiNET
 			return type switch
 			{
 				1 => GameRule<bool>.ReadData(packet, name, isPlayerModifiable),
-				2 => GameRule<int>.ReadData(packet, name, isPlayerModifiable),
+				2 => GameRule<int>.ReadData(packet, name, isPlayerModifiable, fixedWidthInteger),
 				3 => GameRule<float>.ReadData(packet, name, isPlayerModifiable)
 			};
 		}
@@ -240,7 +245,7 @@ namespace MiNET
 			Value = value;
 		}
 
-		protected override void WriteData(Packet packet)
+		protected override void WriteData(Packet packet, bool fixedWidthInteger)
 		{
 			if (Value is bool)
 			{
@@ -250,7 +255,14 @@ namespace MiNET
 			else if (Value is int)
 			{
 				packet.WriteUnsignedVarInt(2);
-				packet.WriteVarInt((this as GameRule<int>).Value);
+				if (fixedWidthInteger)
+				{
+					packet.Write((this as GameRule<int>).Value);
+				}
+				else
+				{
+					packet.WriteVarInt((this as GameRule<int>).Value);
+				}
 			}
 			else if (Value is float)
 			{
@@ -259,7 +271,7 @@ namespace MiNET
 			}
 		}
 
-		internal static GameRule ReadData(Packet packet, string name, bool isPlayerModifiable)
+		internal static GameRule ReadData(Packet packet, string name, bool isPlayerModifiable, bool fixedWidthInteger = false)
 		{
 			if (typeof(T) == typeof(bool))
 			{
@@ -270,7 +282,7 @@ namespace MiNET
 			}
 			else if (typeof(T) == typeof(int))
 			{
-				return new GameRule<int>(name, packet.ReadVarInt())
+				return new GameRule<int>(name, fixedWidthInteger ? packet.ReadInt() : packet.ReadVarInt())
 				{
 					IsPlayerModifiable = isPlayerModifiable
 				};

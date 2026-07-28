@@ -23,6 +23,7 @@ public sealed class PacketShapeData
 	public Vector3? Rotation { get; set; }
 	public float? TimeLeftTotalSeconds { get; set; }
 	public uint? Color { get; set; }
+	public int Dimension { get; set; }
 	public string Text { get; set; }
 	public Vector3? BoxBound { get; set; }
 	public Vector3? EndLocation { get; set; }
@@ -39,17 +40,36 @@ public sealed class PacketShapeData
 		WriteOptional(packet, Rotation, packet.Write);
 		WriteOptional(packet, TimeLeftTotalSeconds, packet.Write);
 		WriteOptional(packet, Color, packet.Write);
-		WriteOptional(packet, Text, packet.Write);
-		WriteOptional(packet, BoxBound, packet.Write);
-		WriteOptional(packet, EndLocation, packet.Write);
-		WriteOptional(packet, ArrowHeadLength, packet.Write);
-		WriteOptional(packet, ArrowHeadRadius, packet.Write);
-		WriteOptional(packet, NumberOfSegments, packet.Write);
+		packet.WriteVarInt(Dimension);
+
+		packet.WriteUnsignedVarInt(GetPayloadType(ShapeType));
+		switch (ShapeType)
+		{
+			case ScriptDebugShapeType.Arrow:
+				WriteOptional(packet, EndLocation, packet.Write);
+				WriteOptional(packet, ArrowHeadLength, packet.Write);
+				WriteOptional(packet, ArrowHeadRadius, packet.Write);
+				WriteOptional(packet, NumberOfSegments, packet.Write);
+				break;
+			case ScriptDebugShapeType.Text:
+				packet.Write(Text ?? string.Empty);
+				break;
+			case ScriptDebugShapeType.Box:
+				packet.Write(BoxBound ?? Vector3.Zero);
+				break;
+			case ScriptDebugShapeType.Line:
+				packet.Write(EndLocation ?? Vector3.Zero);
+				break;
+			case ScriptDebugShapeType.Sphere:
+			case ScriptDebugShapeType.Circle:
+				packet.Write(NumberOfSegments ?? 0);
+				break;
+		}
 	}
 
 	public static PacketShapeData Read(Packet packet)
 	{
-		return new PacketShapeData
+		var shape = new PacketShapeData
 		{
 			NetworkId = packet.ReadUnsignedVarLong(),
 			ShapeType = ReadOptional(packet, () => (ScriptDebugShapeType) packet.ReadByte()),
@@ -57,15 +77,49 @@ public sealed class PacketShapeData
 			Scale = ReadOptional(packet, packet.ReadFloat),
 			Rotation = ReadOptional(packet, packet.ReadVector3),
 			TimeLeftTotalSeconds = ReadOptional(packet, packet.ReadFloat),
-			Color = ReadOptional(packet, packet.ReadUint),
-			Text = ReadOptionalReference(packet, packet.ReadString),
-			BoxBound = ReadOptional(packet, packet.ReadVector3),
-			EndLocation = ReadOptional(packet, packet.ReadVector3),
-			ArrowHeadLength = ReadOptional(packet, packet.ReadFloat),
-			ArrowHeadRadius = ReadOptional(packet, packet.ReadFloat),
-			NumberOfSegments = ReadOptional(packet, packet.ReadByte)
+			Color = ReadOptional(packet, packet.ReadUint)
 		};
+
+		shape.Dimension = packet.ReadVarInt();
+		packet.ReadUnsignedVarInt(); // Payload discriminator; shape type defines the payload layout.
+
+		switch (shape.ShapeType)
+		{
+			case ScriptDebugShapeType.Arrow:
+				shape.EndLocation = ReadOptional(packet, packet.ReadVector3);
+				shape.ArrowHeadLength = ReadOptional(packet, packet.ReadFloat);
+				shape.ArrowHeadRadius = ReadOptional(packet, packet.ReadFloat);
+				shape.NumberOfSegments = ReadOptional(packet, packet.ReadByte);
+				break;
+			case ScriptDebugShapeType.Text:
+				shape.Text = packet.ReadString();
+				break;
+			case ScriptDebugShapeType.Box:
+				shape.BoxBound = packet.ReadVector3();
+				break;
+			case ScriptDebugShapeType.Line:
+				shape.EndLocation = packet.ReadVector3();
+				break;
+			case ScriptDebugShapeType.Sphere:
+			case ScriptDebugShapeType.Circle:
+				shape.NumberOfSegments = packet.ReadByte();
+				break;
+		}
+
+		return shape;
 	}
+
+	private static uint GetPayloadType(ScriptDebugShapeType? type) => type switch
+	{
+		null => 0,
+		ScriptDebugShapeType.Arrow => 1,
+		ScriptDebugShapeType.Text => 2,
+		ScriptDebugShapeType.Box => 3,
+		ScriptDebugShapeType.Line => 4,
+		ScriptDebugShapeType.Sphere => 5,
+		ScriptDebugShapeType.Circle => 5,
+		_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+	};
 
 	private static void WriteOptional<T>(Packet packet, T? value, Action<T> writer) where T : struct
 	{
@@ -73,16 +127,7 @@ public sealed class PacketShapeData
 		if (value.HasValue) writer(value.Value);
 	}
 
-	private static void WriteOptional(Packet packet, string value, Action<string> writer)
-	{
-		packet.Write(value != null);
-		if (value != null) writer(value);
-	}
-
 	private static T? ReadOptional<T>(Packet packet, Func<T> reader) where T : struct =>
-		packet.ReadBool() ? reader() : null;
-
-	private static string ReadOptionalReference(Packet packet, Func<string> reader) =>
 		packet.ReadBool() ? reader() : null;
 }
 

@@ -45,8 +45,8 @@ namespace MiNET.Net
 {
 	public class McpeProtocolInfo
 	{
-		public const int ProtocolVersion = 827;
-		public const string GameVersion = "1.21.100";
+		public const int ProtocolVersion = 859;
+		public const string GameVersion = "1.21.121";
 	}
 
 	public interface IMcpeMessageHandler
@@ -113,6 +113,7 @@ namespace MiNET.Net
 		void HandleMcpeSetPlayerInventoryOptions(McpeSetPlayerInventoryOptions message);
 		void HandleMcpeServerboundLoadingScreen(McpeServerboundLoadingScreen message);
 		void HandleMcpeContainerRegistryCleanup(McpeContainerRegistryCleanup message);
+		void HandleMcpeServerboundPackSettingChange(McpeServerboundPackSettingChange message);
 	}
 
 	public interface IMcpeClientMessageHandler
@@ -233,6 +234,7 @@ namespace MiNET.Net
 		void HandleMcpeCreativeContent(McpeCreativeContent message);
 		void HandleMcpePlayerEnchantOptions(McpePlayerEnchantOptions message);
 		void HandleMcpeItemStackResponse(McpeItemStackResponse message);
+		void HandleMcpePlayerArmorDamage(McpePlayerArmorDamage message);
 		void HandleMcpeEmoteList(McpeEmoteList message);
 		void HandleMcpeCorrectPlayerMovePrediction(McpeCorrectPlayerMovePrediction message);
 		void HandleMcpeItemRegistry(McpeItemRegistry message);
@@ -261,6 +263,7 @@ namespace MiNET.Net
 		void HandleMcpePlayerLocation(McpePlayerLocation message);
 		void HandleMcpeClientboundControlSchemeSet(McpeClientboundControlSchemeSet message);
 		void HandleMcpeServerScriptDebugDrawer(McpeServerScriptDebugDrawer message);
+		void HandleMcpeGraphicsOverrideParameter(McpeGraphicsOverrideParameter message);
 		void HandleMcpeAlexEntityAnimation(McpeAlexEntityAnimation message);
 		void HandleFtlCreatePlayer(FtlCreatePlayer message);
 	}
@@ -626,6 +629,9 @@ namespace MiNET.Net
 				case McpeItemStackResponse msg:
 					_messageHandler.HandleMcpeItemStackResponse(msg);
 					break;
+				case McpePlayerArmorDamage msg:
+					_messageHandler.HandleMcpePlayerArmorDamage(msg);
+					break;
 				case McpeEmoteList msg:
 					_messageHandler.HandleMcpeEmoteList(msg);
 					break;
@@ -709,6 +715,9 @@ namespace MiNET.Net
 					break;
 				case McpeServerScriptDebugDrawer msg:
 					_messageHandler.HandleMcpeServerScriptDebugDrawer(msg);
+					break;
+				case McpeGraphicsOverrideParameter msg:
+					_messageHandler.HandleMcpeGraphicsOverrideParameter(msg);
 					break;
 				case McpeAlexEntityAnimation msg:
 					_messageHandler.HandleMcpeAlexEntityAnimation(msg);
@@ -1049,6 +1058,8 @@ namespace MiNET.Net
 						return McpeItemStackRequest.CreateObject().Decode(buffer);
 					case 0x94:
 						return McpeItemStackResponse.CreateObject().Decode(buffer);
+					case 0x95:
+						return McpePlayerArmorDamage.CreateObject().Decode(buffer);
 					case 0x97:
 						return McpeUpdatePlayerGameType.CreateObject().Decode(buffer);
 					case 0x98:
@@ -1119,6 +1130,10 @@ namespace MiNET.Net
 						return McpeClientboundControlSchemeSet.CreateObject().Decode(buffer);
 					case 0x148:
 						return McpeServerScriptDebugDrawer.CreateObject().Decode(buffer);
+					case 0x149:
+						return McpeServerboundPackSettingChange.CreateObject().Decode(buffer);
+					case 0x14b:
+						return McpeGraphicsOverrideParameter.CreateObject().Decode(buffer);
 					case 0xe0:
 						return McpeAlexEntityAnimation.CreateObject().Decode(buffer);
 				}
@@ -2239,6 +2254,8 @@ namespace MiNET.Net
 			GuestWithoutHost = 120,
 			FailedToJoinExperience = 121,
 			NetherNetDataChannelClosed = 122,
+			DiscoveryEnvironmentMismatch = 123,
+			HostWithoutKeys = 124,
 		}
 
 		public int reason;
@@ -4593,6 +4610,7 @@ namespace MiNET.Net
 
 		public int actionId;
 		public long runtimeEntityId;
+		public float data;
 
 		public McpeAnimate()
 		{
@@ -4608,6 +4626,7 @@ namespace MiNET.Net
 
 			WriteSignedVarInt(actionId);
 			WriteUnsignedVarLong(runtimeEntityId);
+			Write(data);
 
 			AfterEncode();
 		}
@@ -4623,6 +4642,7 @@ namespace MiNET.Net
 
 			actionId = ReadSignedVarInt();
 			runtimeEntityId = ReadUnsignedVarLong();
+			data = ReadFloat();
 
 			AfterDecode();
 		}
@@ -4636,6 +4656,7 @@ namespace MiNET.Net
 
 			actionId = default;
 			runtimeEntityId = default;
+			data = default;
 		}
 
 	}
@@ -6024,7 +6045,7 @@ namespace MiNET.Net
 	public partial class McpeGameRulesChanged : Packet<McpeGameRulesChanged>
 	{
 
-		public GameRules rules;
+		public GameRulesI32 rules;
 
 		public McpeGameRulesChanged()
 		{
@@ -6052,7 +6073,7 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
-			rules = ReadGameRules();
+			rules = ReadGameRulesI32();
 
 			AfterDecode();
 		}
@@ -7104,7 +7125,7 @@ namespace MiNET.Net
 	public partial class McpeShowStoreOffer : Packet<McpeShowStoreOffer>
 	{
 
-		public string offerId;
+		public UUID offerId;
 		public byte redirectType;
 
 		public McpeShowStoreOffer()
@@ -7134,7 +7155,7 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
-			offerId = ReadString();
+			offerId = ReadUUID();
 			redirectType = ReadByte();
 
 			AfterDecode();
@@ -9628,6 +9649,54 @@ namespace MiNET.Net
 
 	}
 
+	public partial class McpePlayerArmorDamage : Packet<McpePlayerArmorDamage>
+	{
+
+		public ArmorSlotAndDamagePairs armorSlotAndDamagePairs;
+
+		public McpePlayerArmorDamage()
+		{
+			Id = 0x95;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(armorSlotAndDamagePairs);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			armorSlotAndDamagePairs = ReadArmorSlotAndDamagePairs();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			armorSlotAndDamagePairs = default;
+		}
+
+	}
+
 	public partial class McpeUpdatePlayerGameType : Packet<McpeUpdatePlayerGameType>
 	{
 
@@ -10419,6 +10488,7 @@ namespace MiNET.Net
 	public partial class McpeCameraInstruction : Packet<McpeCameraInstruction>
 	{
 
+		public CameraInstructionData instruction;
 
 		public McpeCameraInstruction()
 		{
@@ -10432,6 +10502,7 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
+			Write(instruction);
 
 			AfterEncode();
 		}
@@ -10445,6 +10516,7 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
+			instruction = ReadCameraInstructionData();
 
 			AfterDecode();
 		}
@@ -10456,6 +10528,7 @@ namespace MiNET.Net
 		{
 			base.ResetPacket();
 
+			instruction = default;
 		}
 
 	}
@@ -11628,6 +11701,106 @@ namespace MiNET.Net
 			base.ResetPacket();
 
 			shapes = default;
+		}
+
+	}
+
+	public partial class McpeServerboundPackSettingChange : Packet<McpeServerboundPackSettingChange>
+	{
+
+		public UUID packId;
+		public PackSetting packSetting;
+
+		public McpeServerboundPackSettingChange()
+		{
+			Id = 0x149;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(packId);
+			Write(packSetting);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			packId = ReadUUID();
+			packSetting = ReadPackSetting();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			packId = default;
+			packSetting = default;
+		}
+
+	}
+
+	public partial class McpeGraphicsOverrideParameter : Packet<McpeGraphicsOverrideParameter>
+	{
+
+		public GraphicsOverrideParameters parameters;
+
+		public McpeGraphicsOverrideParameter()
+		{
+			Id = 0x14b;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(parameters);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			parameters = ReadGraphicsOverrideParameters();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			parameters = default;
 		}
 
 	}
