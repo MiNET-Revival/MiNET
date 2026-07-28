@@ -678,6 +678,11 @@ namespace MiNET.Client
 		}
 
 		/// <inheritdoc />
+		public virtual void HandleMcpeCorrectPlayerMovePrediction(McpeCorrectPlayerMovePrediction message)
+		{
+		}
+
+		/// <inheritdoc />
 		public void HandleMcpeUpdateSubChunkBlocksPacket(McpeUpdateSubChunkBlocksPacket message)
 		{
 			

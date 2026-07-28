@@ -681,6 +681,8 @@ namespace MiNET
 		LeadUnleash = 558,
 		LeadBreak = 559,
 		Unsaddle = 560,
-		UndefinedV818 = 561,
+		EquipCopper = 561,
+		RecordLavaChicken = 562,
+		UndefinedV827 = 563,
 	}
 }

@@ -559,7 +559,7 @@ namespace MiNET.Entities
 			TimerFlag3 = 117,
 			BodyRotationBlocked = 118,
 			RenderWhenInvisible = 119,
-			BodyRotationAxisAligned = 120,
+			RotationAxisAligned = 120,
 			Collidable = 121,
 			WasdAirControlled = 122,
 			DoesServerAuthOnlyDismount = 123,
