@@ -999,6 +999,16 @@ namespace MiNET.Net
 			return PackSetting.Read(this);
 		}
 
+		public CameraInstructionData ReadCameraInstructionData()
+		{
+			return CameraInstructionData.Read(this);
+		}
+
+		public GraphicsOverrideParameters ReadGraphicsOverrideParameters()
+		{
+			return GraphicsOverrideParameters.Read(this);
+		}
+
 		public EntityAttributes ReadEntityAttributes()
 		{
 			return EntityAttributes.Read(this);

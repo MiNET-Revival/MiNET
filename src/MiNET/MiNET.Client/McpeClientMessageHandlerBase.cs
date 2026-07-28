@@ -773,6 +773,10 @@ namespace MiNET.Client
 			
 		}
 
+		public virtual void HandleMcpeGraphicsOverrideParameter(McpeGraphicsOverrideParameter message)
+		{
+		}
+
 		public void HandleMcpeServerboundLoadingScreen(McpeServerboundLoadingScreen message)
 		{
 			

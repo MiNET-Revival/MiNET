@@ -205,7 +205,8 @@ namespace MiNET.Players
 			McpeAnimate msg = McpeAnimate.CreateObject();
 			msg.runtimeEntityId = EntityId;
 			msg.actionId = message.actionId;
-			msg.unknownFloat = message.unknownFloat;
+			msg.data = message.data;
+			msg.rowingTime = message.rowingTime;
 
 			Level.RelayBroadcast(this, msg);
 		}
