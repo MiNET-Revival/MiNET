@@ -449,6 +449,16 @@ namespace MiNET.Net
 			return _reader.ReadSingle();
 		}
 
+		public void Write(double value)
+		{
+			_writer.Write(value);
+		}
+
+		public double ReadDouble()
+		{
+			return BitConverter.Int64BitsToDouble(_reader.ReadInt64());
+		}
+
 		public void Write(string value)
 		{
 			if (string.IsNullOrEmpty(value))
@@ -1007,6 +1017,16 @@ namespace MiNET.Net
 		public GraphicsOverrideParameters ReadGraphicsOverrideParameters()
 		{
 			return GraphicsOverrideParameters.Read(this);
+		}
+
+		public DataStoreEntries ReadDataStoreEntries()
+		{
+			return DataStoreEntries.Read(this);
+		}
+
+		public ServerboundDataStoreData ReadServerboundDataStoreData()
+		{
+			return ServerboundDataStoreData.Read(this);
 		}
 
 		public EntityAttributes ReadEntityAttributes()

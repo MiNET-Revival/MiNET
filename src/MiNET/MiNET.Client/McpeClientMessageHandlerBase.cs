@@ -777,6 +777,10 @@ namespace MiNET.Client
 		{
 		}
 
+		public virtual void HandleMcpeClientboundDataStore(McpeClientboundDataStore message)
+		{
+		}
+
 		public void HandleMcpeServerboundLoadingScreen(McpeServerboundLoadingScreen message)
 		{
 			

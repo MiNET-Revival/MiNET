@@ -566,8 +566,9 @@ namespace MiNET.Entities
 			BodyRotationAlwaysFollowsHead = 124,
 			CanUseVerticalMovementAction = 125,
 			BodyRotationLockedToVehicle = 126,
+			RotationLockedToVehicle = 127,
 
-			Count = 127
+			Count = 128
 		}
 
 		protected virtual BitArray GetFlags()

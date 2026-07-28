@@ -98,12 +98,6 @@ namespace MiNET.Client
 				sb.AppendLine($"ID={info.Id}, Version={info.Version}, Subpackname={info.SubPackName}");
 			}
 
-			sb.AppendLine("Behavior pack stacks:");
-			foreach (var info in message.behaviorpackidversions)
-			{
-				sb.AppendLine($"ID={info.Id}, Version={info.Version}, Subpackname={info.SubPackName}");
-			}
-
 			Log.Debug(sb.ToString());
 
 			base.HandleMcpeResourcePackStack(message);

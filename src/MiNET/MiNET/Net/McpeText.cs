@@ -27,6 +27,7 @@ namespace MiNET.Net
 {
 	public partial class McpeText : Packet<McpeText>
 	{
+		public byte type;
 		public bool needsTranslation; // = null
 		public string source; // = null;
 		public string message; // = null;
@@ -44,17 +45,38 @@ namespace MiNET.Net
 				case ChatTypes.Chat:
 				case ChatTypes.Whisper:
 				case ChatTypes.Announcement:
+					Write((byte) 1);
+					Write("chat");
+					Write("whisper");
+					Write("announcement");
+					Write(type);
 					Write(source);
-					goto case ChatTypes.Raw;
+					Write(message);
+					break;
 				case ChatTypes.Raw:
 				case ChatTypes.Tip:
 				case ChatTypes.System:
 				case ChatTypes.Json:
+				case ChatTypes.Jsonwhisper:
+				case ChatTypes.Jsonannouncement:
+					Write((byte) 0);
+					Write("raw");
+					Write("tip");
+					Write("system");
+					Write("textObjectWhisper");
+					Write("textObjectAnnouncement");
+					Write("textObject");
+					Write(type);
 					Write(message);
 					break;
 				case ChatTypes.Popup:
 				case ChatTypes.Translation:
 				case ChatTypes.Jukeboxpopup:
+					Write((byte) 2);
+					Write("translate");
+					Write("popup");
+					Write("jukeboxPopup");
+					Write(type);
 					Write(message);
 					if (parameters == null)
 					{
@@ -73,7 +95,9 @@ namespace MiNET.Net
 
 			Write(xuid);
 			Write(platformChatId);
-			Write(filteredMessage);
+			bool hasFilteredMessage = !string.IsNullOrEmpty(filteredMessage);
+			Write(hasFilteredMessage);
+			if (hasFilteredMessage) Write(filteredMessage);
 		}
 
 		public override void Reset()
@@ -88,28 +112,23 @@ namespace MiNET.Net
 		partial void AfterDecode()
 		{
 			needsTranslation = ReadBool();
-
-			ChatTypes chatType = (ChatTypes) type;
-			switch (chatType)
+			byte category = ReadByte();
+			switch (category)
 			{
-				case ChatTypes.Chat:
-				case ChatTypes.Whisper:
-				case ChatTypes.Announcement:
+				case 0:
+					for (int i = 0; i < 6; i++) ReadString();
+					type = ReadByte();
+					message = ReadString();
+					break;
+				case 1:
+					for (int i = 0; i < 3; i++) ReadString();
+					type = ReadByte();
 					source = ReadString();
 					message = ReadString();
 					break;
-				case ChatTypes.Raw:
-				case ChatTypes.Tip:
-				case ChatTypes.System:
-				case ChatTypes.Json:
-				case ChatTypes.Jsonwhisper:
-				case ChatTypes.Jsonannouncement:
-					message = ReadString();
-					break;
-
-				case ChatTypes.Popup:
-				case ChatTypes.Translation:
-				case ChatTypes.Jukeboxpopup:
+				case 2:
+					for (int i = 0; i < 3; i++) ReadString();
+					type = ReadByte();
 					message = ReadString();
 					parameters = new string[ReadUnsignedVarInt()];
 					for (var i = 0; i < parameters.Length; ++i)
@@ -117,11 +136,13 @@ namespace MiNET.Net
 						parameters[i] = ReadString();
 					}
 					break;
+				default:
+					throw new System.IO.InvalidDataException($"Unknown text message category {category}");
 			}
 
 			xuid = ReadString();
 			platformChatId = ReadString();
-			filteredMessage = ReadString();
+			filteredMessage = ReadBool() ? ReadString() : null;
 		}
 	}
 }

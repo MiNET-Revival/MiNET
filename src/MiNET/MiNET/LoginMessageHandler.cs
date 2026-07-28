@@ -800,6 +800,10 @@ namespace MiNET
 		{
 		}
 
+		public void HandleMcpeServerboundDataStore(McpeServerboundDataStore message)
+		{
+		}
+
 		public void HandleMcpeEmoteList(McpeEmoteList message)
 		{
 		}

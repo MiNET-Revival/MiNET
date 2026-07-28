@@ -294,7 +294,6 @@ namespace MiNET.Net
 		public UUID worldTemplateId; // = null;
 		public bool clientSideGenerationEnabled; // = null;
 		public bool blockNetworkIdsAreHashes; // = null;
-		public bool tickDeathSystemsEnabled; // = null;
 		public bool disableClientSounds; // = null;
 
 		public LevelSettings levelSettings = new LevelSettings();
@@ -332,7 +331,6 @@ namespace MiNET.Net
 			Write(worldTemplateId);
 			Write(clientSideGenerationEnabled);
 			Write(blockNetworkIdsAreHashes);
-			Write(tickDeathSystemsEnabled);
 			Write(disableClientSounds);
 		}
 		
@@ -376,7 +374,6 @@ namespace MiNET.Net
 			worldTemplateId = ReadUUID();
 			clientSideGenerationEnabled = ReadBool();
 			blockNetworkIdsAreHashes = ReadBool();
-			tickDeathSystemsEnabled = ReadBool();
 			disableClientSounds = ReadBool();
 		}
 
@@ -405,7 +402,6 @@ namespace MiNET.Net
 			worldTemplateId=default;
 			clientSideGenerationEnabled=default(bool);
 			blockNetworkIdsAreHashes=default(bool);
-			tickDeathSystemsEnabled=default(bool);
 			disableClientSounds=default(bool);
 			base.Reset();
 		}

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<protocol gameVersion="1.21.121" protocolVersion="859">
+<protocol gameVersion="1.21.130" protocolVersion="898">
 
 	<constants>
 		<constant id="OFFLINE_MESSAGE_DATA_ID" type="byte[]"
@@ -170,7 +170,6 @@
 
 	<pdu id="0x07" online="false" client="false" server="true" name="MCPE_RESOURCE_PACK_STACK">
 		<field name="Must Accept" type="bool" />
-		<field name="BehaviorPackIdVersions" type="ResourcePackIdVersions" />
 		<field name="ResourcePackIdVersions" type="ResourcePackIdVersions" />
 		<field name="Game Version" type="string" />
 		<field name="Experiments" type="Experiments" />
@@ -200,12 +199,12 @@
 			<enum id="System" value="6" />
 			<enum id="Whisper" value="7" />
 			<enum id="Announcement" value="8" />
-			<enum id="Json" value="9" />
-			<enum id="JsonWhisper" value="10" />
+			<enum id="JsonWhisper" value="9" />
+			<enum id="Json" value="10" />
 			<enum id="JsonAnnouncement" value="11" />
 		</enums>
 
-		<field name="Type" type="byte" />
+		<!-- Protocol v898: the complete Cereal tagged-union layout is implemented by McpeText.cs. -->
 	</pdu>
 
 	<pdu id="0x10" online="false" client="true" server="true" name="MCPE_SERVER_PLAYER_POST_MOVE_POSITION">
@@ -408,6 +407,7 @@
 		<field name="Particles" type="bool" />
 		<field name="Duration" type="SignedVarInt" />
 		<field name="Tick" type="UnsignedVarLong" />
+		<field name="Ambient" type="bool" />
 	</pdu>
 
 	<pdu id="0x1d" online="false" client="false" server="true" name="MCPE_UPDATE_ATTRIBUTES">
@@ -493,6 +493,7 @@
 
 		<field name="Action ID" type="byte" />
 		<field name="Target Runtime Entity ID" type="UnsignedVarLong" />
+		<field name="Has Position" type="bool" />
 	</pdu>
 
 	<pdu id="0x22" online="false" client="true" server="false" name="MCPE_BLOCK_PICK_REQUEST">
@@ -560,10 +561,10 @@
 	</pdu>
 
 	<pdu id="0x2c" online="false" client="true" server="true" name="MCPE_ANIMATE">
-		<field name="Action ID" type="SignedVarInt" />
+		<field name="Action ID" type="byte" />
 		<field name="Runtime Entity ID" type="UnsignedVarLong" />
-		<!-- Protocol v859: action-specific data is now always present. -->
 		<field name="Data" type="float" />
+		<field name="Has Swing Source" type="bool" />
 	</pdu>
 
 	<pdu id="0x2d" online="false" client="true" server="true" name="MCPE_RESPAWN">
@@ -800,11 +801,11 @@
 
 	<pdu id="0x4d" online="false" client="true" server="false" name="MCPE_COMMAND_REQUEST">
 		<field name="Command" type="string" />
-		<field name="Command type" type="UnsignedVarInt" />
+		<field name="Command type" type="string" />
 		<field name="Unknown UUID" type="UUID" />
 		<field name="Request ID" type="string" />
-		<field name="IsInternal" type="bool" />
-		<field name="Version" type="SignedVarInt" />
+		<field name="Player ID" type="long" />
+		<field name="Version" type="string" />
 	</pdu>
 
 	<pdu id="0x4e" online="false" client="true" server="false" name="MCPE_COMMAND_BLOCK_UPDATE">
@@ -1481,8 +1482,16 @@
 		<field name="Pack Setting" type="PackSetting" />
 	</pdu>
 
+	<pdu id="0x14a" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_DATA_STORE">
+		<field name="Entries" type="DataStoreEntries" />
+	</pdu>
+
 	<pdu id="0x14b" online="false" client="false" server="true" name="MCPE_GRAPHICS_OVERRIDE_PARAMETER">
 		<field name="Parameters" type="GraphicsOverrideParameters" />
+	</pdu>
+
+	<pdu id="0x14c" online="false" client="true" server="false" name="MCPE_SERVERBOUND_DATA_STORE">
+		<field name="Data" type="ServerboundDataStoreData" />
 	</pdu>
 
 	<pdu id="0xe0" online="false" client="false" server="true" name="MCPE_ALEX_ENTITY_ANIMATION">
