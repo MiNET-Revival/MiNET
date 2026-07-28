@@ -675,6 +675,12 @@ namespace MiNET
 		StateChange = 552,
 		ImitateHappyGhast = 553,
 		ArmorUnequipGeneric = 554,
-		UndefinedV800 = 555,
+		RecordTears = 555,
+		TheEndLightFlash = 556,
+		LeadLeash = 557,
+		LeadUnleash = 558,
+		LeadBreak = 559,
+		Unsaddle = 560,
+		UndefinedV818 = 561,
 	}
 }

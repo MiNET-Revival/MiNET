@@ -112,6 +112,43 @@ namespace MiNET.Players
 			Log.Debug(deathMessage);
 		}
 
+		public virtual void SendDeathInfo(DamageCause damageCause, Entity damageSource)
+		{
+			string translationKey = damageCause switch
+			{
+				DamageCause.Contact => "death.attack.cactus",
+				DamageCause.EntityAttack => damageSource is Player ? "death.attack.player" : "death.attack.mob",
+				DamageCause.Projectile => "death.attack.arrow",
+				DamageCause.Suffocation => "death.attack.inWall",
+				DamageCause.Fall => "death.attack.fall",
+				DamageCause.Fire => "death.attack.inFire",
+				DamageCause.FireTick => "death.attack.onFire",
+				DamageCause.Lava => "death.attack.lava",
+				DamageCause.Drowning => "death.attack.drown",
+				DamageCause.BlockExplosion or DamageCause.EntityExplosion => "death.attack.explosion",
+				DamageCause.Void => "death.attack.outOfWorld",
+				DamageCause.Magic => "death.attack.magic",
+				DamageCause.Starving => "death.attack.starve",
+				_ => "death.attack.generic"
+			};
+
+			bool includesDamageSource = damageCause is DamageCause.EntityAttack or DamageCause.Projectile;
+			string damageSourceName = damageSource switch
+			{
+				Player sourcePlayer => sourcePlayer.Username,
+				{ NameTag.Length: > 0 } => damageSource.NameTag,
+				not null => damageSource.EntityTypeId.ToString(),
+				_ => string.Empty
+			};
+
+			var deathInfo = McpeDeathInfo.CreateObject();
+			deathInfo.messageTranslationKey = translationKey;
+			deathInfo.messageParameters = includesDamageSource
+				? new[] { Username, damageSourceName }
+				: new[] { Username };
+			SendPacket(deathInfo);
+		}
+
 		/// <summary>
 		///     Very important litle method. This does all the sending of packets for
 		///     the player class. Treat with respect!

@@ -16,7 +16,7 @@ Compared to the original fork, the main changes so far are:
 - progressively separated responsibilities in `Player` and `Level`;
 - introduced an initial event foundation for `Player`, `Entity`, and `Level`;
 - migrated the project to .NET 10.
-- Support of protocol v800 (v1.21.80)
+- Support of protocol v818 (v1.21.90)
 
 ## Goals
 

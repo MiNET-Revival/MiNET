@@ -112,6 +112,8 @@ namespace MiNET
 
 		public virtual void Regen(int amount = 1)
 		{
+			if (IsDead || Health <= 0) return;
+
 			Health += amount * 10;
 			if (Health > MaxHealth) Health = MaxHealth;
 
@@ -277,6 +279,8 @@ namespace MiNET
 
 			if (player != null)
 			{
+				player.SendDeathInfo(LastDamageCause, LastDamageSource);
+
 				//SendWithDelay(2000, () =>
 				//{
 				//});

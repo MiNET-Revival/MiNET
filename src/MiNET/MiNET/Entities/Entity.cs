@@ -563,8 +563,9 @@ namespace MiNET.Entities
 			Collidable = 121,
 			WasdAirControlled = 122,
 			DoesServerAuthOnlyDismount = 123,
+			BodyRotationAlwaysFollowsHead = 124,
 
-			Count = 124
+			Count = 125
 		}
 
 		protected virtual BitArray GetFlags()

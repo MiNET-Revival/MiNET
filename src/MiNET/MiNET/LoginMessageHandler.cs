@@ -154,6 +154,14 @@ namespace MiNET
 				certificateChain = Encoding.UTF8.GetString(reader.ReadBytes(countCertData));
 				if (Log.IsDebugEnabled) Log.Debug($"Certificate Chain (Lenght={countCertData})\n{certificateChain}");
 
+				// Protocol 818 wraps the legacy certificate-chain JSON in a string-valued
+				// Certificate property. Older payloads remain accepted for compatibility.
+				JObject authenticationInfo = JObject.Parse(certificateChain);
+				if (authenticationInfo["Certificate"]?.Type == JTokenType.String)
+				{
+					certificateChain = authenticationInfo.Value<string>("Certificate");
+				}
+
 				var countSkinData = reader.ReadInt32();
 				skinData = Encoding.UTF8.GetString(reader.ReadBytes(countSkinData));
 				if (Log.IsDebugEnabled) Log.Debug($"Skin data (Lenght={countSkinData})\n{skinData}");

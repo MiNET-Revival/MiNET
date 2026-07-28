@@ -40,6 +40,7 @@ public abstract class SubChunkEntryCommon
 	public SubChunkPositionOffset Offset { get; set; }
 	public SubChunkRequestResult RequestResult { get; set; }
 	public HeightMapData HeightMapData { get; set; }
+	public HeightMapData RenderHeightMapData { get; set; }
 	public byte[] Data { get; set; }
 	
 	public void Read(Packet packet, bool cacheEnabled)
@@ -56,6 +57,7 @@ public abstract class SubChunkEntryCommon
 		Data = data;
 		
 		HeightMapData = packet.ReadHeightMapData();
+		RenderHeightMapData = packet.ReadHeightMapData(HeightMapData, true);
 		
 		OnRead(packet);
 	}
@@ -71,6 +73,7 @@ public abstract class SubChunkEntryCommon
 		}
 		
 		packet.Write(HeightMapData);
+		packet.WriteRenderHeightMapData(RenderHeightMapData);
 		
 		OnWrite(packet);
 	}
