@@ -730,10 +730,11 @@
 	</pdu>
 
 	<pdu id="0x41" online="false" client="false" server="true" name="MCPE_TELEMETRY_EVENT">
-		<field name="Runtime Entity ID" type="UnsignedVarLong" />
+		<field name="Runtime Entity ID" type="SignedVarLong" />
 		<field name="Event data" type="SignedVarInt" />
-		<field name="Event type" type="byte" />
-		<field name="Aux Data" type="byte[]" size="0, true" note="Ignored" />
+		<field name="Use Player Id" type="bool" />
+		<field name="Payload Type" type="UnsignedVarInt" />
+		<field name="Aux Data" type="byte[]" size="0, true" note="Cereal event payload" />
 	</pdu>
 
 	<pdu id="0x42" online="false" client="false" server="true" name="MCPE_SPAWN_EXPERIENCE_ORB">
@@ -1235,6 +1236,9 @@
 	<pdu id="0xa2" online="false" client="false" server="true" name="MCPE_ITEM_REGISTRY">
 		<field name="Item States" type="ItemStates" />
 	</pdu>
+
+	<pdu id="0xa4" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_DEBUG_RENDERER">
+	</pdu>
 	
 	<pdu id="0xac" online="false" client="true" server="true" name="MCPE_UPDATE_SUB_CHUNK_BLOCKS_PACKET">
 		<field name="Subchunk coordinates" type="BlockCoordinates"/>
@@ -1429,6 +1433,9 @@
 		<field name="Mode" type="byte" />
 	</pdu>
 
+	<pdu id="0x140" online="false" client="false" server="true" name="MCPE_CAMERA_AIM_ASSIST_PRESETS">
+	</pdu>
+
 	<pdu id="0x143" online="false" client="false" server="true" name="MCPE_UPDATE_CLIENT_OPTIONS">
 		<enums id="Graphics Mode">
 			<enum id="Simple" value="0" />
@@ -1438,6 +1445,9 @@
 		</enums>
 		
 		<field name="Graphics Mode" type="byte" optional="true" />
+	</pdu>
+
+	<pdu id="0x144" online="false" client="false" server="true" name="MCPE_PLAYER_VIDEO_CAPTURE">
 	</pdu>
 
 	<pdu id="0x145" online="false" client="false" server="true" name="MCPE_PLAYER_UPDATE_ENTITY_OVERRIDES">

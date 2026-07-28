@@ -62,7 +62,7 @@ namespace MiNET.Net
 					Write((byte) 0);
 					Write("raw");
 					Write("tip");
-					Write("system");
+					Write("systemMessage");
 					Write("textObjectWhisper");
 					Write("textObjectAnnouncement");
 					Write("textObject");
