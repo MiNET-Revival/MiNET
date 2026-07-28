@@ -79,7 +79,7 @@ namespace MiNET.Players
 		public virtual void SendGameRules()
 		{
 			McpeGameRulesChanged gameRulesChanged = McpeGameRulesChanged.CreateObject();
-			gameRulesChanged.rules = Level.GetGameRules();
+			gameRulesChanged.rules = GameRulesI32.From(Level.GetGameRules());
 			SendPacket(gameRulesChanged);
 		}
 

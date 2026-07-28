@@ -564,8 +564,9 @@ namespace MiNET.Entities
 			WasdAirControlled = 122,
 			DoesServerAuthOnlyDismount = 123,
 			BodyRotationAlwaysFollowsHead = 124,
+			CanUseVerticalMovementAction = 125,
 
-			Count = 125
+			Count = 126
 		}
 
 		protected virtual BitArray GetFlags()

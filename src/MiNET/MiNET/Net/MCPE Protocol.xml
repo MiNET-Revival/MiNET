@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<protocol gameVersion="1.21.100" protocolVersion="827">
+<protocol gameVersion="1.21.111" protocolVersion="844">
 
 	<constants>
 		<constant id="OFFLINE_MESSAGE_DATA_ID" type="byte[]"
@@ -754,7 +754,9 @@
 	</pdu>
 
 	<pdu id="0x48" online="false" client="false" server="true" name="MCPE_GAME_RULES_CHANGED">
-		<field name="Rules" type="GameRules" />
+		<!-- Protocol v844: integer gamerule values use fixed little-endian int32
+		     here, while StartGame keeps signed varints. -->
+		<field name="Rules" type="GameRulesI32" />
 	</pdu>
 
 	<pdu id="0x49" online="false" client="false" server="true" name="MCPE_CAMERA">
@@ -1183,6 +1185,11 @@
 		<field name="Responses" type="ItemStackResponses" />
 	</pdu>
 
+	<pdu id="0x95" online="false" client="false" server="true" name="MCPE_PLAYER_ARMOR_DAMAGE">
+		<!-- Protocol v844 replaced the legacy bitset with a length-prefixed list. -->
+		<field name="Armor Slot And Damage Pairs" type="ArmorSlotAndDamagePairs" />
+	</pdu>
+
 	<pdu id="0x97" online="false" client="true" server="false" name="MCPE_UPDATE_PLAYER_GAME_TYPE">
 		<field name="Game Mode" type="VarInt" />
 		<field name="Player Entity Unique Id" type="ulong" />
@@ -1462,6 +1469,11 @@
 
 	<pdu id="0x148" online="false" client="false" server="true" name="MCPE_SERVER_SCRIPT_DEBUG_DRAWER">
 		<field name="Shapes" type="PacketShapeData[]" />
+	</pdu>
+
+	<pdu id="0x149" online="false" client="true" server="false" name="MCPE_SERVERBOUND_PACK_SETTING_CHANGE">
+		<field name="Pack Id" type="UUID" />
+		<field name="Pack Setting" type="PackSetting" />
 	</pdu>
 
 	<pdu id="0xe0" online="false" client="false" server="true" name="MCPE_ALEX_ENTITY_ANIMATION">

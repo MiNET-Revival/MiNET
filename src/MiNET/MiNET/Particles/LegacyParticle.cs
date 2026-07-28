@@ -121,7 +121,8 @@ namespace MiNET.Particles
 		WhiteSmoke = 89,
 		VaultConnection = 90,
 		WindExplosion = 91,
-		WolfArmorCrack = 92
+		WolfArmorCrack = 92,
+		GreenFlame = 98
 	}
 
 	public class LegacyParticle : Particle

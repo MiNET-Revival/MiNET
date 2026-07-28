@@ -667,6 +667,10 @@ namespace MiNET.Client
 		{
 		}
 
+		public virtual void HandleMcpePlayerArmorDamage(McpePlayerArmorDamage message)
+		{
+		}
+
 		public virtual void HandleMcpeEmoteList(McpeEmoteList message)
 		{
 		}

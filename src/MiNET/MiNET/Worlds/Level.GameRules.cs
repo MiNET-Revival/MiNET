@@ -80,7 +80,7 @@ namespace MiNET.Worlds
 		public virtual void BroadcastGameRules()
 		{
 			McpeGameRulesChanged gameRulesChanged = McpeGameRulesChanged.CreateObject();
-			gameRulesChanged.rules = GetGameRules();
+			gameRulesChanged.rules = GameRulesI32.From(GetGameRules());
 			RelayBroadcast(gameRulesChanged);
 		}
 

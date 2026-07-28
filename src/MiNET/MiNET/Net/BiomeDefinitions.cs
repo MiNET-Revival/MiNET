@@ -108,9 +108,14 @@ namespace MiNET.Net
 		public ushort? BiomeId { get; set; }
 		public float Temperature { get; set; }
 		public float Downfall { get; set; }
+		public float FoliageSnow { get; set; }
+		[Obsolete("Protocol v844 no longer serializes red spore density in BiomeDefinitionData.")]
 		public float RedSporeDensity { get; set; }
+		[Obsolete("Protocol v844 no longer serializes blue spore density in BiomeDefinitionData.")]
 		public float BlueSporeDensity { get; set; }
+		[Obsolete("Protocol v844 no longer serializes ash density in BiomeDefinitionData.")]
 		public float AshDensity { get; set; }
+		[Obsolete("Protocol v844 no longer serializes white ash density in BiomeDefinitionData.")]
 		public float WhiteAshDensity { get; set; }
 		public float Depth { get; set; }
 		public float Scale { get; set; }
@@ -125,10 +130,7 @@ namespace MiNET.Net
 				BiomeId = null,
 				Temperature = biome.Temperature,
 				Downfall = biome.Downfall,
-				RedSporeDensity = biome.RedSpores,
-				BlueSporeDensity = biome.BlueSpores,
-				AshDensity = biome.Ash,
-				WhiteAshDensity = biome.WhiteAsh,
+				FoliageSnow = 0,
 				Depth = biome.Depth,
 				Scale = biome.Height,
 				MapWaterColorArgb = ToArgb(biome),
@@ -145,10 +147,9 @@ namespace MiNET.Net
 
 			packet.Write(Temperature);
 			packet.Write(Downfall);
-			packet.Write(RedSporeDensity);
-			packet.Write(BlueSporeDensity);
-			packet.Write(AshDensity);
-			packet.Write(WhiteAshDensity);
+			// Protocol v844 moved the four precipitation density values out of
+			// BiomeDefinitionData and replaced them with foliage snow progress.
+			packet.Write(FoliageSnow);
 			packet.Write(Depth);
 			packet.Write(Scale);
 			packet.Write(MapWaterColorArgb);
@@ -170,10 +171,7 @@ namespace MiNET.Net
 
 			definition.Temperature = packet.ReadFloat();
 			definition.Downfall = packet.ReadFloat();
-			definition.RedSporeDensity = packet.ReadFloat();
-			definition.BlueSporeDensity = packet.ReadFloat();
-			definition.AshDensity = packet.ReadFloat();
-			definition.WhiteAshDensity = packet.ReadFloat();
+			definition.FoliageSnow = packet.ReadFloat();
 			definition.Depth = packet.ReadFloat();
 			definition.Scale = packet.ReadFloat();
 			definition.MapWaterColorArgb = packet.ReadInt();

@@ -260,5 +260,10 @@ namespace MiNET.Players
 				var offHandItem = Inventory.OffHand;
 			}
 		}
+
+		public virtual void HandleMcpeServerboundPackSettingChange(McpeServerboundPackSettingChange message)
+		{
+			// Pack settings do not currently have a gameplay consumer in MiNET.
+		}
 	}
 }

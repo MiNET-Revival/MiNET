@@ -683,6 +683,9 @@ namespace MiNET
 		Unsaddle = 560,
 		EquipCopper = 561,
 		RecordLavaChicken = 562,
-		UndefinedV827 = 563,
+		PlaceItem = 563,
+		SingleItemSwap = 564,
+		MultiItemSwap = 565,
+		Undefined = 566,
 	}
 }

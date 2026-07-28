@@ -795,6 +795,11 @@ namespace MiNET
 		public void HandleMcpeContainerRegistryCleanup(McpeContainerRegistryCleanup message)
 		{
 		}
+
+		public void HandleMcpeServerboundPackSettingChange(McpeServerboundPackSettingChange message)
+		{
+		}
+
 		public void HandleMcpeEmoteList(McpeEmoteList message)
 		{
 		}
