@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<protocol gameVersion="1.26.0" protocolVersion="924">
+<protocol gameVersion="1.26.10" protocolVersion="944">
 
 	<constants>
 		<constant id="OFFLINE_MESSAGE_DATA_ID" type="byte[]"
@@ -1332,9 +1332,9 @@
 		</enums>
 		<enums id="Inventory Layout">
 			<enum id="None" value="0" />
-			<enum id="Inventory Only" value="1" />
-			<enum id="Default" value="2" />
-			<enum id="Recipe Book Only" value="3" />
+			<enum id="Survival" value="1" />
+			<enum id="Recipe Book" value="2" />
+			<enum id="Creative" value="3" />
 		</enums>
 
 		<field name="Left Tab" type="VarInt" />
@@ -1401,7 +1401,6 @@
 		<field name="Avg End Frame Time MS" type="float" />
 		<field name="Avg Remainder Time Percent" type="float" />
 		<field name="Avg Unaccounted Time Percent" type="float" />	
-		<field name="Memory Category Counters" type="MemoryCategoryCounters" />
 	</pdu>
 
 	<pdu id="0x13c" online="false" client="false" server="true" name="MCPE_CAMERA_AIM_ASSIST">
@@ -1505,11 +1504,18 @@
 		<field name="Data" type="ServerboundDataStoreData" />
 	</pdu>
 
+	<!-- Protocol v924-v944 (Bedrock 1.26.10).
+	     Complex Cereal payloads intentionally stay fieldless in the T4 surface until
+	     their dedicated serializers are represented by manual partials. Registering
+	     every packet here still gives the dispatcher the authoritative v944 IDs. -->
 	<pdu id="0x14d" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_DATA_DRIVEN_UI_SHOW_SCREEN">
 		<field name="Screen Id" type="string" />
+		<field name="Form Id" type="int" />
+		<field name="Data Instance Id" type="int" optional="true" />
 	</pdu>
 
-	<pdu id="0x14e" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_DATA_DRIVEN_UI_CLOSE_ALL_SCREENS">
+	<pdu id="0x14e" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_DATA_DRIVEN_UI_CLOSE_SCREEN">
+		<field name="Form Id" type="int" optional="true" />
 	</pdu>
 
 	<pdu id="0x14f" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_DATA_DRIVEN_UI_RELOAD">
@@ -1529,6 +1535,27 @@
 
 	<pdu id="0x153" online="false" client="false" server="true" name="MCPE_CAMERA_AIM_ASSIST_ACTOR_PRIORITY">
 		<field name="Data" type="CameraAimAssistActorPriorityDataList" />
+	</pdu>
+
+	<pdu id="0x154" online="false" client="true" server="false" name="MCPE_RESOURCE_PACKS_READY_FOR_VALIDATION">
+	</pdu>
+
+	<pdu id="0x155" online="false" client="false" server="true" name="MCPE_LOCATOR_BAR">
+	</pdu>
+
+	<pdu id="0x156" online="false" client="true" server="false" name="MCPE_PARTY_CHANGED">
+		<field name="Party Id" type="string" optional="true" />
+	</pdu>
+
+	<pdu id="0x157" online="false" client="true" server="false" name="MCPE_SERVERBOUND_DATA_DRIVEN_SCREEN_CLOSED">
+		<field name="Form Id" type="int" />
+		<field name="Close Reason" type="string" />
+	</pdu>
+
+	<pdu id="0x158" online="false" client="false" server="true" name="MCPE_SYNC_WORLD_CLOCKS">
+	</pdu>
+
+	<pdu id="0x159" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_ATTRIBUTE_LAYER_SYNC">
 	</pdu>
 
 	<pdu id="0xe0" online="false" client="false" server="true" name="MCPE_ALEX_ENTITY_ANIMATION">

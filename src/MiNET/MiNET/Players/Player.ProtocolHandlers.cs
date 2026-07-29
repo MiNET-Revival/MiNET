@@ -270,5 +270,20 @@ namespace MiNET.Players
 		{
 			// Data store updates do not currently have a gameplay consumer in MiNET.
 		}
+
+		public virtual void HandleMcpeResourcePacksReadyForValidation(McpeResourcePacksReadyForValidation message)
+		{
+			// Protocol v944 acknowledgement; MiNET currently has no additional validation phase.
+		}
+
+		public virtual void HandleMcpePartyChanged(McpePartyChanged message)
+		{
+			// Party metadata does not currently have a gameplay consumer in MiNET.
+		}
+
+		public virtual void HandleMcpeServerboundDataDrivenScreenClosed(McpeServerboundDataDrivenScreenClosed message)
+		{
+			// Data-driven UI screens are not currently managed by MiNET.
+		}
 	}
 }

@@ -15,8 +15,8 @@ Compared to the original fork, the main changes so far are:
 - reworked and split several large classes to make the code easier to understand;
 - progressively separated responsibilities in `Player` and `Level`;
 - introduced an initial event foundation for `Player`, `Entity`, and `Level`;
-- migrated the project to .NET 10.
-- Support of protocol v924 (v1.26.0)
+- migrated the project to .NET 10;
+- added support for Minecraft Bedrock 1.26.10 (protocol v944).
 
 ## Goals
 

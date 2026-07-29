@@ -1,4 +1,4 @@
-﻿#region LICENSE
+#region LICENSE
 
 // The contents of this file are subject to the Common Public Attribution// The contents of this file are subject to the Common Public Attribution
 // License Version 1.0. (the "License"); you may not use this file except in
@@ -45,8 +45,8 @@ namespace MiNET.Net
 {
 	public class McpeProtocolInfo
 	{
-		public const int ProtocolVersion = 924;
-		public const string GameVersion = "1.26.0";
+		public const int ProtocolVersion = 944;
+		public const string GameVersion = "1.26.10";
 	}
 
 	public interface IMcpeMessageHandler
@@ -115,6 +115,9 @@ namespace MiNET.Net
 		void HandleMcpeContainerRegistryCleanup(McpeContainerRegistryCleanup message);
 		void HandleMcpeServerboundPackSettingChange(McpeServerboundPackSettingChange message);
 		void HandleMcpeServerboundDataStore(McpeServerboundDataStore message);
+		void HandleMcpeResourcePacksReadyForValidation(McpeResourcePacksReadyForValidation message);
+		void HandleMcpePartyChanged(McpePartyChanged message);
+		void HandleMcpeServerboundDataDrivenScreenClosed(McpeServerboundDataDrivenScreenClosed message);
 	}
 
 	public interface IMcpeClientMessageHandler
@@ -270,12 +273,15 @@ namespace MiNET.Net
 		void HandleMcpeClientboundDataStore(McpeClientboundDataStore message);
 		void HandleMcpeGraphicsOverrideParameter(McpeGraphicsOverrideParameter message);
 		void HandleMcpeClientboundDataDrivenUiShowScreen(McpeClientboundDataDrivenUiShowScreen message);
-		void HandleMcpeClientboundDataDrivenUiCloseAllScreens(McpeClientboundDataDrivenUiCloseAllScreens message);
+		void HandleMcpeClientboundDataDrivenUiCloseScreen(McpeClientboundDataDrivenUiCloseScreen message);
 		void HandleMcpeClientboundDataDrivenUiReload(McpeClientboundDataDrivenUiReload message);
 		void HandleMcpeClientboundTextureShift(McpeClientboundTextureShift message);
 		void HandleMcpeVoxelShapes(McpeVoxelShapes message);
 		void HandleMcpeCameraSpline(McpeCameraSpline message);
 		void HandleMcpeCameraAimAssistActorPriority(McpeCameraAimAssistActorPriority message);
+		void HandleMcpeLocatorBar(McpeLocatorBar message);
+		void HandleMcpeSyncWorldClocks(McpeSyncWorldClocks message);
+		void HandleMcpeClientboundAttributeLayerSync(McpeClientboundAttributeLayerSync message);
 		void HandleMcpeAlexEntityAnimation(McpeAlexEntityAnimation message);
 		void HandleFtlCreatePlayer(FtlCreatePlayer message);
 	}
@@ -746,8 +752,8 @@ namespace MiNET.Net
 				case McpeClientboundDataDrivenUiShowScreen msg:
 					_messageHandler.HandleMcpeClientboundDataDrivenUiShowScreen(msg);
 					break;
-				case McpeClientboundDataDrivenUiCloseAllScreens msg:
-					_messageHandler.HandleMcpeClientboundDataDrivenUiCloseAllScreens(msg);
+				case McpeClientboundDataDrivenUiCloseScreen msg:
+					_messageHandler.HandleMcpeClientboundDataDrivenUiCloseScreen(msg);
 					break;
 				case McpeClientboundDataDrivenUiReload msg:
 					_messageHandler.HandleMcpeClientboundDataDrivenUiReload(msg);
@@ -763,6 +769,15 @@ namespace MiNET.Net
 					break;
 				case McpeCameraAimAssistActorPriority msg:
 					_messageHandler.HandleMcpeCameraAimAssistActorPriority(msg);
+					break;
+				case McpeLocatorBar msg:
+					_messageHandler.HandleMcpeLocatorBar(msg);
+					break;
+				case McpeSyncWorldClocks msg:
+					_messageHandler.HandleMcpeSyncWorldClocks(msg);
+					break;
+				case McpeClientboundAttributeLayerSync msg:
+					_messageHandler.HandleMcpeClientboundAttributeLayerSync(msg);
 					break;
 				case McpeAlexEntityAnimation msg:
 					_messageHandler.HandleMcpeAlexEntityAnimation(msg);
@@ -1192,7 +1207,7 @@ namespace MiNET.Net
 					case 0x14d:
 						return McpeClientboundDataDrivenUiShowScreen.CreateObject().Decode(buffer);
 					case 0x14e:
-						return McpeClientboundDataDrivenUiCloseAllScreens.CreateObject().Decode(buffer);
+						return McpeClientboundDataDrivenUiCloseScreen.CreateObject().Decode(buffer);
 					case 0x14f:
 						return McpeClientboundDataDrivenUiReload.CreateObject().Decode(buffer);
 					case 0x150:
@@ -1203,6 +1218,18 @@ namespace MiNET.Net
 						return McpeCameraSpline.CreateObject().Decode(buffer);
 					case 0x153:
 						return McpeCameraAimAssistActorPriority.CreateObject().Decode(buffer);
+					case 0x154:
+						return McpeResourcePacksReadyForValidation.CreateObject().Decode(buffer);
+					case 0x155:
+						return McpeLocatorBar.CreateObject().Decode(buffer);
+					case 0x156:
+						return McpePartyChanged.CreateObject().Decode(buffer);
+					case 0x157:
+						return McpeServerboundDataDrivenScreenClosed.CreateObject().Decode(buffer);
+					case 0x158:
+						return McpeSyncWorldClocks.CreateObject().Decode(buffer);
+					case 0x159:
+						return McpeClientboundAttributeLayerSync.CreateObject().Decode(buffer);
 					case 0xe0:
 						return McpeAlexEntityAnimation.CreateObject().Decode(buffer);
 				}
@@ -10836,9 +10863,9 @@ namespace MiNET.Net
 		public enum InventoryLayout
 		{
 			None = 0,
-			InventoryOnly = 1,
-			Default = 2,
-			RecipeBookOnly = 3,
+			Survival = 1,
+			RecipeBook = 2,
+			Creative = 3,
 		}
 
 		public int leftTab;
@@ -11230,7 +11257,6 @@ namespace MiNET.Net
 		public float avgEndFrameTimeMs;
 		public float avgRemainderTimePercent;
 		public float avgUnaccountedTimePercent;
-		public MemoryCategoryCounters memoryCategoryCounters;
 
 		public McpeServerboundDiagnostics()
 		{
@@ -11253,7 +11279,6 @@ namespace MiNET.Net
 			Write(avgEndFrameTimeMs);
 			Write(avgRemainderTimePercent);
 			Write(avgUnaccountedTimePercent);
-			Write(memoryCategoryCounters);
 
 			AfterEncode();
 		}
@@ -11276,7 +11301,6 @@ namespace MiNET.Net
 			avgEndFrameTimeMs = ReadFloat();
 			avgRemainderTimePercent = ReadFloat();
 			avgUnaccountedTimePercent = ReadFloat();
-			memoryCategoryCounters = ReadMemoryCategoryCounters();
 
 			AfterDecode();
 		}
@@ -11297,7 +11321,6 @@ namespace MiNET.Net
 			avgEndFrameTimeMs = default;
 			avgRemainderTimePercent = default;
 			avgUnaccountedTimePercent = default;
-			memoryCategoryCounters = default;
 		}
 
 	}
@@ -12118,6 +12141,8 @@ namespace MiNET.Net
 	{
 
 		public string screenId;
+		public int formId;
+		public int? dataInstanceId;
 
 		public McpeClientboundDataDrivenUiShowScreen()
 		{
@@ -12132,6 +12157,12 @@ namespace MiNET.Net
 			BeforeEncode();
 
 			Write(screenId);
+			Write(formId);
+			Write(dataInstanceId.HasValue); // is optional
+			if (dataInstanceId.HasValue)
+			{
+				Write(dataInstanceId.Value);
+			}
 
 			AfterEncode();
 		}
@@ -12146,6 +12177,11 @@ namespace MiNET.Net
 			BeforeDecode();
 
 			screenId = ReadString();
+			formId = ReadInt();
+			if (ReadBool())
+			{
+				dataInstanceId = ReadInt();
+			}
 
 			AfterDecode();
 		}
@@ -12158,15 +12194,18 @@ namespace MiNET.Net
 			base.ResetPacket();
 
 			screenId = default;
+			formId = default;
+			dataInstanceId = default;
 		}
 
 	}
 
-	public partial class McpeClientboundDataDrivenUiCloseAllScreens : Packet<McpeClientboundDataDrivenUiCloseAllScreens>
+	public partial class McpeClientboundDataDrivenUiCloseScreen : Packet<McpeClientboundDataDrivenUiCloseScreen>
 	{
 
+		public int? formId;
 
-		public McpeClientboundDataDrivenUiCloseAllScreens()
+		public McpeClientboundDataDrivenUiCloseScreen()
 		{
 			Id = 0x14e;
 			IsMcpe = true;
@@ -12178,6 +12217,11 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
+			Write(formId.HasValue); // is optional
+			if (formId.HasValue)
+			{
+				Write(formId.Value);
+			}
 
 			AfterEncode();
 		}
@@ -12191,6 +12235,10 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
+			if (ReadBool())
+			{
+				formId = ReadInt();
+			}
 
 			AfterDecode();
 		}
@@ -12202,6 +12250,7 @@ namespace MiNET.Net
 		{
 			base.ResetPacket();
 
+			formId = default;
 		}
 
 	}
@@ -12438,6 +12487,289 @@ namespace MiNET.Net
 			base.ResetPacket();
 
 			data = default;
+		}
+
+	}
+
+	public partial class McpeResourcePacksReadyForValidation : Packet<McpeResourcePacksReadyForValidation>
+	{
+
+
+		public McpeResourcePacksReadyForValidation()
+		{
+			Id = 0x154;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+		}
+
+	}
+
+	public partial class McpeLocatorBar : Packet<McpeLocatorBar>
+	{
+
+
+		public McpeLocatorBar()
+		{
+			Id = 0x155;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+		}
+
+	}
+
+	public partial class McpePartyChanged : Packet<McpePartyChanged>
+	{
+
+		public string? partyId;
+
+		public McpePartyChanged()
+		{
+			Id = 0x156;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(partyId != null); // is optional
+			if (partyId != null)
+			{
+				Write(partyId);
+			}
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			if (ReadBool())
+			{
+				partyId = ReadString();
+			}
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			partyId = default;
+		}
+
+	}
+
+	public partial class McpeServerboundDataDrivenScreenClosed : Packet<McpeServerboundDataDrivenScreenClosed>
+	{
+
+		public int formId;
+		public string closeReason;
+
+		public McpeServerboundDataDrivenScreenClosed()
+		{
+			Id = 0x157;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(formId);
+			Write(closeReason);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			formId = ReadInt();
+			closeReason = ReadString();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			formId = default;
+			closeReason = default;
+		}
+
+	}
+
+	public partial class McpeSyncWorldClocks : Packet<McpeSyncWorldClocks>
+	{
+
+
+		public McpeSyncWorldClocks()
+		{
+			Id = 0x158;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+		}
+
+	}
+
+	public partial class McpeClientboundAttributeLayerSync : Packet<McpeClientboundAttributeLayerSync>
+	{
+
+
+		public McpeClientboundAttributeLayerSync()
+		{
+			Id = 0x159;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
 		}
 
 	}
