@@ -199,10 +199,6 @@ namespace MiNET.Net
 			packet.Write(ExperimentalGameplayOverride);
 			packet.Write(ChatRestrictionLevel);
 			packet.Write(IsDisablePlayerInteractions);
-			packet.Write(ServerIdentifier);
-			packet.Write(WorldIdentifier);
-			packet.Write(ScenarioIdentifier);
-			packet.Write(OwnerIdentifier);
 		}
 
 		public static LevelSettings Read(Packet packet)
@@ -259,12 +255,23 @@ namespace MiNET.Net
 				ExperimentalGameplayOverride = packet.ReadBool(),
 				ChatRestrictionLevel = packet.ReadByte(),
 				IsDisablePlayerInteractions = packet.ReadBool(),
-				ServerIdentifier = packet.ReadString(),
-				WorldIdentifier = packet.ReadString(),
-				ScenarioIdentifier = packet.ReadString(),
-				OwnerIdentifier = packet.ReadString(),
 			};
 		}
+	}
+
+	public sealed class GatheringJoinInfo
+	{
+		public string ExperienceId { get; set; } = string.Empty;
+		public string ExperienceName { get; set; } = string.Empty;
+		public string ExperienceWorldId { get; set; } = string.Empty;
+		public string ExperienceWorldName { get; set; } = string.Empty;
+		public string CreatorId { get; set; } = string.Empty;
+		public string StoreId { get; set; } = string.Empty;
+	}
+
+	public sealed class ServerJoinInformation
+	{
+		public GatheringJoinInfo GatheringInfo { get; set; }
 	}
 
 	public partial class McpeStartGame : Packet<McpeStartGame>
@@ -295,6 +302,11 @@ namespace MiNET.Net
 		public bool clientSideGenerationEnabled; // = null;
 		public bool blockNetworkIdsAreHashes; // = null;
 		public bool disableClientSounds; // = null;
+		public ServerJoinInformation serverJoinInformation;
+		public string serverIdentifier = string.Empty;
+		public string scenarioIdentifier = string.Empty;
+		public string worldIdentifier = string.Empty;
+		public string ownerIdentifier = string.Empty;
 
 		public LevelSettings levelSettings = new LevelSettings();
 		
@@ -332,6 +344,25 @@ namespace MiNET.Net
 			Write(clientSideGenerationEnabled);
 			Write(blockNetworkIdsAreHashes);
 			Write(disableClientSounds);
+			Write(serverJoinInformation != null);
+			if (serverJoinInformation != null)
+			{
+				Write(serverJoinInformation.GatheringInfo != null);
+				if (serverJoinInformation.GatheringInfo != null)
+				{
+					GatheringJoinInfo info = serverJoinInformation.GatheringInfo;
+					Write(info.ExperienceId);
+					Write(info.ExperienceName);
+					Write(info.ExperienceWorldId);
+					Write(info.ExperienceWorldName);
+					Write(info.CreatorId);
+					Write(info.StoreId);
+				}
+			}
+			Write(serverIdentifier);
+			Write(scenarioIdentifier);
+			Write(worldIdentifier);
+			Write(ownerIdentifier);
 		}
 		
 		partial void AfterDecode()
@@ -375,6 +406,26 @@ namespace MiNET.Net
 			clientSideGenerationEnabled = ReadBool();
 			blockNetworkIdsAreHashes = ReadBool();
 			disableClientSounds = ReadBool();
+			if (ReadBool())
+			{
+				serverJoinInformation = new ServerJoinInformation();
+				if (ReadBool())
+				{
+					serverJoinInformation.GatheringInfo = new GatheringJoinInfo
+					{
+						ExperienceId = ReadString(),
+						ExperienceName = ReadString(),
+						ExperienceWorldId = ReadString(),
+						ExperienceWorldName = ReadString(),
+						CreatorId = ReadString(),
+						StoreId = ReadString()
+					};
+				}
+			}
+			serverIdentifier = ReadString();
+			scenarioIdentifier = ReadString();
+			worldIdentifier = ReadString();
+			ownerIdentifier = ReadString();
 		}
 
 		/// <inheritdoc />
@@ -403,6 +454,11 @@ namespace MiNET.Net
 			clientSideGenerationEnabled=default(bool);
 			blockNetworkIdsAreHashes=default(bool);
 			disableClientSounds=default(bool);
+			serverJoinInformation=default;
+			serverIdentifier=default;
+			scenarioIdentifier=default;
+			worldIdentifier=default;
+			ownerIdentifier=default;
 			base.Reset();
 		}
 	}

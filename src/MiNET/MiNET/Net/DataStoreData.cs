@@ -26,6 +26,7 @@ namespace MiNET.Net
 		public DataStoreValueType ValueType { get; set; }
 		public object Value { get; set; }
 		public uint UpdateCount { get; set; }
+		public uint PathUpdateCount { get; set; }
 	}
 
 	public sealed class DataStoreEntries : IPacketDataObject
@@ -45,7 +46,11 @@ namespace MiNET.Net
 				if (entry.EntryType == DataStoreEntryType.Update) packet.Write(entry.Path);
 				if (entry.EntryType == DataStoreEntryType.Change) packet.WriteUnsignedVarInt(entry.UpdateCount);
 				WriteValue(packet, entry.ValueType, entry.Value);
-				if (entry.EntryType == DataStoreEntryType.Update) packet.WriteUnsignedVarInt(entry.UpdateCount);
+				if (entry.EntryType == DataStoreEntryType.Update)
+				{
+					packet.Write(entry.UpdateCount);
+					packet.Write(entry.PathUpdateCount);
+				}
 			}
 		}
 
@@ -66,7 +71,11 @@ namespace MiNET.Net
 					if (entry.EntryType == DataStoreEntryType.Update) entry.Path = packet.ReadString();
 					if (entry.EntryType == DataStoreEntryType.Change) entry.UpdateCount = packet.ReadUnsignedVarInt();
 					ReadValue(packet, entry);
-					if (entry.EntryType == DataStoreEntryType.Update) entry.UpdateCount = packet.ReadUnsignedVarInt();
+					if (entry.EntryType == DataStoreEntryType.Update)
+					{
+						entry.UpdateCount = packet.ReadUint();
+						entry.PathUpdateCount = packet.ReadUint();
+					}
 				}
 				result.Entries.Add(entry);
 			}
@@ -109,6 +118,7 @@ namespace MiNET.Net
 			packet.Write(Entry.Path);
 			DataStoreEntries.WriteValue(packet, Entry.ValueType, Entry.Value);
 			packet.WriteUnsignedVarInt(Entry.UpdateCount);
+			packet.Write(Entry.PathUpdateCount);
 		}
 
 		public static ServerboundDataStoreData Read(Packet packet)
@@ -121,6 +131,7 @@ namespace MiNET.Net
 			};
 			DataStoreEntries.ReadValue(packet, entry);
 			entry.UpdateCount = packet.ReadUnsignedVarInt();
+			entry.PathUpdateCount = packet.ReadUint();
 			return new ServerboundDataStoreData { Entry = entry };
 		}
 	}

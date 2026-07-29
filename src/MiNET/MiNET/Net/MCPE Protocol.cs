@@ -45,8 +45,8 @@ namespace MiNET.Net
 {
 	public class McpeProtocolInfo
 	{
-		public const int ProtocolVersion = 898;
-		public const string GameVersion = "1.21.130";
+		public const int ProtocolVersion = 924;
+		public const string GameVersion = "1.26.0";
 	}
 
 	public interface IMcpeMessageHandler
@@ -269,6 +269,13 @@ namespace MiNET.Net
 		void HandleMcpeServerScriptDebugDrawer(McpeServerScriptDebugDrawer message);
 		void HandleMcpeClientboundDataStore(McpeClientboundDataStore message);
 		void HandleMcpeGraphicsOverrideParameter(McpeGraphicsOverrideParameter message);
+		void HandleMcpeClientboundDataDrivenUiShowScreen(McpeClientboundDataDrivenUiShowScreen message);
+		void HandleMcpeClientboundDataDrivenUiCloseAllScreens(McpeClientboundDataDrivenUiCloseAllScreens message);
+		void HandleMcpeClientboundDataDrivenUiReload(McpeClientboundDataDrivenUiReload message);
+		void HandleMcpeClientboundTextureShift(McpeClientboundTextureShift message);
+		void HandleMcpeVoxelShapes(McpeVoxelShapes message);
+		void HandleMcpeCameraSpline(McpeCameraSpline message);
+		void HandleMcpeCameraAimAssistActorPriority(McpeCameraAimAssistActorPriority message);
 		void HandleMcpeAlexEntityAnimation(McpeAlexEntityAnimation message);
 		void HandleFtlCreatePlayer(FtlCreatePlayer message);
 	}
@@ -736,6 +743,27 @@ namespace MiNET.Net
 				case McpeGraphicsOverrideParameter msg:
 					_messageHandler.HandleMcpeGraphicsOverrideParameter(msg);
 					break;
+				case McpeClientboundDataDrivenUiShowScreen msg:
+					_messageHandler.HandleMcpeClientboundDataDrivenUiShowScreen(msg);
+					break;
+				case McpeClientboundDataDrivenUiCloseAllScreens msg:
+					_messageHandler.HandleMcpeClientboundDataDrivenUiCloseAllScreens(msg);
+					break;
+				case McpeClientboundDataDrivenUiReload msg:
+					_messageHandler.HandleMcpeClientboundDataDrivenUiReload(msg);
+					break;
+				case McpeClientboundTextureShift msg:
+					_messageHandler.HandleMcpeClientboundTextureShift(msg);
+					break;
+				case McpeVoxelShapes msg:
+					_messageHandler.HandleMcpeVoxelShapes(msg);
+					break;
+				case McpeCameraSpline msg:
+					_messageHandler.HandleMcpeCameraSpline(msg);
+					break;
+				case McpeCameraAimAssistActorPriority msg:
+					_messageHandler.HandleMcpeCameraAimAssistActorPriority(msg);
+					break;
 				case McpeAlexEntityAnimation msg:
 					_messageHandler.HandleMcpeAlexEntityAnimation(msg);
 					break;
@@ -1161,6 +1189,20 @@ namespace MiNET.Net
 						return McpeGraphicsOverrideParameter.CreateObject().Decode(buffer);
 					case 0x14c:
 						return McpeServerboundDataStore.CreateObject().Decode(buffer);
+					case 0x14d:
+						return McpeClientboundDataDrivenUiShowScreen.CreateObject().Decode(buffer);
+					case 0x14e:
+						return McpeClientboundDataDrivenUiCloseAllScreens.CreateObject().Decode(buffer);
+					case 0x14f:
+						return McpeClientboundDataDrivenUiReload.CreateObject().Decode(buffer);
+					case 0x150:
+						return McpeClientboundTextureShift.CreateObject().Decode(buffer);
+					case 0x151:
+						return McpeVoxelShapes.CreateObject().Decode(buffer);
+					case 0x152:
+						return McpeCameraSpline.CreateObject().Decode(buffer);
+					case 0x153:
+						return McpeCameraAimAssistActorPriority.CreateObject().Decode(buffer);
 					case 0xe0:
 						return McpeAlexEntityAnimation.CreateObject().Decode(buffer);
 				}
@@ -10794,9 +10836,9 @@ namespace MiNET.Net
 		public enum InventoryLayout
 		{
 			None = 0,
-			Survival = 1,
-			RecipeBook = 2,
-			Creative = 3,
+			InventoryOnly = 1,
+			Default = 2,
+			RecipeBookOnly = 3,
 		}
 
 		public int leftTab;
@@ -11188,6 +11230,7 @@ namespace MiNET.Net
 		public float avgEndFrameTimeMs;
 		public float avgRemainderTimePercent;
 		public float avgUnaccountedTimePercent;
+		public MemoryCategoryCounters memoryCategoryCounters;
 
 		public McpeServerboundDiagnostics()
 		{
@@ -11210,6 +11253,7 @@ namespace MiNET.Net
 			Write(avgEndFrameTimeMs);
 			Write(avgRemainderTimePercent);
 			Write(avgUnaccountedTimePercent);
+			Write(memoryCategoryCounters);
 
 			AfterEncode();
 		}
@@ -11232,6 +11276,7 @@ namespace MiNET.Net
 			avgEndFrameTimeMs = ReadFloat();
 			avgRemainderTimePercent = ReadFloat();
 			avgUnaccountedTimePercent = ReadFloat();
+			memoryCategoryCounters = ReadMemoryCategoryCounters();
 
 			AfterDecode();
 		}
@@ -11252,6 +11297,7 @@ namespace MiNET.Net
 			avgEndFrameTimeMs = default;
 			avgRemainderTimePercent = default;
 			avgUnaccountedTimePercent = default;
+			memoryCategoryCounters = default;
 		}
 
 	}
@@ -12052,6 +12098,334 @@ namespace MiNET.Net
 			BeforeDecode();
 
 			data = ReadServerboundDataStoreData();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			data = default;
+		}
+
+	}
+
+	public partial class McpeClientboundDataDrivenUiShowScreen : Packet<McpeClientboundDataDrivenUiShowScreen>
+	{
+
+		public string screenId;
+
+		public McpeClientboundDataDrivenUiShowScreen()
+		{
+			Id = 0x14d;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(screenId);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			screenId = ReadString();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			screenId = default;
+		}
+
+	}
+
+	public partial class McpeClientboundDataDrivenUiCloseAllScreens : Packet<McpeClientboundDataDrivenUiCloseAllScreens>
+	{
+
+
+		public McpeClientboundDataDrivenUiCloseAllScreens()
+		{
+			Id = 0x14e;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+		}
+
+	}
+
+	public partial class McpeClientboundDataDrivenUiReload : Packet<McpeClientboundDataDrivenUiReload>
+	{
+
+
+		public McpeClientboundDataDrivenUiReload()
+		{
+			Id = 0x14f;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+		}
+
+	}
+
+	public partial class McpeClientboundTextureShift : Packet<McpeClientboundTextureShift>
+	{
+
+		public TextureShiftData data;
+
+		public McpeClientboundTextureShift()
+		{
+			Id = 0x150;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(data);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			data = ReadTextureShiftData();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			data = default;
+		}
+
+	}
+
+	public partial class McpeVoxelShapes : Packet<McpeVoxelShapes>
+	{
+
+		public VoxelShapesData data;
+
+		public McpeVoxelShapes()
+		{
+			Id = 0x151;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(data);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			data = ReadVoxelShapesData();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			data = default;
+		}
+
+	}
+
+	public partial class McpeCameraSpline : Packet<McpeCameraSpline>
+	{
+
+		public CameraSplineData data;
+
+		public McpeCameraSpline()
+		{
+			Id = 0x152;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(data);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			data = ReadCameraSplineData();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			data = default;
+		}
+
+	}
+
+	public partial class McpeCameraAimAssistActorPriority : Packet<McpeCameraAimAssistActorPriority>
+	{
+
+		public CameraAimAssistActorPriorityDataList data;
+
+		public McpeCameraAimAssistActorPriority()
+		{
+			Id = 0x153;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(data);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			data = ReadCameraAimAssistActorPriorityDataList();
 
 			AfterDecode();
 		}

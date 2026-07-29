@@ -1029,6 +1029,17 @@ namespace MiNET.Net
 			return ServerboundDataStoreData.Read(this);
 		}
 
+		public MemoryCategoryCounters ReadMemoryCategoryCounters() => MemoryCategoryCounters.Read(this);
+
+		public TextureShiftData ReadTextureShiftData() => TextureShiftData.Read(this);
+
+		public VoxelShapesData ReadVoxelShapesData() => VoxelShapesData.Read(this);
+
+		public CameraSplineData ReadCameraSplineData() => CameraSplineData.Read(this);
+
+		public CameraAimAssistActorPriorityDataList ReadCameraAimAssistActorPriorityDataList() =>
+			CameraAimAssistActorPriorityDataList.Read(this);
+
 		public EntityAttributes ReadEntityAttributes()
 		{
 			return EntityAttributes.Read(this);
