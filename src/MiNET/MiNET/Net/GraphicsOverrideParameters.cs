@@ -16,12 +16,30 @@ namespace MiNET.Net
 		RayleighStrength = 6,
 		SunMieStrength = 7,
 		MoonMieStrength = 8,
-		SunGlareShape = 9
+		SunGlareShape = 9,
+		Chlorophyll = 10,
+		Cdom = 11,
+		SuspendedSediment = 12,
+		WavesDepth = 13,
+		WavesFrequency = 14,
+		WavesFrequencyScaling = 15,
+		WavesSpeed = 16,
+		WavesSpeedScaling = 17,
+		WavesShape = 18,
+		WavesOctaves = 19,
+		WavesMix = 20,
+		WavesPull = 21,
+		WavesDirectionIncrement = 22,
+		MidtonesContrast = 23,
+		HighlightsContrast = 24,
+		ShadowsContrast = 25
 	}
 
 	public sealed class GraphicsOverrideParameters : IPacketDataObject
 	{
 		public List<GraphicsParameterKeyframe> Values { get; } = new();
+		public float FloatValue { get; set; }
+		public Vector3 VectorValue { get; set; }
 		public string BiomeIdentifier { get; set; } = string.Empty;
 		public GraphicsOverrideParameterType ParameterType { get; set; }
 		public bool Reset { get; set; }
@@ -35,6 +53,8 @@ namespace MiNET.Net
 				packet.Write(value.Value);
 			}
 
+			packet.Write(FloatValue);
+			packet.Write(VectorValue);
 			packet.Write(BiomeIdentifier);
 			packet.Write((byte) ParameterType);
 			packet.Write(Reset);
@@ -49,6 +69,8 @@ namespace MiNET.Net
 				parameters.Values.Add(new GraphicsParameterKeyframe(packet.ReadFloat(), packet.ReadVector3()));
 			}
 
+			parameters.FloatValue = packet.ReadFloat();
+			parameters.VectorValue = packet.ReadVector3();
 			parameters.BiomeIdentifier = packet.ReadString();
 			parameters.ParameterType = (GraphicsOverrideParameterType) packet.ReadByte();
 			parameters.Reset = packet.ReadBool();

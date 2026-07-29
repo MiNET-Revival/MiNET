@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<protocol gameVersion="1.21.130" protocolVersion="898">
+<protocol gameVersion="1.26.0" protocolVersion="924">
 
 	<constants>
 		<constant id="OFFLINE_MESSAGE_DATA_ID" type="byte[]"
@@ -1332,9 +1332,9 @@
 		</enums>
 		<enums id="Inventory Layout">
 			<enum id="None" value="0" />
-			<enum id="Survival" value="1" />
-			<enum id="Recipe Book" value="2" />
-			<enum id="Creative" value="3" />
+			<enum id="Inventory Only" value="1" />
+			<enum id="Default" value="2" />
+			<enum id="Recipe Book Only" value="3" />
 		</enums>
 
 		<field name="Left Tab" type="VarInt" />
@@ -1401,6 +1401,7 @@
 		<field name="Avg End Frame Time MS" type="float" />
 		<field name="Avg Remainder Time Percent" type="float" />
 		<field name="Avg Unaccounted Time Percent" type="float" />	
+		<field name="Memory Category Counters" type="MemoryCategoryCounters" />
 	</pdu>
 
 	<pdu id="0x13c" online="false" client="false" server="true" name="MCPE_CAMERA_AIM_ASSIST">
@@ -1502,6 +1503,32 @@
 
 	<pdu id="0x14c" online="false" client="true" server="false" name="MCPE_SERVERBOUND_DATA_STORE">
 		<field name="Data" type="ServerboundDataStoreData" />
+	</pdu>
+
+	<pdu id="0x14d" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_DATA_DRIVEN_UI_SHOW_SCREEN">
+		<field name="Screen Id" type="string" />
+	</pdu>
+
+	<pdu id="0x14e" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_DATA_DRIVEN_UI_CLOSE_ALL_SCREENS">
+	</pdu>
+
+	<pdu id="0x14f" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_DATA_DRIVEN_UI_RELOAD">
+	</pdu>
+
+	<pdu id="0x150" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_TEXTURE_SHIFT">
+		<field name="Data" type="TextureShiftData" />
+	</pdu>
+
+	<pdu id="0x151" online="false" client="false" server="true" name="MCPE_VOXEL_SHAPES">
+		<field name="Data" type="VoxelShapesData" />
+	</pdu>
+
+	<pdu id="0x152" online="false" client="false" server="true" name="MCPE_CAMERA_SPLINE">
+		<field name="Data" type="CameraSplineData" />
+	</pdu>
+
+	<pdu id="0x153" online="false" client="false" server="true" name="MCPE_CAMERA_AIM_ASSIST_ACTOR_PRIORITY">
+		<field name="Data" type="CameraAimAssistActorPriorityDataList" />
 	</pdu>
 
 	<pdu id="0xe0" online="false" client="false" server="true" name="MCPE_ALEX_ENTITY_ANIMATION">

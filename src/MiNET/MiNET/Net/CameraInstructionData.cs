@@ -57,7 +57,8 @@ namespace MiNET.Net
 	public readonly record struct CameraFade(float FadeInDuration, float WaitDuration, float FadeOutDuration, Vector3 Color);
 	public readonly record struct CameraTarget(Vector3? Offset, long EntityUniqueId);
 	public readonly record struct CameraFieldOfView(float FieldOfView, float EaseTime, CameraEaseType EaseType, bool Clear);
-	public readonly record struct CameraSplineRotation(Vector3 Value, float Time);
+	public readonly record struct CameraSplineProgressOption(float Value, float Time, CameraEaseType EaseType);
+	public readonly record struct CameraSplineRotation(Vector3 Value, float Time, CameraEaseType EaseType);
 
 	public enum CameraSplineEaseType : byte
 	{
@@ -70,8 +71,10 @@ namespace MiNET.Net
 		public float TotalTime { get; set; }
 		public CameraSplineEaseType EaseType { get; set; }
 		public List<Vector3> Curve { get; } = new();
-		public List<Vector2> ProgressKeyframes { get; } = new();
+		public List<CameraSplineProgressOption> ProgressKeyframes { get; } = new();
 		public List<CameraSplineRotation> RotationOptions { get; } = new();
+		public string SplineIdentifier { get; set; } = string.Empty;
+		public bool LoadFromJson { get; set; }
 	}
 
 	public sealed class CameraInstructionData : IPacketDataObject
@@ -184,12 +187,20 @@ namespace MiNET.Net
 			packet.Write(value.TotalTime);
 			packet.Write((byte) value.EaseType);
 			WriteArray(packet, value.Curve, packet.Write);
-			WriteArray(packet, value.ProgressKeyframes, packet.Write);
+			WriteArray(packet, value.ProgressKeyframes, option =>
+			{
+				packet.Write(option.Value);
+				packet.Write(option.Time);
+				packet.Write((byte) option.EaseType);
+			});
 			WriteArray(packet, value.RotationOptions, option =>
 			{
 				packet.Write(option.Value);
 				packet.Write(option.Time);
+				packet.Write((byte) option.EaseType);
 			});
+			packet.Write(value.SplineIdentifier);
+			packet.Write(value.LoadFromJson);
 		}
 
 		private static CameraSplineInstruction ReadSpline(Packet packet)
@@ -200,9 +211,12 @@ namespace MiNET.Net
 				EaseType = (CameraSplineEaseType) packet.ReadByte()
 			};
 			ReadArray(packet, value.Curve, packet.ReadVector3);
-			ReadArray(packet, value.ProgressKeyframes, packet.ReadVector2);
+			ReadArray(packet, value.ProgressKeyframes,
+				() => new CameraSplineProgressOption(packet.ReadFloat(), packet.ReadFloat(), (CameraEaseType) packet.ReadByte()));
 			ReadArray(packet, value.RotationOptions,
-				() => new CameraSplineRotation(packet.ReadVector3(), packet.ReadFloat()));
+				() => new CameraSplineRotation(packet.ReadVector3(), packet.ReadFloat(), (CameraEaseType) packet.ReadByte()));
+			value.SplineIdentifier = packet.ReadString();
+			value.LoadFromJson = packet.ReadBool();
 			return value;
 		}
 

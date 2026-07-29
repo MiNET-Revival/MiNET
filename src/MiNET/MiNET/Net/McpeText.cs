@@ -46,9 +46,6 @@ namespace MiNET.Net
 				case ChatTypes.Whisper:
 				case ChatTypes.Announcement:
 					Write((byte) 1);
-					Write("chat");
-					Write("whisper");
-					Write("announcement");
 					Write(type);
 					Write(source);
 					Write(message);
@@ -60,12 +57,6 @@ namespace MiNET.Net
 				case ChatTypes.Jsonwhisper:
 				case ChatTypes.Jsonannouncement:
 					Write((byte) 0);
-					Write("raw");
-					Write("tip");
-					Write("systemMessage");
-					Write("textObjectWhisper");
-					Write("textObjectAnnouncement");
-					Write("textObject");
 					Write(type);
 					Write(message);
 					break;
@@ -73,9 +64,6 @@ namespace MiNET.Net
 				case ChatTypes.Translation:
 				case ChatTypes.Jukeboxpopup:
 					Write((byte) 2);
-					Write("translate");
-					Write("popup");
-					Write("jukeboxPopup");
 					Write(type);
 					Write(message);
 					if (parameters == null)
@@ -116,18 +104,15 @@ namespace MiNET.Net
 			switch (category)
 			{
 				case 0:
-					for (int i = 0; i < 6; i++) ReadString();
 					type = ReadByte();
 					message = ReadString();
 					break;
 				case 1:
-					for (int i = 0; i < 3; i++) ReadString();
 					type = ReadByte();
 					source = ReadString();
 					message = ReadString();
 					break;
 				case 2:
-					for (int i = 0; i < 3; i++) ReadString();
 					type = ReadByte();
 					message = ReadString();
 					parameters = new string[ReadUnsignedVarInt()];

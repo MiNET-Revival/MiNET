@@ -845,6 +845,20 @@ namespace MiNET.Client
 		public void HandleMcpeClientboundDebugRenderer(McpeClientboundDebugRenderer message)
 		{
 		}
+
+		public virtual void HandleMcpeClientboundDataDrivenUiShowScreen(McpeClientboundDataDrivenUiShowScreen message) { }
+
+		public virtual void HandleMcpeClientboundDataDrivenUiCloseAllScreens(McpeClientboundDataDrivenUiCloseAllScreens message) { }
+
+		public virtual void HandleMcpeClientboundDataDrivenUiReload(McpeClientboundDataDrivenUiReload message) { }
+
+		public virtual void HandleMcpeClientboundTextureShift(McpeClientboundTextureShift message) { }
+
+		public virtual void HandleMcpeVoxelShapes(McpeVoxelShapes message) { }
+
+		public virtual void HandleMcpeCameraSpline(McpeCameraSpline message) { }
+
+		public virtual void HandleMcpeCameraAimAssistActorPriority(McpeCameraAimAssistActorPriority message) { }
 	}
 
 	public class DefaultMessageHandler : McpeClientMessageHandlerBase

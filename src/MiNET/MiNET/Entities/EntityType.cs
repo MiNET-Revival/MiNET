@@ -116,6 +116,8 @@ namespace MiNET.Entities
 		HappyGhast = 147,
 		Nautilus = 149,
 		ZombieNautilus = 150,
+		Parched = 151,
+		CamelHusk = 152,
 
 		Chicken = 10,
 		Cow = 11,
@@ -183,6 +185,8 @@ namespace MiNET.Entities
 			{ EntityType.Zombie, "minecraft:zombie" },
 			{ EntityType.Nautilus, "minecraft:nautilus" },
 			{ EntityType.ZombieNautilus, "minecraft:zombie_nautilus" },
+			{ EntityType.Parched, "minecraft:parched" },
+			{ EntityType.CamelHusk, "minecraft:camel_husk" },
 			{ EntityType.SkeletonHorse, "minecraft:skeleton_horse" },
 			{ EntityType.Mule, "minecraft:mule" },
 			{ EntityType.Donkey, "minecraft:donkey" },

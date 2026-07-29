@@ -14,6 +14,7 @@ namespace MiNET.Net
 		public List<CameraAimAssistPriority> EntityPriorities { get; set; } = new();
 		public List<CameraAimAssistPriority> BlockPriorities { get; set; } = new();
 		public List<CameraAimAssistPriority> BlockTagPriorities { get; set; } = new();
+		public List<CameraAimAssistPriority> EntityTypeFamilyPriorities { get; set; } = new();
 		public int? EntityDefaultPriority { get; set; }
 		public int? BlockDefaultPriority { get; set; }
 	}
@@ -30,6 +31,7 @@ namespace MiNET.Net
 		public List<string> BlockExclusionList { get; set; } = new();
 		public List<string> EntityExclusionList { get; set; } = new();
 		public List<string> BlockTagExclusionList { get; set; } = new();
+		public List<string> EntityTypeFamilyExclusionList { get; set; } = new();
 		public List<string> LiquidTargetingList { get; set; } = new();
 		public List<CameraAimAssistItemSettings> ItemSettings { get; set; } = new();
 		public string DefaultItemSettings { get; set; }
@@ -75,6 +77,7 @@ namespace MiNET.Net
 			WritePriorities(value.EntityPriorities);
 			WritePriorities(value.BlockPriorities);
 			WritePriorities(value.BlockTagPriorities);
+			WritePriorities(value.EntityTypeFamilyPriorities);
 			WriteOptionalInt(value.EntityDefaultPriority);
 			WriteOptionalInt(value.BlockDefaultPriority);
 		}
@@ -85,6 +88,7 @@ namespace MiNET.Net
 			EntityPriorities = ReadPriorities(),
 			BlockPriorities = ReadPriorities(),
 			BlockTagPriorities = ReadPriorities(),
+			EntityTypeFamilyPriorities = ReadPriorities(),
 			EntityDefaultPriority = ReadOptionalInt(),
 			BlockDefaultPriority = ReadOptionalInt()
 		};
@@ -95,6 +99,7 @@ namespace MiNET.Net
 			WriteStrings(value.BlockExclusionList);
 			WriteStrings(value.EntityExclusionList);
 			WriteStrings(value.BlockTagExclusionList);
+			WriteStrings(value.EntityTypeFamilyExclusionList);
 			WriteStrings(value.LiquidTargetingList);
 			WriteUnsignedVarInt((uint) value.ItemSettings.Count);
 			foreach (CameraAimAssistItemSettings setting in value.ItemSettings)
@@ -114,6 +119,7 @@ namespace MiNET.Net
 				BlockExclusionList = ReadStringList(),
 				EntityExclusionList = ReadStringList(),
 				BlockTagExclusionList = ReadStringList(),
+				EntityTypeFamilyExclusionList = ReadStringList(),
 				LiquidTargetingList = ReadStringList()
 			};
 			int count = (int) ReadUnsignedVarInt();
