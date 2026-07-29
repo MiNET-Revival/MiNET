@@ -116,7 +116,8 @@ namespace MiNET.Players
 			startGame.isTrial = false;
 			startGame.currentTick = Level.TickTime;
 			startGame.enchantmentSeed = 123456;
-			startGame.enableNewBlockBreakSystem = false;
+			// Modern clients send authoritative block actions through PlayerAuthInput.
+			startGame.enableNewBlockBreakSystem = true;
 
 			startGame.blockNetworkIdsAreHashes = BlockFactory.FactoryProfile.BlockRuntimeIdsAreHashes;
 			startGame.blockPalette = startGame.blockNetworkIdsAreHashes

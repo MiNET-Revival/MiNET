@@ -142,10 +142,12 @@ public enum AuthInputFlags : long
 	IsRotControlledByMoveDirection = 1L << 55,
 	StartSpinAttack = 1L << 56,
 	StopSpinAttack = 1L << 57,
-	JumpReleasedRaw = 1L << 58,
-	JumpPressedRaw = 1L << 59,
-	JumpCurrentRaw = 1L << 60,
-	SneakReleasedRaw = 1L << 61,
-	SneakPressedRaw = 1L << 62,
-	SneakCurrentRaw = 1L << 63,
+	HotbarOnlyTouch = 1L << 58,
+	JumpReleasedRaw = 1L << 59,
+	JumpPressedRaw = 1L << 60,
+	JumpCurrentRaw = 1L << 61,
+	SneakReleasedRaw = 1L << 62,
+	SneakPressedRaw = 1L << 63,
+	// SneakCurrentRaw is bit 64 and is exposed separately by McpePlayerAuthInput:
+	// it cannot be represented by this legacy 64-bit flags enum.
 }

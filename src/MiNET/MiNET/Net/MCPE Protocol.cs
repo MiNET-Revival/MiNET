@@ -45,8 +45,8 @@ namespace MiNET.Net
 {
 	public class McpeProtocolInfo
 	{
-		public const int ProtocolVersion = 898;
-		public const string GameVersion = "1.21.130";
+		public const int ProtocolVersion = 944;
+		public const string GameVersion = "1.26.10";
 	}
 
 	public interface IMcpeMessageHandler
@@ -115,6 +115,9 @@ namespace MiNET.Net
 		void HandleMcpeContainerRegistryCleanup(McpeContainerRegistryCleanup message);
 		void HandleMcpeServerboundPackSettingChange(McpeServerboundPackSettingChange message);
 		void HandleMcpeServerboundDataStore(McpeServerboundDataStore message);
+		void HandleMcpeResourcePacksReadyForValidation(McpeResourcePacksReadyForValidation message);
+		void HandleMcpePartyChanged(McpePartyChanged message);
+		void HandleMcpeServerboundDataDrivenScreenClosed(McpeServerboundDataDrivenScreenClosed message);
 	}
 
 	public interface IMcpeClientMessageHandler
@@ -269,6 +272,16 @@ namespace MiNET.Net
 		void HandleMcpeServerScriptDebugDrawer(McpeServerScriptDebugDrawer message);
 		void HandleMcpeClientboundDataStore(McpeClientboundDataStore message);
 		void HandleMcpeGraphicsOverrideParameter(McpeGraphicsOverrideParameter message);
+		void HandleMcpeClientboundDataDrivenUiShowScreen(McpeClientboundDataDrivenUiShowScreen message);
+		void HandleMcpeClientboundDataDrivenUiCloseScreen(McpeClientboundDataDrivenUiCloseScreen message);
+		void HandleMcpeClientboundDataDrivenUiReload(McpeClientboundDataDrivenUiReload message);
+		void HandleMcpeClientboundTextureShift(McpeClientboundTextureShift message);
+		void HandleMcpeVoxelShapes(McpeVoxelShapes message);
+		void HandleMcpeCameraSpline(McpeCameraSpline message);
+		void HandleMcpeCameraAimAssistActorPriority(McpeCameraAimAssistActorPriority message);
+		void HandleMcpeLocatorBar(McpeLocatorBar message);
+		void HandleMcpeSyncWorldClocks(McpeSyncWorldClocks message);
+		void HandleMcpeClientboundAttributeLayerSync(McpeClientboundAttributeLayerSync message);
 		void HandleMcpeAlexEntityAnimation(McpeAlexEntityAnimation message);
 		void HandleFtlCreatePlayer(FtlCreatePlayer message);
 	}
@@ -736,6 +749,36 @@ namespace MiNET.Net
 				case McpeGraphicsOverrideParameter msg:
 					_messageHandler.HandleMcpeGraphicsOverrideParameter(msg);
 					break;
+				case McpeClientboundDataDrivenUiShowScreen msg:
+					_messageHandler.HandleMcpeClientboundDataDrivenUiShowScreen(msg);
+					break;
+				case McpeClientboundDataDrivenUiCloseScreen msg:
+					_messageHandler.HandleMcpeClientboundDataDrivenUiCloseScreen(msg);
+					break;
+				case McpeClientboundDataDrivenUiReload msg:
+					_messageHandler.HandleMcpeClientboundDataDrivenUiReload(msg);
+					break;
+				case McpeClientboundTextureShift msg:
+					_messageHandler.HandleMcpeClientboundTextureShift(msg);
+					break;
+				case McpeVoxelShapes msg:
+					_messageHandler.HandleMcpeVoxelShapes(msg);
+					break;
+				case McpeCameraSpline msg:
+					_messageHandler.HandleMcpeCameraSpline(msg);
+					break;
+				case McpeCameraAimAssistActorPriority msg:
+					_messageHandler.HandleMcpeCameraAimAssistActorPriority(msg);
+					break;
+				case McpeLocatorBar msg:
+					_messageHandler.HandleMcpeLocatorBar(msg);
+					break;
+				case McpeSyncWorldClocks msg:
+					_messageHandler.HandleMcpeSyncWorldClocks(msg);
+					break;
+				case McpeClientboundAttributeLayerSync msg:
+					_messageHandler.HandleMcpeClientboundAttributeLayerSync(msg);
+					break;
 				case McpeAlexEntityAnimation msg:
 					_messageHandler.HandleMcpeAlexEntityAnimation(msg);
 					break;
@@ -1161,6 +1204,32 @@ namespace MiNET.Net
 						return McpeGraphicsOverrideParameter.CreateObject().Decode(buffer);
 					case 0x14c:
 						return McpeServerboundDataStore.CreateObject().Decode(buffer);
+					case 0x14d:
+						return McpeClientboundDataDrivenUiShowScreen.CreateObject().Decode(buffer);
+					case 0x14e:
+						return McpeClientboundDataDrivenUiCloseScreen.CreateObject().Decode(buffer);
+					case 0x14f:
+						return McpeClientboundDataDrivenUiReload.CreateObject().Decode(buffer);
+					case 0x150:
+						return McpeClientboundTextureShift.CreateObject().Decode(buffer);
+					case 0x151:
+						return McpeVoxelShapes.CreateObject().Decode(buffer);
+					case 0x152:
+						return McpeCameraSpline.CreateObject().Decode(buffer);
+					case 0x153:
+						return McpeCameraAimAssistActorPriority.CreateObject().Decode(buffer);
+					case 0x154:
+						return McpeResourcePacksReadyForValidation.CreateObject().Decode(buffer);
+					case 0x155:
+						return McpeLocatorBar.CreateObject().Decode(buffer);
+					case 0x156:
+						return McpePartyChanged.CreateObject().Decode(buffer);
+					case 0x157:
+						return McpeServerboundDataDrivenScreenClosed.CreateObject().Decode(buffer);
+					case 0x158:
+						return McpeSyncWorldClocks.CreateObject().Decode(buffer);
+					case 0x159:
+						return McpeClientboundAttributeLayerSync.CreateObject().Decode(buffer);
 					case 0xe0:
 						return McpeAlexEntityAnimation.CreateObject().Decode(buffer);
 				}
@@ -12064,6 +12133,627 @@ namespace MiNET.Net
 			base.ResetPacket();
 
 			data = default;
+		}
+
+	}
+
+	public partial class McpeClientboundDataDrivenUiShowScreen : Packet<McpeClientboundDataDrivenUiShowScreen>
+	{
+
+		public string screenId;
+		public int formId;
+		public int? dataInstanceId;
+
+		public McpeClientboundDataDrivenUiShowScreen()
+		{
+			Id = 0x14d;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(screenId);
+			Write(formId);
+			Write(dataInstanceId.HasValue); // is optional
+			if (dataInstanceId.HasValue)
+			{
+				Write(dataInstanceId.Value);
+			}
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			screenId = ReadString();
+			formId = ReadInt();
+			if (ReadBool())
+			{
+				dataInstanceId = ReadInt();
+			}
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			screenId = default;
+			formId = default;
+			dataInstanceId = default;
+		}
+
+	}
+
+	public partial class McpeClientboundDataDrivenUiCloseScreen : Packet<McpeClientboundDataDrivenUiCloseScreen>
+	{
+
+		public int? formId;
+
+		public McpeClientboundDataDrivenUiCloseScreen()
+		{
+			Id = 0x14e;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(formId.HasValue); // is optional
+			if (formId.HasValue)
+			{
+				Write(formId.Value);
+			}
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			if (ReadBool())
+			{
+				formId = ReadInt();
+			}
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			formId = default;
+		}
+
+	}
+
+	public partial class McpeClientboundDataDrivenUiReload : Packet<McpeClientboundDataDrivenUiReload>
+	{
+
+
+		public McpeClientboundDataDrivenUiReload()
+		{
+			Id = 0x14f;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+		}
+
+	}
+
+	public partial class McpeClientboundTextureShift : Packet<McpeClientboundTextureShift>
+	{
+
+
+		public McpeClientboundTextureShift()
+		{
+			Id = 0x150;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+		}
+
+	}
+
+	public partial class McpeVoxelShapes : Packet<McpeVoxelShapes>
+	{
+
+
+		public McpeVoxelShapes()
+		{
+			Id = 0x151;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+		}
+
+	}
+
+	public partial class McpeCameraSpline : Packet<McpeCameraSpline>
+	{
+
+
+		public McpeCameraSpline()
+		{
+			Id = 0x152;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+		}
+
+	}
+
+	public partial class McpeCameraAimAssistActorPriority : Packet<McpeCameraAimAssistActorPriority>
+	{
+
+
+		public McpeCameraAimAssistActorPriority()
+		{
+			Id = 0x153;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+		}
+
+	}
+
+	public partial class McpeResourcePacksReadyForValidation : Packet<McpeResourcePacksReadyForValidation>
+	{
+
+
+		public McpeResourcePacksReadyForValidation()
+		{
+			Id = 0x154;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+		}
+
+	}
+
+	public partial class McpeLocatorBar : Packet<McpeLocatorBar>
+	{
+
+
+		public McpeLocatorBar()
+		{
+			Id = 0x155;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+		}
+
+	}
+
+	public partial class McpePartyChanged : Packet<McpePartyChanged>
+	{
+
+		public string? partyId;
+
+		public McpePartyChanged()
+		{
+			Id = 0x156;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(partyId != null); // is optional
+			if (partyId != null)
+			{
+				Write(partyId);
+			}
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			if (ReadBool())
+			{
+				partyId = ReadString();
+			}
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			partyId = default;
+		}
+
+	}
+
+	public partial class McpeServerboundDataDrivenScreenClosed : Packet<McpeServerboundDataDrivenScreenClosed>
+	{
+
+		public int formId;
+		public string closeReason;
+
+		public McpeServerboundDataDrivenScreenClosed()
+		{
+			Id = 0x157;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(formId);
+			Write(closeReason);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			formId = ReadInt();
+			closeReason = ReadString();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			formId = default;
+			closeReason = default;
+		}
+
+	}
+
+	public partial class McpeSyncWorldClocks : Packet<McpeSyncWorldClocks>
+	{
+
+
+		public McpeSyncWorldClocks()
+		{
+			Id = 0x158;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+		}
+
+	}
+
+	public partial class McpeClientboundAttributeLayerSync : Packet<McpeClientboundAttributeLayerSync>
+	{
+
+
+		public McpeClientboundAttributeLayerSync()
+		{
+			Id = 0x159;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
 		}
 
 	}

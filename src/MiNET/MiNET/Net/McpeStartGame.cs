@@ -199,10 +199,6 @@ namespace MiNET.Net
 			packet.Write(ExperimentalGameplayOverride);
 			packet.Write(ChatRestrictionLevel);
 			packet.Write(IsDisablePlayerInteractions);
-			packet.Write(ServerIdentifier);
-			packet.Write(WorldIdentifier);
-			packet.Write(ScenarioIdentifier);
-			packet.Write(OwnerIdentifier);
 		}
 
 		public static LevelSettings Read(Packet packet)
@@ -259,10 +255,6 @@ namespace MiNET.Net
 				ExperimentalGameplayOverride = packet.ReadBool(),
 				ChatRestrictionLevel = packet.ReadByte(),
 				IsDisablePlayerInteractions = packet.ReadBool(),
-				ServerIdentifier = packet.ReadString(),
-				WorldIdentifier = packet.ReadString(),
-				ScenarioIdentifier = packet.ReadString(),
-				OwnerIdentifier = packet.ReadString(),
 			};
 		}
 	}
@@ -332,6 +324,14 @@ namespace MiNET.Net
 			Write(clientSideGenerationEnabled);
 			Write(blockNetworkIdsAreHashes);
 			Write(disableClientSounds);
+
+			// Protocol v924+: optional ServerConfigurationJoinInfo. MiNET does not
+			// currently advertise Gatherings, Store or Presence configuration.
+			Write(false);
+			Write(settings.ServerIdentifier);
+			Write(settings.ScenarioIdentifier);
+			Write(settings.WorldIdentifier);
+			Write(settings.OwnerIdentifier);
 		}
 		
 		partial void AfterDecode()
@@ -375,6 +375,17 @@ namespace MiNET.Net
 			clientSideGenerationEnabled = ReadBool();
 			blockNetworkIdsAreHashes = ReadBool();
 			disableClientSounds = ReadBool();
+
+			bool hasServerConfigurationJoinInfo = ReadBool();
+			if (hasServerConfigurationJoinInfo)
+			{
+				throw new NotSupportedException("ServerConfigurationJoinInfo decoding is not implemented.");
+			}
+
+			levelSettings.ServerIdentifier = ReadString();
+			levelSettings.ScenarioIdentifier = ReadString();
+			levelSettings.WorldIdentifier = ReadString();
+			levelSettings.OwnerIdentifier = ReadString();
 		}
 
 		/// <inheritdoc />
