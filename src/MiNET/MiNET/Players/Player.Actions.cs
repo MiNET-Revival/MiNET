@@ -289,10 +289,7 @@ namespace MiNET.Players
 				case PlayerAction.StopBreak:
 				{
 					var crackCoordinates = ResolveBreakCrackStopCoordinates(message.coordinates);
-					McpeLevelEvent breakEvent = McpeLevelEvent.CreateObject();
-					breakEvent.eventId = 3601;
-					breakEvent.position = crackCoordinates;
-					Level.RelayBroadcast(breakEvent);
+					SendBlockBreakStopEvent(crackCoordinates);
 					_lastBreakCrackCoordinates = null;
 					break;
 				}
@@ -444,6 +441,12 @@ namespace MiNET.Players
 
 		private void SendBlockBreakSpeedEvent(BlockCoordinates coordinates, LevelEventType eventType)
 		{
+			if (_lastBreakCrackCoordinates.HasValue && _lastBreakCrackCoordinates.Value != coordinates)
+			{
+				SendBlockBreakStopEvent(_lastBreakCrackCoordinates.Value);
+				_lastBreakCrackCoordinates = null;
+			}
+
 			Block target = Level.GetBlock(coordinates);
 			double breakTime = CalculateBreakTimeTicks(target);
 
@@ -457,6 +460,14 @@ namespace MiNET.Players
 			breakEvent.position = coordinates;
 			breakEvent.data = (int) (65535 / breakTime);
 			_lastBreakCrackCoordinates = coordinates;
+			Level.RelayBroadcast(breakEvent);
+		}
+
+		private void SendBlockBreakStopEvent(BlockCoordinates coordinates)
+		{
+			McpeLevelEvent breakEvent = McpeLevelEvent.CreateObject();
+			breakEvent.eventId = (int) LevelEventType.StopBlockCracking;
+			breakEvent.position = coordinates;
 			Level.RelayBroadcast(breakEvent);
 		}
 
