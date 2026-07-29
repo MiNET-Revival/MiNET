@@ -142,6 +142,8 @@ namespace MiNET
 
 			string certificateChain;
 			string skinData;
+			int authenticationType = -1;
+			string authenticationToken = null;
 
 			try
 			{
@@ -157,9 +159,15 @@ namespace MiNET
 				// Protocol 818 wraps the legacy certificate-chain JSON in a string-valued
 				// Certificate property. Older payloads remain accepted for compatibility.
 				JObject authenticationInfo = JObject.Parse(certificateChain);
+				authenticationType = authenticationInfo.Value<int?>("AuthenticationType") ?? -1;
+				authenticationToken = authenticationInfo.Value<string>("Token");
 				if (authenticationInfo["Certificate"]?.Type == JTokenType.String)
 				{
-					certificateChain = authenticationInfo.Value<string>("Certificate");
+					string certificate = authenticationInfo.Value<string>("Certificate");
+					if (!string.IsNullOrWhiteSpace(certificate))
+					{
+						certificateChain = certificate;
+					}
 				}
 
 				var countSkinData = reader.ReadInt32();
@@ -325,24 +333,80 @@ namespace MiNET
 					string validationKey = null;
 					string identityPublicKey = null;
 
-					foreach (JToken token in chain)
+					// Since 1.26.10, self-signed and OIDC logins carry identity data in
+					// AuthenticationInfo.Token. Their certificate chain is deliberately [""].
+					if (!string.IsNullOrWhiteSpace(authenticationToken))
 					{
-						IDictionary<string, dynamic> headers = JWT.Headers(token.ToString());
+						JObject tokenPayload = JObject.Parse(JWT.Payload(authenticationToken));
+						string clientPublicKey = tokenPayload.Value<string>("cpk");
+						string displayName = tokenPayload.Value<string>("xname");
+						string xuid = tokenPayload.Value<string>("xid");
+						string identity = tokenPayload.Value<string>("leguuid");
+
+						if (string.IsNullOrWhiteSpace(identity) && !string.IsNullOrWhiteSpace(xuid))
+						{
+							identity = CreateIdentityFromXuid(xuid);
+						}
+
+						if (!string.IsNullOrWhiteSpace(clientPublicKey) &&
+						    !string.IsNullOrWhiteSpace(displayName) &&
+						    !string.IsNullOrWhiteSpace(identity))
+						{
+							_playerInfo.CertificateData = new CertificateData
+							{
+								IdentityPublicKey = clientPublicKey,
+								ExtraData = new ExtraData
+								{
+									DisplayName = displayName,
+									Identity = identity,
+									// Only FULL authentication claims an authenticated XUID.
+									Xuid = authenticationType == 0 ? xuid : null,
+								},
+							};
+							identityPublicKey = clientPublicKey;
+						}
+					}
+
+					foreach (JToken token in _playerInfo.CertificateData == null ? chain : Enumerable.Empty<JToken>())
+					{
+						string rawToken = token.ToString();
+						if (string.IsNullOrWhiteSpace(rawToken)) continue;
+
+						IDictionary<string, dynamic> headers = JWT.Headers(rawToken);
+						string x5u = null;
+
+						if (headers != null && headers.TryGetValue("x5u", out dynamic x5uValue))
+						{
+							x5u = x5uValue as string;
+						}
+
+						if (string.IsNullOrWhiteSpace(x5u))
+						{
+							try
+							{
+								string encodedHeader = rawToken.Split('.')[0];
+								JObject header = JObject.Parse(Encoding.UTF8.GetString(Base64Url.Decode(encodedHeader)));
+								x5u = header.Value<string>("x5u");
+							}
+							catch (Exception e)
+							{
+								Log.Warn("Ignoring a certificate-chain element with an invalid JWT header.", e);
+								continue;
+							}
+						}
 
 						if (Log.IsDebugEnabled)
 						{
-							Log.Debug("Raw chain element:\n" + token.ToString());
-							Log.Debug($"JWT Header: {string.Join(";", headers)}");
+							Log.Debug("Raw chain element:\n" + rawToken);
+							Log.Debug($"JWT Header: {(headers == null ? "<fallback decoder>" : string.Join(";", headers))}");
 
-							dynamic jsonPayload = JObject.Parse(JWT.Payload(token.ToString()));
+							dynamic jsonPayload = JObject.Parse(JWT.Payload(rawToken));
 							Log.Debug($"JWT Payload:\n{jsonPayload}");
 						}
 
 						// Mojang root x5u cert (string): MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V
 
-						if (!headers.ContainsKey("x5u")) continue;
-
-						string x5u = headers["x5u"];
+						if (string.IsNullOrWhiteSpace(x5u)) continue;
 
 						if (identityPublicKey == null)
 						{
@@ -377,7 +441,7 @@ namespace MiNET
 						};
 						signParam.Validate();
 
-						CertificateData data = JWT.Decode<CertificateData>(token.ToString(), ECDsa.Create(signParam));
+						CertificateData data = JWT.Decode<CertificateData>(rawToken, ECDsa.Create(signParam));
 
 						// Validate
 
@@ -423,6 +487,15 @@ namespace MiNET
 					//TODO: Implement disconnect here
 
 					{
+						if (_playerInfo.CertificateData?.ExtraData == null ||
+						    string.IsNullOrWhiteSpace(_playerInfo.CertificateData.ExtraData.DisplayName) ||
+						    string.IsNullOrWhiteSpace(_playerInfo.CertificateData.ExtraData.Identity))
+						{
+							Log.Warn("Login certificate chain did not contain valid player identity data.");
+							_session.Disconnect("Invalid login certificate.");
+							return;
+						}
+
 						_playerInfo.Username = _playerInfo.CertificateData.ExtraData.DisplayName;
 						_session.Username = _playerInfo.Username;
 						string identity = _playerInfo.CertificateData.ExtraData.Identity;
@@ -534,6 +607,16 @@ namespace MiNET
 			{
 				Log.Error("Decrypt", e);
 			}
+		}
+
+		private static string CreateIdentityFromXuid(string xuid)
+		{
+			byte[] hash = MD5.HashData(Encoding.UTF8.GetBytes("pocket-auth-1-xuid:" + xuid));
+			hash[6] = (byte) ((hash[6] & 0x0f) | 0x30);
+			hash[8] = (byte) ((hash[8] & 0x3f) | 0x80);
+
+			string value = Convert.ToHexString(hash).ToLowerInvariant();
+			return $"{value[..8]}-{value[8..12]}-{value[12..16]}-{value[16..20]}-{value[20..]}";
 		}
 
 		public void HandleMcpeClientToServerHandshake(McpeClientToServerHandshake message)
@@ -801,6 +884,18 @@ namespace MiNET
 		}
 
 		public void HandleMcpeServerboundDataStore(McpeServerboundDataStore message)
+		{
+		}
+
+		public void HandleMcpeResourcePacksReadyForValidation(McpeResourcePacksReadyForValidation message)
+		{
+		}
+
+		public void HandleMcpePartyChanged(McpePartyChanged message)
+		{
+		}
+
+		public void HandleMcpeServerboundDataDrivenScreenClosed(McpeServerboundDataDrivenScreenClosed message)
 		{
 		}
 

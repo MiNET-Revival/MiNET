@@ -38,6 +38,14 @@ public partial class McpePlayerAuthInput : Packet<McpePlayerAuthInput>
 	public AuthInputFlags InputFlags;
 
 	/// <summary>
+	/// The v766+ input bitset may use bit 64, which does not fit in
+	/// <see cref="AuthInputFlags"/>. Keep the complete wire value here.
+	/// </summary>
+	public System.Numerics.BigInteger InputFlagsRaw;
+
+	public bool SneakCurrentRaw => !InputFlagsRaw.IsZero && (InputFlagsRaw & (System.Numerics.BigInteger.One << 64)) != 0;
+
+	/// <summary>
 	///  InputMode specifies the way that the client inputs data to the screen.
 	/// </summary>
 	public PlayerInputMode InputMode;
@@ -90,7 +98,8 @@ public partial class McpePlayerAuthInput : Packet<McpePlayerAuthInput>
 		Position = ReadVector3();
 		MoveVector = ReadVector2();
 		HeadYaw = ReadFloat();
-		InputFlags = (AuthInputFlags) ReadUnsignedVarLong();
+		InputFlagsRaw = ReadInputFlags();
+		InputFlags = unchecked((AuthInputFlags) (long) (ulong) (InputFlagsRaw & ulong.MaxValue));
 		InputMode = (PlayerInputMode) ReadUnsignedVarInt();
 		PlayMode = (PlayerPlayMode) ReadUnsignedVarInt();
 		InteractionModel = (PlayerInteractionModel) ReadSignedVarInt();
@@ -136,7 +145,9 @@ public partial class McpePlayerAuthInput : Packet<McpePlayerAuthInput>
 		Write(Position);
 		Write(MoveVector);
 		Write(HeadYaw);
-		WriteUnsignedVarLong((long) InputFlags);
+		WriteInputFlags(InputFlagsRaw.IsZero
+			? new System.Numerics.BigInteger(unchecked((ulong) (long) InputFlags))
+			: InputFlagsRaw);
 		WriteUnsignedVarInt((uint) InputMode);
 		WriteUnsignedVarInt((uint) PlayMode);
 		WriteSignedVarInt((int) InteractionModel);
@@ -153,6 +164,7 @@ public partial class McpePlayerAuthInput : Packet<McpePlayerAuthInput>
 		if ((InputFlags & AuthInputFlags.PerformItemInteraction) != 0)
 		{
 			Write(ItemInteraction);
+			Write(((ItemUseTransaction) ItemInteraction).ClientCooldownState);
 		}
 
 		if ((InputFlags & AuthInputFlags.PerformItemStackRequest) != 0)
@@ -204,10 +216,43 @@ public partial class McpePlayerAuthInput : Packet<McpePlayerAuthInput>
 		}
 
 		var transaction = ItemUseTransaction.ReadData(this);
+		transaction.ClientCooldownState = ReadByte();
 		transaction.RequestId = requestId;
 		transaction.RequestRecords = requestRecords;
 		transaction.TransactionRecords = records;
 		return transaction;
+	}
+
+	private System.Numerics.BigInteger ReadInputFlags()
+	{
+		var value = System.Numerics.BigInteger.Zero;
+
+		for (var index = 0; index < 10; index++)
+		{
+			byte current = ReadByte();
+			value |= new System.Numerics.BigInteger(current & 0x7f) << (index * 7);
+			if ((current & 0x80) != 0) continue;
+
+			if ((value >> 65) != 0)
+			{
+				throw new System.IO.InvalidDataException("PlayerAuthInput flags exceed the v944 65-bit bitset.");
+			}
+
+			return value;
+		}
+
+		throw new System.IO.InvalidDataException("PlayerAuthInput flags exceed the v944 65-bit bitset.");
+	}
+
+	private void WriteInputFlags(System.Numerics.BigInteger value)
+	{
+		do
+		{
+			byte current = (byte) (value & 0x7f);
+			value >>= 7;
+			if (!value.IsZero) current |= 0x80;
+			Write(current);
+		} while (!value.IsZero);
 	}
 
 	/// <inheritdoc />
@@ -218,6 +263,7 @@ public partial class McpePlayerAuthInput : Packet<McpePlayerAuthInput>
 		MoveVector = Vector2.Zero;
 		Position = Vector3.Zero;
 		InputFlags = 0;
+		InputFlagsRaw = System.Numerics.BigInteger.Zero;
 		InputMode = PlayerInputMode.Mouse;
 		PlayMode = PlayerPlayMode.Normal;
 		InteractionModel = PlayerInteractionModel.Touch;

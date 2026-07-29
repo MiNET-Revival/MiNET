@@ -865,6 +865,12 @@ namespace MiNET.Net
 
 		public PredictedResult ClientInteractPrediction { get; set; }
 
+		/// <summary>
+		/// Client-side item cooldown state. Present in PlayerAuthInput since
+		/// protocol 944; legacy InventoryTransaction packets do not carry it.
+		/// </summary>
+		public byte ClientCooldownState { get; set; }
+
 		protected override void WriteType(Packet packet)
 		{
 			packet.WriteUnsignedVarInt((int) McpeInventoryTransaction.TransactionType.ItemUse);
