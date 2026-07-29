@@ -114,6 +114,8 @@ namespace MiNET.Entities
 		Bogged = 144,
 		Creaking = 146,
 		HappyGhast = 147,
+		Nautilus = 149,
+		ZombieNautilus = 150,
 
 		Chicken = 10,
 		Cow = 11,
@@ -179,6 +181,8 @@ namespace MiNET.Entities
 			{ EntityType.Skeleton, "minecraft:skeleton" },
 			{ EntityType.Creeper, "minecraft:creeper" },
 			{ EntityType.Zombie, "minecraft:zombie" },
+			{ EntityType.Nautilus, "minecraft:nautilus" },
+			{ EntityType.ZombieNautilus, "minecraft:zombie_nautilus" },
 			{ EntityType.SkeletonHorse, "minecraft:skeleton_horse" },
 			{ EntityType.Mule, "minecraft:mule" },
 			{ EntityType.Donkey, "minecraft:donkey" },

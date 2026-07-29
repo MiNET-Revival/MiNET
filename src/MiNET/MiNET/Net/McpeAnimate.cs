@@ -27,21 +27,21 @@ namespace MiNET.Net
 {
 	public partial class McpeAnimate : Packet<McpeAnimate>
 	{
-		public float rowingTime;
+		public string swingSource;
 
 		partial void AfterDecode()
 		{
-			if (actionId == 0x80 || actionId == 0x81)
+			if (hasSwingSource)
 			{
-				rowingTime = ReadFloat();
+				swingSource = ReadString();
 			}
 		}
 
 		partial void AfterEncode()
 		{
-			if (actionId == 0x80 || actionId == 0x81)
+			if (hasSwingSource)
 			{
-				Write(rowingTime);
+				Write(swingSource);
 			}
 		}
 	}

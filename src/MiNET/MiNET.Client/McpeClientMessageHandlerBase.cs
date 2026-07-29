@@ -777,6 +777,10 @@ namespace MiNET.Client
 		{
 		}
 
+		public virtual void HandleMcpeClientboundDataStore(McpeClientboundDataStore message)
+		{
+		}
+
 		public void HandleMcpeServerboundLoadingScreen(McpeServerboundLoadingScreen message)
 		{
 			
@@ -812,9 +816,17 @@ namespace MiNET.Client
 
 		}
 
+		public void HandleMcpeCameraAimAssistPresets(McpeCameraAimAssistPresets message)
+		{
+		}
+
 		public void HandleMcpeUpdateClientOptions(McpeUpdateClientOptions message)
 		{
 
+		}
+
+		public void HandleMcpePlayerVideoCapture(McpePlayerVideoCapture message)
+		{
 		}
 
 		public void HandleMcpePlayerUpdateEntityOverrides(McpePlayerUpdateEntityOverrides message)
@@ -827,6 +839,10 @@ namespace MiNET.Client
 		}
 
 		public void HandleMcpeServerScriptDebugDrawer(McpeServerScriptDebugDrawer message)
+		{
+		}
+
+		public void HandleMcpeClientboundDebugRenderer(McpeClientboundDebugRenderer message)
 		{
 		}
 	}

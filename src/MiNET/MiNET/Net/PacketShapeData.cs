@@ -23,7 +23,7 @@ public sealed class PacketShapeData
 	public Vector3? Rotation { get; set; }
 	public float? TimeLeftTotalSeconds { get; set; }
 	public uint? Color { get; set; }
-	public int Dimension { get; set; }
+	public int? Dimension { get; set; }
 	public string Text { get; set; }
 	public Vector3? BoxBound { get; set; }
 	public Vector3? EndLocation { get; set; }
@@ -40,7 +40,7 @@ public sealed class PacketShapeData
 		WriteOptional(packet, Rotation, packet.Write);
 		WriteOptional(packet, TimeLeftTotalSeconds, packet.Write);
 		WriteOptional(packet, Color, packet.Write);
-		packet.WriteVarInt(Dimension);
+		WriteOptional(packet, Dimension, packet.WriteVarInt);
 
 		packet.WriteUnsignedVarInt(GetPayloadType(ShapeType));
 		switch (ShapeType)
@@ -80,7 +80,7 @@ public sealed class PacketShapeData
 			Color = ReadOptional(packet, packet.ReadUint)
 		};
 
-		shape.Dimension = packet.ReadVarInt();
+		shape.Dimension = ReadOptional(packet, packet.ReadVarInt);
 		packet.ReadUnsignedVarInt(); // Payload discriminator; shape type defines the payload layout.
 
 		switch (shape.ShapeType)

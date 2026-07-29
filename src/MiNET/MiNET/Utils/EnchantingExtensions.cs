@@ -55,7 +55,8 @@ namespace MiNET.Utils
 		Flame = 21,
 		Infinity = 22,
 		LuckOfTheSea = 23,
-		Lure = 24
+		Lure = 24,
+		Lunge = 41
 	}
 
 	public class Enchanting

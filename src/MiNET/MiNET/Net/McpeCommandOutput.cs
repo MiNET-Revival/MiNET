@@ -58,11 +58,52 @@ namespace MiNET.Net
 		public uint SuccessCount { get; set; }
 		public CommandOutputMessage[] Messages { get; set; }
 		public string UnknownString { get; set; }
+
+		partial void AfterEncode()
+		{
+			Write("player");
+			Write(OriginData?.UUID ?? default);
+			Write(OriginData?.RequestId ?? string.Empty);
+			Write(OriginData?.EntityUniqueId ?? 0L);
+			Write(OutputType switch
+			{
+				CommandOutputType.Last => "lastoutput",
+				CommandOutputType.Silent => "silent",
+				CommandOutputType.All => "alloutput",
+				CommandOutputType.DataSet => "dataset",
+				_ => "none"
+			});
+			Write(SuccessCount);
+			WriteUnsignedVarInt((uint) (Messages?.Length ?? 0));
+			if (Messages != null)
+			{
+				foreach (var message in Messages)
+				{
+					Write(message.MessageId ?? string.Empty);
+					Write(message.IsInternal);
+					WriteUnsignedVarInt((uint) (message.Parameters?.Length ?? 0));
+					if (message.Parameters == null) continue;
+					foreach (var parameter in message.Parameters) Write(parameter ?? string.Empty);
+				}
+			}
+
+			bool hasData = UnknownString != null;
+			Write(hasData);
+			if (hasData) Write(UnknownString);
+		}
+
 		partial void AfterDecode()
 		{
 			OriginData = ReadOriginData();
-			OutputType = (CommandOutputType)ReadByte();
-			SuccessCount = ReadUnsignedVarInt();
+			OutputType = ReadString() switch
+			{
+				"lastoutput" => CommandOutputType.Last,
+				"silent" => CommandOutputType.Silent,
+				"alloutput" => CommandOutputType.All,
+				"dataset" => CommandOutputType.DataSet,
+				_ => CommandOutputType.Last
+			};
+			SuccessCount = ReadUint();
 
 			var messageCount = ReadUnsignedVarInt();
 			Messages = new CommandOutputMessage[messageCount];
@@ -72,7 +113,7 @@ namespace MiNET.Net
 				Messages[i] = ReadCommandOutputMessage();
 			}
 
-			if (OutputType == CommandOutputType.DataSet)
+			if (ReadBool())
 			{
 				UnknownString = ReadString();
 			}
@@ -80,14 +121,11 @@ namespace MiNET.Net
 
 		private CommandOriginData ReadOriginData()
 		{
-			var type = (CommandOriginType)ReadUnsignedVarInt();
+			ReadString(); // Cereal origin discriminator, currently "player".
+			var type = CommandOriginType.Player;
 			var uuid = ReadUUID();
 			var requestId = ReadString();
-			var entityId = 0L;
-			if (type == CommandOriginType.DevConsole || type == CommandOriginType.Test)
-			{
-				entityId = ReadVarLong();
-			}
+			var entityId = ReadLong();
 
 			return new CommandOriginData(type, uuid, requestId, entityId);
 		}
@@ -95,8 +133,8 @@ namespace MiNET.Net
 		private CommandOutputMessage ReadCommandOutputMessage()
 		{
 			CommandOutputMessage result = new CommandOutputMessage();
-			result.IsInternal = ReadBool();
 			result.MessageId = ReadString();
+			result.IsInternal = ReadBool();
 
 			var count = ReadUnsignedVarInt();
 			result.Parameters = new string[count];

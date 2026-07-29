@@ -71,7 +71,10 @@ namespace MiNET
 		[Description("{0} starved to death")] Starving,
 
 		[Description("{0} died a customized death")]
-		Custom
+		Custom,
+
+		[Description("{0} died from dehydration")]
+		Dehydration = 31
 	}
 
 	public class HealthManager

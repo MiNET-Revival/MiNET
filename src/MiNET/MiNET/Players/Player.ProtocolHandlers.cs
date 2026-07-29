@@ -265,5 +265,10 @@ namespace MiNET.Players
 		{
 			// Pack settings do not currently have a gameplay consumer in MiNET.
 		}
+
+		public virtual void HandleMcpeServerboundDataStore(McpeServerboundDataStore message)
+		{
+			// Data store updates do not currently have a gameplay consumer in MiNET.
+		}
 	}
 }

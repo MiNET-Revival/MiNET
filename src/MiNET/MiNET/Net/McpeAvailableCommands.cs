@@ -102,19 +102,7 @@ namespace MiNET.Net
 					Log.Debug($"{i} - {enumName}:{enumValueCount}");
 					for (int j = 0; j < enumValueCount; j++)
 					{
-						int idx;
-						if (stringValuesCount <= byte.MaxValue)
-						{
-							idx = ReadByte();
-						}
-						else if (stringValuesCount <= short.MaxValue)
-						{
-							idx = ReadShort();
-						}
-						else
-						{
-							idx = ReadInt();
-						}
+						int idx = (int) ReadUint();
 
 						enumValues[j] = stringValues[idx];
 						Log.Debug($"{enumName}, {idx} - {stringValues[idx]}");
@@ -138,8 +126,8 @@ namespace MiNET.Net
 					uint valCount = ReadUnsignedVarInt();
 					for (int j = 0; j < valCount; j++)
 					{
-						var valueName = chainedSubCommandValueNames[ReadShort()];
-						var valueType = ReadShort();
+						var valueName = chainedSubCommandValueNames[(int) ReadUnsignedVarInt()];
+						var valueType = (short) ReadUnsignedVarInt();
 						Log.Debug($"\t{name} valueName:{valueName} valueType:{valueType}");
 
 						values.Add(valueName, valueType);
@@ -159,7 +147,15 @@ namespace MiNET.Net
 					string commandName = ReadString();
 					string description = ReadString();
 					int flags = ReadShort();
-					int permissions = ReadByte();
+					string permission = ReadString();
+					int permissions = permission switch
+					{
+						"gamedirectors" => (int) CommandPermission.Operator,
+						"admin" => (int) CommandPermission.Admin,
+						"host" => (int) CommandPermission.Host,
+						"owner" => (int) CommandPermission.Admin,
+						_ => (int) CommandPermission.Normal
+					};
 
 					command.Name = commandName;
 
@@ -174,8 +170,7 @@ namespace MiNET.Net
 						Log.Debug($"Command chained sub command data {c}");
 						for (int j = 0; j < c; j++)
 						{
-							var chainedSubCommandData = allChainedSubCommandData.ElementAt(ReadShort());
-							var valueType = ReadShort();
+							var chainedSubCommandData = allChainedSubCommandData.ElementAt((int) ReadUint());
 							//Log.Debug($"\tchainedSubCommandData: {chainedSubCommandData.Key}");
 						}
 					}
@@ -412,18 +407,7 @@ namespace MiNET.Net
 						foreach (var enumValue in aliases)
 						{
 							if (!stringList.Contains(enumValue)) Log.Error($"Expected enum value: {enumValue} in string list, but didn't find it.");
-							if (stringList.Count <= byte.MaxValue)
-							{
-								Write((byte) stringList.IndexOf(enumValue));
-							}
-							else if (stringList.Count <= short.MaxValue)
-							{
-								Write((short) stringList.IndexOf(enumValue));
-							}
-							else
-							{
-								Write((int) stringList.IndexOf(enumValue));
-							}
+							Write((uint) stringList.IndexOf(enumValue));
 
 							//Log.Debug($"EnumType: {aliasEnum}, {enumValue}, {stringList.IndexOf(enumValue)} ");
 						}
@@ -450,18 +434,7 @@ namespace MiNET.Net
 								foreach (var enumValue in parameter.EnumValues)
 								{
 									if (!stringList.Contains(enumValue)) Log.Error($"Expected enum value: {enumValue} in string list, but didn't find it.");
-									if (stringList.Count <= byte.MaxValue)
-									{
-										Write((byte) stringList.IndexOf(enumValue));
-									}
-									else if (stringList.Count <= short.MaxValue)
-									{
-										Write((short) stringList.IndexOf(enumValue));
-									}
-									else
-									{
-										Write((int) stringList.IndexOf(enumValue));
-									}
+									Write((uint) stringList.IndexOf(enumValue));
 
 									//Log.Debug($"EnumType: {parameter.EnumType}, {enumValue}, {stringList.IndexOf(enumValue)} ");
 								}
@@ -478,7 +451,13 @@ namespace MiNET.Net
 					Write(command.Name);
 					Write(command.Versions[0].Description);
 					Write((short) 0); // flags
-					Write((byte) command.Versions[0].CommandPermission); // permissions
+					Write(((CommandPermission) command.Versions[0].CommandPermission) switch
+					{
+						CommandPermission.Operator => "gamedirectors",
+						CommandPermission.Admin => "admin",
+						CommandPermission.Host => "host",
+						_ => "any"
+					});
 
 					if (command.Versions[0].Aliases.Length > 0)
 					{

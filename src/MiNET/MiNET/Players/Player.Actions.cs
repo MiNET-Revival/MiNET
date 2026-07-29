@@ -206,7 +206,8 @@ namespace MiNET.Players
 			msg.runtimeEntityId = EntityId;
 			msg.actionId = message.actionId;
 			msg.data = message.data;
-			msg.rowingTime = message.rowingTime;
+			msg.hasSwingSource = message.hasSwingSource;
+			msg.swingSource = message.swingSource;
 
 			Level.RelayBroadcast(this, msg);
 		}
