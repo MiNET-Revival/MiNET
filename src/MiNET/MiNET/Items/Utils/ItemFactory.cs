@@ -42,10 +42,10 @@ namespace MiNET.Items
 			(IdToType, TypeToId) = BuildIdTypeMapPair();
 			IdToFactory = BuildIdToFactory();
 
-			var missingItems = ItemStates.Keys.Where(id => !id.Contains("item.")).Except(IdToType.Keys);
-			foreach (var missingItem in missingItems)
+			var missingItemCount = ItemStates.Keys.Count(id => !id.Contains("item.") && !IdToType.ContainsKey(id));
+			if (missingItemCount > 0)
 			{
-				Log.Warn($"Detected missing items [{missingItem}]");
+				Log.Debug($"Detected {missingItemCount} item registry entries without a dedicated MiNET implementation.");
 			}
 
 			if (!Config.GetProperty("EnableEdu", false))
@@ -134,8 +134,8 @@ namespace MiNET.Items
 
 				if (item is ItemBlock itemBlock)
 				{
-					block ??= BlockFactory.GetBlockById(BlockFactory.GetBlockIdFromItemId(id))
-						?? BlockFactory.GetBlockById(id);
+					string blockId = BlockFactory.GetBlockIdFromItemId(id) ?? id;
+					block ??= BlockFactory.GetBlockById(blockId, metadata);
 
 					if (block != null)
 					{
@@ -145,8 +145,8 @@ namespace MiNET.Items
 			}
 			else
 			{
-				block ??= BlockFactory.GetBlockById(BlockFactory.GetBlockIdFromItemId(id))
-					?? BlockFactory.GetBlockById(id);
+				string blockId = BlockFactory.GetBlockIdFromItemId(id) ?? id;
+				block ??= BlockFactory.GetBlockById(blockId, metadata);
 
 				if (block != null)
 				{

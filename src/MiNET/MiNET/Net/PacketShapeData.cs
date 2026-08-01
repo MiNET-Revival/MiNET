@@ -22,10 +22,16 @@ public sealed class PacketShapeData
 	public float? Scale { get; set; }
 	public Vector3? Rotation { get; set; }
 	public float? TimeLeftTotalSeconds { get; set; }
+	public float? MaximumRenderDistance { get; set; }
 	public uint? Color { get; set; }
 	public int? Dimension { get; set; }
 	public long? AttachedToEntityId { get; set; }
 	public string Text { get; set; }
+	public bool? TextUseRotation { get; set; }
+	public uint? TextBackgroundColor { get; set; }
+	public bool? TextDepthTest { get; set; }
+	public bool? TextShowBackface { get; set; }
+	public bool? TextShowTextBackface { get; set; }
 	public Vector3? BoxBound { get; set; }
 	public Vector3? EndLocation { get; set; }
 	public float? ArrowHeadLength { get; set; }
@@ -40,6 +46,7 @@ public sealed class PacketShapeData
 		WriteOptional(packet, Scale, packet.Write);
 		WriteOptional(packet, Rotation, packet.Write);
 		WriteOptional(packet, TimeLeftTotalSeconds, packet.Write);
+		WriteOptional(packet, MaximumRenderDistance, packet.Write);
 		WriteOptional(packet, Color, packet.Write);
 		WriteOptional(packet, Dimension, packet.WriteVarInt);
 		WriteOptional(packet, AttachedToEntityId, packet.WriteUnsignedVarLong);
@@ -55,6 +62,11 @@ public sealed class PacketShapeData
 				break;
 			case ScriptDebugShapeType.Text:
 				packet.Write(Text ?? string.Empty);
+				WriteOptional(packet, TextUseRotation, packet.Write);
+				WriteOptional(packet, TextBackgroundColor, packet.Write);
+				WriteOptional(packet, TextDepthTest, packet.Write);
+				WriteOptional(packet, TextShowBackface, packet.Write);
+				WriteOptional(packet, TextShowTextBackface, packet.Write);
 				break;
 			case ScriptDebugShapeType.Box:
 				packet.Write(BoxBound ?? Vector3.Zero);
@@ -79,6 +91,7 @@ public sealed class PacketShapeData
 			Scale = ReadOptional(packet, packet.ReadFloat),
 			Rotation = ReadOptional(packet, packet.ReadVector3),
 			TimeLeftTotalSeconds = ReadOptional(packet, packet.ReadFloat),
+			MaximumRenderDistance = ReadOptional(packet, packet.ReadFloat),
 			Color = ReadOptional(packet, packet.ReadUint)
 		};
 
@@ -96,6 +109,11 @@ public sealed class PacketShapeData
 				break;
 			case ScriptDebugShapeType.Text:
 				shape.Text = packet.ReadString();
+				shape.TextUseRotation = ReadOptional(packet, packet.ReadBool);
+				shape.TextBackgroundColor = ReadOptional(packet, packet.ReadUint);
+				shape.TextDepthTest = ReadOptional(packet, packet.ReadBool);
+				shape.TextShowBackface = ReadOptional(packet, packet.ReadBool);
+				shape.TextShowTextBackface = ReadOptional(packet, packet.ReadBool);
 				break;
 			case ScriptDebugShapeType.Box:
 				shape.BoxBound = packet.ReadVector3();

@@ -8,6 +8,7 @@ namespace MiNET.Net
 		public Vector3 position; // = null;
 		public float volume; // = null;
 		public float pitch; // = null;
+		public ulong? serverSoundHandle;
 
 		partial void AfterEncode()
 		{
@@ -18,6 +19,11 @@ namespace MiNET.Net
 
 			Write(volume);
 			Write(pitch);
+			Write(serverSoundHandle.HasValue);
+			if (serverSoundHandle.HasValue)
+			{
+				Write(serverSoundHandle.Value);
+			}
 		}
 
 		partial void AfterDecode()
@@ -25,6 +31,7 @@ namespace MiNET.Net
 			position = new Vector3(ReadSignedVarInt() / 8f, ReadSignedVarInt() / 4f, ReadSignedVarInt() / 8f);
 			volume = ReadFloat();
 			pitch = ReadFloat();
+			serverSoundHandle = ReadBool() ? ReadUlong() : null;
 		}
 
 		public override void Reset()
@@ -32,6 +39,7 @@ namespace MiNET.Net
 			position = default(BlockCoordinates);
 			volume = default(float);
 			pitch = default(float);
+			serverSoundHandle = default(ulong?);
 
 			base.Reset();
 		}

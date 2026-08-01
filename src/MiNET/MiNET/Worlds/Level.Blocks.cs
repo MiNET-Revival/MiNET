@@ -230,7 +230,7 @@ namespace MiNET.Worlds
 				var message = McpeUpdateBlock.CreateObject();
 				message.blockRuntimeId = (uint) block.RuntimeId;
 				message.coordinates = block.Coordinates;
-				message.blockPriority = 0xb;
+				message.blockPriority = 0x13;
 				RelayBroadcast(message);
 			}
 

@@ -89,7 +89,7 @@ namespace MiNET.Worlds
 					var message = McpeUpdateBlock.CreateObject();
 					message.blockRuntimeId = (uint) block.RuntimeId;
 					message.coordinates = block.Coordinates;
-					message.blockPriority = 0xb;
+					message.blockPriority = 0x13;
 					player.SendPacket(message);
 
 					return;
@@ -156,7 +156,7 @@ namespace MiNET.Worlds
 			var updateBlock = McpeUpdateBlockSynced.CreateObject();
 			updateBlock.coordinates = blockCoordinates;
 			updateBlock.blockRuntimeId = (uint) air.RuntimeId;
-			updateBlock.blockPriority = 0xb;
+			updateBlock.blockPriority = 0x13;
 			updateBlock.dataLayerId = 0;
 			updateBlock.unknown0 = player.EntityId;
 			updateBlock.unknown1 = 1;
@@ -169,7 +169,7 @@ namespace MiNET.Worlds
 			var message = McpeUpdateBlock.CreateObject();
 			message.blockRuntimeId = (uint) block.RuntimeId;
 			message.coordinates = block.Coordinates;
-			message.blockPriority = 0xb;
+			message.blockPriority = 0x13;
 			player.SendPacket(message);
 
 			// Revert block entity if exists

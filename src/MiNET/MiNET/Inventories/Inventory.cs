@@ -353,7 +353,9 @@ namespace MiNET.Inventories
 			sendSlot.inventoryId = (uint) windowId;
 			sendSlot.slot = (uint) slot;
 			sendSlot.item = item;
-			sendSlot.containerName = FullContainerName.Unknown;
+			// Since protocol v955 this field is a nullable Cereal value. Normal
+			// inventories have no dynamic container context, so it must be absent.
+			sendSlot.containerName = null;
 			player.SendPacket(sendSlot);
 		}
 

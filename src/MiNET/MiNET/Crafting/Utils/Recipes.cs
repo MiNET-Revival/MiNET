@@ -10,10 +10,21 @@ namespace MiNET.Crafting
 	{
 		public void Write(Packet packet)
 		{
-			packet.WriteLength(Count);
-
+			// Protocol v962 removed FurnaceRecipe and FurnaceAuxRecipe from
+			// CraftingDataEntryType. Keep smelting recipes in RecipeManager for
+			// server-side furnace validation, but do not serialize their legacy
+			// discriminants and payloads to v975 clients.
+			var networkRecipeCount = 0;
 			foreach (var recipe in this)
-				recipe.Write(packet);
+			{
+				if (recipe is not SmeltingRecipeBase) networkRecipeCount++;
+			}
+
+			packet.WriteLength(networkRecipeCount);
+			foreach (var recipe in this)
+			{
+				if (recipe is not SmeltingRecipeBase) recipe.Write(packet);
+			}
 		}
 
 		public static Recipes Read(Packet packet)

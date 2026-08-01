@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
-<protocol gameVersion="1.26.10" protocolVersion="944">
+<protocol gameVersion="1.26.20" protocolVersion="975">
 
 	<constants>
 		<constant id="OFFLINE_MESSAGE_DATA_ID" type="byte[]"
@@ -362,7 +362,8 @@
 			<enum id="Neighbors" value="1" />
 			<enum id="Network" value="2" />
 			<enum id="Nographic" value="4" />
-			<enum id="Priority" value="8" />
+			<enum id="Unused" value="8" />
+			<enum id="Priority" value="16" />
 
 			<enum id="All" value="(Neighbors | Network)" />
 			<enum id="All Priority" value="(All | Priority)" />
@@ -397,6 +398,8 @@
 		<field name="Runtime Entity ID" type="UnsignedVarLong" />
 		<field name="Event ID" type="byte" />
 		<field name="Data" type="SignedVarInt" />
+		<!-- Protocol v958: optional origin used by FireAtPosition actor events. -->
+		<field name="Fire At Position" type="Vector3" optional="true" />
 	</pdu>
 
 	<pdu id="0x1c" online="false" client="false" server="true" name="MCPE_MOB_EFFECT">
@@ -466,7 +469,9 @@
 
 	<pdu id="0x1f" online="false" client="true" server="true" name="MCPE_MOB_EQUIPMENT">
 		<field name="Runtime Entity ID" type="UnsignedVarLong" />
-		<field name="Item" type="Item" />
+		<!-- Protocol v966: converted to Cereal and now uses the fixed-width
+		     NetworkItemStackDescriptor rather than the legacy Item encoding. -->
+		<field name="Item" type="NetworkItemStackDescriptor" />
 		<field name="Slot" type="byte" />
 		<field name="Selected Slot" type="byte" />
 		<field name="Windows Id" type="byte" />
@@ -609,9 +614,11 @@
 	<pdu id="0x32" online="false" client="true" server="true" name="MCPE_INVENTORY_SLOT">
 		<field name="Inventory Id" type="UnsignedVarInt" />
 		<field name="Slot" type="UnsignedVarInt" />
-		<field name="Container Name" type="FullContainerName" />
-		<field name="Storage" type="Item" />
-		<field name="Item" type="Item" />
+		<!-- Protocol v955: converted to Cereal. Both context fields are nullable,
+		     and item payloads use NetworkItemStackDescriptor in v975. -->
+		<field name="Container Name" type="FullContainerName" optional="true" />
+		<field name="Storage" type="NetworkItemStackDescriptor" optional="true" />
+		<field name="Item" type="NetworkItemStackDescriptor" />
 	</pdu>
 
 	<pdu id="0x33" online="false" client="false" server="true" name="MCPE_CONTAINER_SET_DATA">
@@ -1081,6 +1088,8 @@
 		<field name="Is baby mob" type="bool" />
 		<field name="Is global" type="bool" />
 		<field name="Runtime Entity ID" type="long" />
+		<!-- Protocol v963: optional origin used by FireAtPosition sounds. -->
+		<field name="Fire At Position" type="Vector3" optional="true" />
 	</pdu>
 
 	<pdu id="0x7c" online="false" client="false" server="true" name="MCPE_LEVEL_EVENT_GENERIC">
@@ -1444,6 +1453,7 @@
 			<enum id="Ray Traced" value="3" />
 		</enums>
 		
+		<field name="Filter Profanity" type="bool" />
 		<field name="Graphics Mode" type="byte" optional="true" />
 	</pdu>
 
@@ -1483,6 +1493,7 @@
 		<field name="Control Scheme" type="byte" />
 	</pdu>
 
+	<!-- Renamed PrimitiveShapesPacket in v951; legacy MiNET name retained for API compatibility. -->
 	<pdu id="0x148" online="false" client="false" server="true" name="MCPE_SERVER_SCRIPT_DEBUG_DRAWER">
 		<field name="Shapes" type="PacketShapeData[]" />
 	</pdu>
@@ -1545,6 +1556,7 @@
 
 	<pdu id="0x156" online="false" client="true" server="false" name="MCPE_PARTY_CHANGED">
 		<field name="Party Id" type="string" optional="true" />
+		<field name="Is Party Leader" type="bool" />
 	</pdu>
 
 	<pdu id="0x157" online="false" client="true" server="false" name="MCPE_SERVERBOUND_DATA_DRIVEN_SCREEN_CLOSED">
@@ -1556,6 +1568,17 @@
 	</pdu>
 
 	<pdu id="0x159" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_ATTRIBUTE_LAYER_SYNC">
+	</pdu>
+
+	<!-- Protocol v960-v975 (Bedrock 1.26.20). -->
+	<pdu id="0x15a" online="false" client="false" server="true" name="MCPE_SERVER_STORE_INFO">
+		<field name="Store Id" type="string" />
+		<field name="Store Name" type="string" />
+	</pdu>
+
+	<pdu id="0x15b" online="false" client="false" server="true" name="MCPE_SERVER_PRESENCE_INFO">
+		<field name="Experience Name" type="string" />
+		<field name="World Name" type="string" />
 	</pdu>
 
 	<pdu id="0xe0" online="false" client="false" server="true" name="MCPE_ALEX_ENTITY_ANIMATION">
