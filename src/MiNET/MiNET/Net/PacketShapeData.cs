@@ -11,7 +11,11 @@ public enum ScriptDebugShapeType : byte
 	Circle = 3,
 	Text = 4,
 	Arrow = 5,
-	NumShapeTypes = 6
+	Cylinder = 6,
+	Pyramid = 7,
+	Ellipsoid = 8,
+	Cone = 9,
+	NumShapeTypes = 10
 }
 
 public sealed class PacketShapeData
@@ -37,6 +41,13 @@ public sealed class PacketShapeData
 	public float? ArrowHeadLength { get; set; }
 	public float? ArrowHeadRadius { get; set; }
 	public byte? NumberOfSegments { get; set; }
+	public Vector2 RadiusX { get; set; }
+	public Vector2 RadiusZ { get; set; }
+	public Vector2 Radii { get; set; }
+	public Vector3 EllipsoidRadii { get; set; }
+	public float Width { get; set; }
+	public float? Depth { get; set; }
+	public float Height { get; set; }
 
 	public void Write(Packet packet)
 	{
@@ -62,11 +73,11 @@ public sealed class PacketShapeData
 				break;
 			case ScriptDebugShapeType.Text:
 				packet.Write(Text ?? string.Empty);
-				WriteOptional(packet, TextUseRotation, packet.Write);
+				packet.Write(TextUseRotation ?? false);
 				WriteOptional(packet, TextBackgroundColor, packet.Write);
-				WriteOptional(packet, TextDepthTest, packet.Write);
-				WriteOptional(packet, TextShowBackface, packet.Write);
-				WriteOptional(packet, TextShowTextBackface, packet.Write);
+				packet.Write(TextDepthTest ?? false);
+				packet.Write(TextShowBackface ?? false);
+				packet.Write(TextShowTextBackface ?? false);
 				break;
 			case ScriptDebugShapeType.Box:
 				packet.Write(BoxBound ?? Vector3.Zero);
@@ -76,6 +87,26 @@ public sealed class PacketShapeData
 				break;
 			case ScriptDebugShapeType.Sphere:
 			case ScriptDebugShapeType.Circle:
+				packet.Write(NumberOfSegments ?? 0);
+				break;
+			case ScriptDebugShapeType.Cylinder:
+				packet.Write(RadiusX);
+				packet.Write(RadiusZ);
+				packet.Write(Height);
+				packet.Write(NumberOfSegments ?? 0);
+				break;
+			case ScriptDebugShapeType.Pyramid:
+				packet.Write(Width);
+				WriteOptional(packet, Depth, packet.Write);
+				packet.Write(Height);
+				break;
+			case ScriptDebugShapeType.Ellipsoid:
+				packet.Write(EllipsoidRadii);
+				packet.Write(NumberOfSegments ?? 0);
+				break;
+			case ScriptDebugShapeType.Cone:
+				packet.Write(Radii);
+				packet.Write(Height);
 				packet.Write(NumberOfSegments ?? 0);
 				break;
 		}
@@ -109,11 +140,11 @@ public sealed class PacketShapeData
 				break;
 			case ScriptDebugShapeType.Text:
 				shape.Text = packet.ReadString();
-				shape.TextUseRotation = ReadOptional(packet, packet.ReadBool);
+				shape.TextUseRotation = packet.ReadBool();
 				shape.TextBackgroundColor = ReadOptional(packet, packet.ReadUint);
-				shape.TextDepthTest = ReadOptional(packet, packet.ReadBool);
-				shape.TextShowBackface = ReadOptional(packet, packet.ReadBool);
-				shape.TextShowTextBackface = ReadOptional(packet, packet.ReadBool);
+				shape.TextDepthTest = packet.ReadBool();
+				shape.TextShowBackface = packet.ReadBool();
+				shape.TextShowTextBackface = packet.ReadBool();
 				break;
 			case ScriptDebugShapeType.Box:
 				shape.BoxBound = packet.ReadVector3();
@@ -123,6 +154,26 @@ public sealed class PacketShapeData
 				break;
 			case ScriptDebugShapeType.Sphere:
 			case ScriptDebugShapeType.Circle:
+				shape.NumberOfSegments = packet.ReadByte();
+				break;
+			case ScriptDebugShapeType.Cylinder:
+				shape.RadiusX = packet.ReadVector2();
+				shape.RadiusZ = packet.ReadVector2();
+				shape.Height = packet.ReadFloat();
+				shape.NumberOfSegments = packet.ReadByte();
+				break;
+			case ScriptDebugShapeType.Pyramid:
+				shape.Width = packet.ReadFloat();
+				shape.Depth = ReadOptional(packet, packet.ReadFloat);
+				shape.Height = packet.ReadFloat();
+				break;
+			case ScriptDebugShapeType.Ellipsoid:
+				shape.EllipsoidRadii = packet.ReadVector3();
+				shape.NumberOfSegments = packet.ReadByte();
+				break;
+			case ScriptDebugShapeType.Cone:
+				shape.Radii = packet.ReadVector2();
+				shape.Height = packet.ReadFloat();
 				shape.NumberOfSegments = packet.ReadByte();
 				break;
 		}
@@ -139,6 +190,10 @@ public sealed class PacketShapeData
 		ScriptDebugShapeType.Line => 4,
 		ScriptDebugShapeType.Sphere => 5,
 		ScriptDebugShapeType.Circle => 5,
+		ScriptDebugShapeType.Cylinder => 6,
+		ScriptDebugShapeType.Pyramid => 7,
+		ScriptDebugShapeType.Ellipsoid => 8,
+		ScriptDebugShapeType.Cone => 9,
 		_ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
 	};
 

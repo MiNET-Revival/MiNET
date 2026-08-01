@@ -6315,7 +6315,7 @@ namespace MiNET.Net
 		}
 
 		public long bossEntityId;
-		public uint eventType;
+		public byte eventType;
 
 		public McpeBossEvent()
 		{
@@ -6330,7 +6330,7 @@ namespace MiNET.Net
 			BeforeEncode();
 
 			WriteSignedVarLong(bossEntityId);
-			WriteUnsignedVarInt(eventType);
+			Write(eventType);
 
 			AfterEncode();
 		}
@@ -6345,7 +6345,7 @@ namespace MiNET.Net
 			BeforeDecode();
 
 			bossEntityId = ReadSignedVarLong();
-			eventType = ReadUnsignedVarInt();
+			eventType = ReadByte();
 
 			AfterDecode();
 		}
@@ -11321,6 +11321,7 @@ namespace MiNET.Net
 		public float avgEndFrameTimeMs;
 		public float avgRemainderTimePercent;
 		public float avgUnaccountedTimePercent;
+		public ServerboundDiagnosticsTail diagnosticsTail;
 
 		public McpeServerboundDiagnostics()
 		{
@@ -11343,6 +11344,7 @@ namespace MiNET.Net
 			Write(avgEndFrameTimeMs);
 			Write(avgRemainderTimePercent);
 			Write(avgUnaccountedTimePercent);
+			Write(diagnosticsTail);
 
 			AfterEncode();
 		}
@@ -11365,6 +11367,7 @@ namespace MiNET.Net
 			avgEndFrameTimeMs = ReadFloat();
 			avgRemainderTimePercent = ReadFloat();
 			avgUnaccountedTimePercent = ReadFloat();
+			diagnosticsTail = ReadServerboundDiagnosticsTail();
 
 			AfterDecode();
 		}
@@ -11385,6 +11388,7 @@ namespace MiNET.Net
 			avgEndFrameTimeMs = default;
 			avgRemainderTimePercent = default;
 			avgUnaccountedTimePercent = default;
+			diagnosticsTail = default;
 		}
 
 	}
@@ -12805,6 +12809,7 @@ namespace MiNET.Net
 	public partial class McpeClientboundAttributeLayerSync : Packet<McpeClientboundAttributeLayerSync>
 	{
 
+		public AttributeLayerSyncData payload;
 
 		public McpeClientboundAttributeLayerSync()
 		{
@@ -12818,6 +12823,7 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
+			Write(payload);
 
 			AfterEncode();
 		}
@@ -12831,6 +12837,7 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
+			payload = ReadAttributeLayerSyncData();
 
 			AfterDecode();
 		}
@@ -12842,6 +12849,7 @@ namespace MiNET.Net
 		{
 			base.ResetPacket();
 
+			payload = default;
 		}
 
 	}

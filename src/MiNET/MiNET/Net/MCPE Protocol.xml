@@ -792,7 +792,8 @@
 			<enum id="Query" value="8" />
 		</enums>
 		<field name="Boss Entity ID" type="SignedVarLong" />
-		<field name="Event Type" type="UnsignedVarInt" />
+		<!-- Protocol v984: Cereal layout, action is a raw byte and all payload fields are unconditional. -->
+		<field name="Event Type" type="byte" />
 	</pdu>
 
 	<pdu id="0x4b" online="false" client="false" server="true" name="MCPE_SHOW_CREDITS">
@@ -1414,6 +1415,7 @@
 		<field name="Avg End Frame Time MS" type="float" />
 		<field name="Avg Remainder Time Percent" type="float" />
 		<field name="Avg Unaccounted Time Percent" type="float" />	
+		<field name="Diagnostics Tail" type="ServerboundDiagnosticsTail" />
 	</pdu>
 
 	<pdu id="0x13c" online="false" client="false" server="true" name="MCPE_CAMERA_AIM_ASSIST">
@@ -1572,6 +1574,7 @@
 	</pdu>
 
 	<pdu id="0x159" online="false" client="false" server="true" name="MCPE_CLIENTBOUND_ATTRIBUTE_LAYER_SYNC">
+		<field name="Payload" type="AttributeLayerSyncData" />
 	</pdu>
 
 	<!-- Protocol v960-v975 (Bedrock 1.26.20). -->

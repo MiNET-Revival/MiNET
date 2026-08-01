@@ -27,47 +27,21 @@ namespace MiNET.Net
 {
 	public partial class McpeBossEvent
 	{
-		public ushort darkenScreen;
 		public string title;
 		public string filteredTitle;
 		public float healthPercent;
 		public long playerId;
-		public uint color = 0xff00ff00;
-		public uint overlay = 0xff00ff00;
+		public byte color;
+		public byte overlay;
 
 		partial void AfterEncode()
 		{
-			switch ((McpeBossEvent.Type)eventType)
-			{
-				case Type.AddPlayer:
-				case Type.RemovePlayer:
-					WriteSignedVarLong(playerId);
-					break;
-
-				case Type.UpdateProgress:
-					Write(healthPercent);
-					break;
-
-				case Type.UpdateName:
-					Write(title);
-					Write(filteredTitle);
-					break;
-				case Type.AddBoss:
-					Write(title);
-					Write(filteredTitle);
-					Write(healthPercent);
-					goto case Type.UpdateOptions;
-				case Type.UpdateOptions:
-					Write(darkenScreen);
-					goto case Type.UpdateStyle;
-				case Type.UpdateStyle:
-					WriteUnsignedVarInt(color);
-					WriteUnsignedVarInt(overlay);
-					break;
-				case Type.Query:
-					WriteEntityId(playerId);
-					break;
-			}
+			WriteSignedVarLong(playerId);
+			Write(title ?? string.Empty);
+			Write(filteredTitle ?? string.Empty);
+			Write(healthPercent);
+			Write(color);
+			Write(overlay);
 		}
 
 		public override void Reset()
@@ -77,42 +51,12 @@ namespace MiNET.Net
 
 		partial void AfterDecode()
 		{
-			switch ((McpeBossEvent.Type) eventType)
-			{
-				case Type.AddPlayer:
-				case Type.RemovePlayer:
-					// Entity Unique ID
-					playerId = ReadSignedVarLong();
-					break;
-				case Type.UpdateProgress:
-					// float
-					healthPercent = ReadFloat();
-					break;
-				case Type.UpdateName:
-					// string
-					title = ReadString();
-					filteredTitle = ReadString();
-					break;
-				case Type.AddBoss:
-					// string
-					title = ReadString();
-					filteredTitle = ReadString();
-					// float
-					healthPercent = ReadFloat();
-					goto case Type.UpdateOptions;
-				case Type.UpdateOptions:
-					// ushort?
-					 darkenScreen = ReadUshort();
-					goto case Type.UpdateStyle;
-				case Type.UpdateStyle:
-					// NOOP
-					color = ReadUnsignedVarInt();
-					overlay = ReadUnsignedVarInt();
-					break;
-				case Type.Query:
-					playerId = ReadSignedVarLong();
-					break;
-			}
+			playerId = ReadSignedVarLong();
+			title = ReadString();
+			filteredTitle = ReadString();
+			healthPercent = ReadFloat();
+			color = ReadByte();
+			overlay = ReadByte();
 		}
 	}
 }

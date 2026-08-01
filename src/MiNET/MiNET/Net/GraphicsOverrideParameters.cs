@@ -38,9 +38,10 @@ namespace MiNET.Net
 	public sealed class GraphicsOverrideParameters : IPacketDataObject
 	{
 		public List<GraphicsParameterKeyframe> Values { get; } = new();
-		public float FloatValue { get; set; }
-		public Vector3 VectorValue { get; set; }
+		public float? FloatValue { get; set; }
+		public Vector3? VectorValue { get; set; }
 		public string BiomeIdentifier { get; set; } = string.Empty;
+		public string PlayerIdentifier { get; set; }
 		public GraphicsOverrideParameterType ParameterType { get; set; }
 		public bool Reset { get; set; }
 
@@ -53,9 +54,13 @@ namespace MiNET.Net
 				packet.Write(value.Value);
 			}
 
-			packet.Write(FloatValue);
-			packet.Write(VectorValue);
+			packet.Write(FloatValue.HasValue);
+			if (FloatValue.HasValue) packet.Write(FloatValue.Value);
+			packet.Write(VectorValue.HasValue);
+			if (VectorValue.HasValue) packet.Write(VectorValue.Value);
 			packet.Write(BiomeIdentifier);
+			packet.Write(PlayerIdentifier != null);
+			if (PlayerIdentifier != null) packet.Write(PlayerIdentifier);
 			packet.Write((byte) ParameterType);
 			packet.Write(Reset);
 		}
@@ -69,9 +74,10 @@ namespace MiNET.Net
 				parameters.Values.Add(new GraphicsParameterKeyframe(packet.ReadFloat(), packet.ReadVector3()));
 			}
 
-			parameters.FloatValue = packet.ReadFloat();
-			parameters.VectorValue = packet.ReadVector3();
+			parameters.FloatValue = packet.ReadBool() ? packet.ReadFloat() : null;
+			parameters.VectorValue = packet.ReadBool() ? packet.ReadVector3() : null;
 			parameters.BiomeIdentifier = packet.ReadString();
+			parameters.PlayerIdentifier = packet.ReadBool() ? packet.ReadString() : null;
 			parameters.ParameterType = (GraphicsOverrideParameterType) packet.ReadByte();
 			parameters.Reset = packet.ReadBool();
 			return parameters;

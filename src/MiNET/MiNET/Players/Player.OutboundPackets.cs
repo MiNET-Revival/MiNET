@@ -32,7 +32,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Numerics;
-using System.Threading;
 using fNbt;
 using log4net;
 using MiNET.BlockEntities;
@@ -97,8 +96,6 @@ namespace MiNET.Players
 			inventoryContent.input = Inventory.GetSlots();
 			inventoryContent.containerName = new FullContainerName { ContainerId = ContainerId.AnvilInput };
 			SendPacket(inventoryContent);
-			Log.Warn("Protocol v1001 inventory checkpoint: sent main InventoryContent");
-			Thread.Sleep(500);
 
 			SendPlayerArmor();
 
@@ -107,16 +104,12 @@ namespace MiNET.Players
 			uiContent.input = Inventory.UiInventory.GetSlots();
 			uiContent.containerName = new FullContainerName { ContainerId = ContainerId.AnvilInput };
 			SendPacket(uiContent);
-			Log.Warn("Protocol v1001 inventory checkpoint: sent UI InventoryContent");
-			Thread.Sleep(500);
 
 			var offHandContent = McpeInventoryContent.CreateObject();
 			offHandContent.inventoryId = (byte) WindowId.Offhand;
 			offHandContent.input = Inventory.GetOffHand();
 			offHandContent.containerName = new FullContainerName { ContainerId = ContainerId.AnvilInput };
 			SendPacket(offHandContent);
-			Log.Warn("Protocol v1001 inventory checkpoint: sent offhand InventoryContent");
-			Thread.Sleep(500);
 
 			var mobEquipment = McpeMobEquipment.CreateObject();
 			mobEquipment.runtimeEntityId = EntityManager.EntityIdSelf;
@@ -124,8 +117,6 @@ namespace MiNET.Players
 			mobEquipment.slot = (byte) Inventory.InHandSlot;
 			mobEquipment.selectedSlot = (byte) Inventory.InHandSlot;
 			SendPacket(mobEquipment);
-			Log.Warn("Protocol v1001 inventory checkpoint: sent MobEquipment");
-			Thread.Sleep(500);
 		}
 
 		public virtual void SendPlayerArmor()
@@ -135,8 +126,6 @@ namespace MiNET.Players
 			armorContent.input = Inventory.GetArmor();
 			armorContent.containerName = new FullContainerName { ContainerId = ContainerId.AnvilInput };
 			SendPacket(armorContent);
-			Log.Warn("Protocol v1001 inventory checkpoint: sent armor InventoryContent");
-			Thread.Sleep(500);
 		}
 
 		public virtual void SendCraftingRecipes()

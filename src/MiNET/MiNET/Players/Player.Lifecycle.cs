@@ -112,27 +112,18 @@ namespace MiNET.Players
 				// Vanilla 1st player list here
 
 				//Level.AddPlayer(this, false);
-				void StartupCheckpoint(string packetName)
-				{
-					Log.Warn($"Protocol v1001 startup checkpoint: sent {packetName}");
-					Thread.Sleep(500);
-				}
 
 				SendSetTime();
 
 				SendStartGame();
-				StartupCheckpoint("StartGame");
 
 				SendItemRegistry();
-				StartupCheckpoint("ItemRegistry");
 
 				SetGameMode(GameMode);
 
 				SendAvailableEntityIdentifiers();
-				StartupCheckpoint("AvailableEntityIdentifiers");
 
 				SendBiomeDefinitionList();
-				StartupCheckpoint("BiomeDefinitionList");
 
 				BroadcastSetEntityData();
 
@@ -159,19 +150,14 @@ namespace MiNET.Players
 				SendUpdateAttributes();
 
 				SendPlayerInventory();
-				StartupCheckpoint("PlayerInventory");
 
 				SendCreativeInventory();
-				StartupCheckpoint("CreativeContent");
 
 				SendCraftingRecipes();
-				StartupCheckpoint("CraftingData");
 
 				SendAvailableCommands(); // Don't send this before StartGame!
-				StartupCheckpoint("AvailableCommands");
 
 				SendNetworkChunkPublisherUpdate();
-				StartupCheckpoint("NetworkChunkPublisherUpdate");
 				MiNetServer.FastThreadPool.QueueUserWorkItem(SendChunksForKnownPosition);
 			}
 			catch (Exception e)
