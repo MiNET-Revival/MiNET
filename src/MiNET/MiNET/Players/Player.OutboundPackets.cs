@@ -95,22 +95,28 @@ namespace MiNET.Players
 			var inventoryContent = McpeInventoryContent.CreateObject();
 			inventoryContent.inventoryId = (byte) WindowId.Inventory;
 			inventoryContent.input = Inventory.GetSlots();
-			inventoryContent.containerName = FullContainerName.Unknown;
+			inventoryContent.containerName = new FullContainerName { ContainerId = ContainerId.AnvilInput };
 			SendPacket(inventoryContent);
+			Log.Warn("Protocol v1001 inventory checkpoint: sent main InventoryContent");
+			Thread.Sleep(500);
 
 			SendPlayerArmor();
 
 			var uiContent = McpeInventoryContent.CreateObject();
 			uiContent.inventoryId = (byte) WindowId.UI;
 			uiContent.input = Inventory.UiInventory.GetSlots();
-			uiContent.containerName = FullContainerName.Unknown;
+			uiContent.containerName = new FullContainerName { ContainerId = ContainerId.AnvilInput };
 			SendPacket(uiContent);
+			Log.Warn("Protocol v1001 inventory checkpoint: sent UI InventoryContent");
+			Thread.Sleep(500);
 
 			var offHandContent = McpeInventoryContent.CreateObject();
 			offHandContent.inventoryId = (byte) WindowId.Offhand;
 			offHandContent.input = Inventory.GetOffHand();
-			offHandContent.containerName = FullContainerName.Unknown;
+			offHandContent.containerName = new FullContainerName { ContainerId = ContainerId.AnvilInput };
 			SendPacket(offHandContent);
+			Log.Warn("Protocol v1001 inventory checkpoint: sent offhand InventoryContent");
+			Thread.Sleep(500);
 
 			var mobEquipment = McpeMobEquipment.CreateObject();
 			mobEquipment.runtimeEntityId = EntityManager.EntityIdSelf;
@@ -118,6 +124,8 @@ namespace MiNET.Players
 			mobEquipment.slot = (byte) Inventory.InHandSlot;
 			mobEquipment.selectedSlot = (byte) Inventory.InHandSlot;
 			SendPacket(mobEquipment);
+			Log.Warn("Protocol v1001 inventory checkpoint: sent MobEquipment");
+			Thread.Sleep(500);
 		}
 
 		public virtual void SendPlayerArmor()
@@ -125,8 +133,10 @@ namespace MiNET.Players
 			var armorContent = McpeInventoryContent.CreateObject();
 			armorContent.inventoryId = (byte) WindowId.Armor;
 			armorContent.input = Inventory.GetArmor();
-			armorContent.containerName = FullContainerName.Unknown;
+			armorContent.containerName = new FullContainerName { ContainerId = ContainerId.AnvilInput };
 			SendPacket(armorContent);
+			Log.Warn("Protocol v1001 inventory checkpoint: sent armor InventoryContent");
+			Thread.Sleep(500);
 		}
 
 		public virtual void SendCraftingRecipes()

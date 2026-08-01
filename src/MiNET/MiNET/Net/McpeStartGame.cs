@@ -135,6 +135,10 @@ namespace MiNET.Net
 
 		public bool IsDisablePlayerInteractions { get; set; }
 
+		public int ServerEditorConnectionPolicy { get; set; }
+
+		public bool AllowAnonymousBlockDropsInEditorWorlds { get; set; }
+
 		public string ServerIdentifier { get; set; }
 
 		public string WorldIdentifier { get; set; }
@@ -199,6 +203,8 @@ namespace MiNET.Net
 			packet.Write(ExperimentalGameplayOverride);
 			packet.Write(ChatRestrictionLevel);
 			packet.Write(IsDisablePlayerInteractions);
+			packet.WriteSignedVarInt(ServerEditorConnectionPolicy);
+			packet.Write(AllowAnonymousBlockDropsInEditorWorlds);
 		}
 
 		public static LevelSettings Read(Packet packet)
@@ -255,6 +261,8 @@ namespace MiNET.Net
 				ExperimentalGameplayOverride = packet.ReadBool(),
 				ChatRestrictionLevel = packet.ReadByte(),
 				IsDisablePlayerInteractions = packet.ReadBool(),
+				ServerEditorConnectionPolicy = packet.ReadSignedVarInt(),
+				AllowAnonymousBlockDropsInEditorWorlds = packet.ReadBool(),
 			};
 		}
 	}
@@ -302,6 +310,7 @@ namespace MiNET.Net
 		public bool clientSideGenerationEnabled; // = null;
 		public bool blockNetworkIdsAreHashes; // = null;
 		public bool disableClientSounds; // = null;
+		public bool isLoggingChat; // = null;
 		public ServerJoinInformation serverJoinInformation;
 		public string serverIdentifier = string.Empty;
 		public string scenarioIdentifier = string.Empty;
@@ -344,6 +353,7 @@ namespace MiNET.Net
 			Write(clientSideGenerationEnabled);
 			Write(blockNetworkIdsAreHashes);
 			Write(disableClientSounds);
+			Write(isLoggingChat);
 			Write(serverJoinInformation != null);
 			if (serverJoinInformation != null)
 			{
@@ -406,6 +416,7 @@ namespace MiNET.Net
 			clientSideGenerationEnabled = ReadBool();
 			blockNetworkIdsAreHashes = ReadBool();
 			disableClientSounds = ReadBool();
+			isLoggingChat = ReadBool();
 			if (ReadBool())
 			{
 				serverJoinInformation = new ServerJoinInformation();
@@ -454,6 +465,7 @@ namespace MiNET.Net
 			clientSideGenerationEnabled=default(bool);
 			blockNetworkIdsAreHashes=default(bool);
 			disableClientSounds=default(bool);
+			isLoggingChat=default(bool);
 			serverJoinInformation=default;
 			serverIdentifier=default;
 			scenarioIdentifier=default;

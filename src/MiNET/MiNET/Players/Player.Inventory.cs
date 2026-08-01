@@ -270,7 +270,9 @@ namespace MiNET.Players
 			{
 				case McpeInventoryTransaction.ItemUseAction.Place:
 				{
+					Log.Warn($"Protocol v1001 placement checkpoint: begin position={transaction.Position}, face={transaction.Face}, slot={transaction.Slot}, serverItem={itemInHand}, clientItem={transaction.Item}");
 					Level.Interact(this, itemInHand, transaction.Position, (BlockFace) transaction.Face, transaction.ClickPosition);
+					Log.Warn("Protocol v1001 placement checkpoint: Level.Interact completed");
 					break;
 				}
 				case McpeInventoryTransaction.ItemUseAction.Use:
@@ -290,7 +292,9 @@ namespace MiNET.Players
 				}
 			}
 
+			Log.Warn($"Protocol v1001 transaction checkpoint: applying {transaction.TransactionRecords.Count} records");
 			HandleTransactionRecords(transaction.TransactionRecords);
+			Log.Warn("Protocol v1001 transaction checkpoint: records applied");
 		}
 
 		protected virtual void HandleNormalTransaction(NormalTransaction transaction)

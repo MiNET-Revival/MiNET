@@ -406,7 +406,7 @@ namespace MiNET.Players
 		{
 			var packet = McpeLevelSoundEvent.CreateObject();
 			packet.position = position;
-			packet.soundId = (uint) sound;
+			packet.soundId = sound.GetSerializedName();
 			packet.blockId = blockId;
 			SendPacket(packet);
 		}

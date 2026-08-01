@@ -70,7 +70,7 @@ namespace MiNET.Worlds
 		{
 			var packet = McpeLevelSoundEvent.CreateObject();
 			packet.position = position;
-			packet.soundId = (uint) sound;
+			packet.soundId = sound.GetSerializedName();
 			packet.blockId = blockId;
 			packet.runtimeEntityId = runtimeEntityId;
 			packet.entityType = entityTypeId;

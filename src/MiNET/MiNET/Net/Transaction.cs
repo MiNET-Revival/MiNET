@@ -713,7 +713,9 @@ namespace MiNET.Net
 		{
 			packet.WriteSignedVarInt(RequestId);
 
-			if (RequestId != 0)
+			var hasLegacySlots = RequestId < -1 && (RequestId & 1) == 0;
+			packet.Write(hasLegacySlots);
+			if (hasLegacySlots)
 			{
 				packet.WriteLength(RequestRecords.Count);
 
@@ -723,10 +725,10 @@ namespace MiNET.Net
 				}
 			}
 
+			packet.Write(true); // Cereal required transaction type.
 			WriteType(packet);
 
-			//packet.Write(HasNetworkIds);
-
+			packet.Write(true); // Cereal required inventory action list.
 			packet.WriteLength(TransactionRecords.Count);
 			foreach (var record in TransactionRecords)
 			{
@@ -747,7 +749,8 @@ namespace MiNET.Net
 			var requestId = packet.ReadSignedVarInt();
 			var requestRecords = new List<RequestRecord>();
 
-			if (requestId != 0)
+			var hasLegacySlots = packet.ReadBool();
+			if (hasLegacySlots && requestId < -1 && (requestId & 1) == 0)
 			{
 				var recordsCount = packet.ReadLength();
 				for (int i = 0; i < recordsCount; i++)
@@ -756,9 +759,11 @@ namespace MiNET.Net
 				}
 			}
 
+			if (!packet.ReadBool()) throw new System.IO.InvalidDataException("Inventory transaction type is missing.");
 			var transactionType = (McpeInventoryTransaction.TransactionType) packet.ReadUnsignedVarInt();
 
 			var records = new List<TransactionRecord>();
+			if (!packet.ReadBool()) throw new System.IO.InvalidDataException("Inventory transaction actions are missing.");
 			var count = packet.ReadLength();
 			for (int i = 0; i < count; i++)
 			{
@@ -878,32 +883,34 @@ namespace MiNET.Net
 
 		protected override void WriteData(Packet packet)
 		{
-			packet.WriteUnsignedVarInt((uint) ActionType);
-			packet.WriteUnsignedVarInt((uint) TriggerType);
+			packet.WriteSignedVarInt((int) ActionType);
+			packet.Write((byte) TriggerType);
 			packet.Write(Position);
-			packet.WriteSignedVarInt(Face);
+			packet.Write((byte) Face);
 			packet.WriteSignedVarInt(Slot);
-			packet.Write(Item);
+			packet.WriteNetworkItemStackDescriptor(Item);
 			packet.Write(FromPosition);
 			packet.Write(ClickPosition);
 			packet.WriteUnsignedVarInt(BlockRuntimeId);
-			packet.WriteUnsignedVarInt((uint) ClientInteractPrediction);
+			packet.Write((byte) ClientInteractPrediction);
+			packet.Write(ClientCooldownState);
 		}
 
 		internal static ItemUseTransaction ReadData(Packet packet)
 		{
 			return new ItemUseTransaction()
 			{
-				ActionType = (McpeInventoryTransaction.ItemUseAction) packet.ReadUnsignedVarInt(),
-				TriggerType = (TriggerType) packet.ReadUnsignedVarInt(),
+				ActionType = (McpeInventoryTransaction.ItemUseAction) packet.ReadSignedVarInt(),
+				TriggerType = (TriggerType) packet.ReadByte(),
 				Position = packet.ReadBlockCoordinates(),
-				Face = packet.ReadSignedVarInt(),
+				Face = packet.ReadByte(),
 				Slot = packet.ReadSignedVarInt(),
-				Item = packet.ReadItem(),
+				Item = packet.ReadNetworkItemStackDescriptor(),
 				FromPosition = packet.ReadVector3(),
 				ClickPosition = packet.ReadVector3(),
 				BlockRuntimeId = packet.ReadUnsignedVarInt(),
-				ClientInteractPrediction = (PredictedResult) packet.ReadUnsignedVarInt()
+				ClientInteractPrediction = (PredictedResult) packet.ReadByte(),
+				ClientCooldownState = packet.ReadByte()
 			};
 		}
 	}
@@ -925,9 +932,9 @@ namespace MiNET.Net
 		protected override void WriteData(Packet packet)
 		{
 			packet.WriteRuntimeEntityId(RuntimeEntityId);
-			packet.WriteUnsignedVarInt((uint) ActionType);
+			packet.WriteSignedVarInt((int) ActionType);
 			packet.WriteSignedVarInt(Slot);
-			packet.Write(Item);
+			packet.WriteNetworkItemStackDescriptor(Item);
 			packet.Write(FromPosition);
 			packet.Write(ClickPosition);
 		}
@@ -937,9 +944,9 @@ namespace MiNET.Net
 			return new ItemUseOnEntityTransaction()
 			{
 				RuntimeEntityId = packet.ReadRuntimeEntityId(),
-				ActionType = (McpeInventoryTransaction.ItemUseOnEntityAction) packet.ReadUnsignedVarInt(),
+				ActionType = (McpeInventoryTransaction.ItemUseOnEntityAction) packet.ReadSignedVarInt(),
 				Slot = packet.ReadSignedVarInt(),
-				Item = packet.ReadItem(),
+				Item = packet.ReadNetworkItemStackDescriptor(),
 				FromPosition = packet.ReadVector3(),
 				ClickPosition = packet.ReadVector3()
 			};
@@ -960,9 +967,9 @@ namespace MiNET.Net
 
 		protected override void WriteData(Packet packet)
 		{
-			packet.WriteUnsignedVarInt((uint) ActionType);
+			packet.WriteSignedVarInt((int) ActionType);
 			packet.WriteSignedVarInt(Slot);
-			packet.Write(Item);
+			packet.WriteNetworkItemStackDescriptor(Item);
 			packet.Write(FromPosition);
 		}
 
@@ -970,9 +977,9 @@ namespace MiNET.Net
 		{
 			return new ItemReleaseTransaction()
 			{
-				ActionType = (McpeInventoryTransaction.ItemReleaseAction) packet.ReadUnsignedVarInt(),
+				ActionType = (McpeInventoryTransaction.ItemReleaseAction) packet.ReadSignedVarInt(),
 				Slot = packet.ReadSignedVarInt(),
-				Item = packet.ReadItem(),
+				Item = packet.ReadNetworkItemStackDescriptor(),
 				FromPosition = packet.ReadVector3()
 			};
 		}
@@ -992,16 +999,16 @@ namespace MiNET.Net
 		{
 			WriteData(packet);
 
-			packet.WriteVarInt(Slot);
-			packet.Write(OldItem);
-			packet.Write(NewItem);
+			packet.WriteUnsignedVarInt((uint) Slot);
+			packet.WriteNetworkItemStackDescriptor(OldItem);
+			packet.WriteNetworkItemStackDescriptor(NewItem);
 		}
 
 		protected virtual void WriteData(Packet packet) { }
 
 		public static TransactionRecord Read(Packet packet)
 		{
-			var sourceType = packet.ReadVarInt();
+			var sourceType = (int) packet.ReadUnsignedVarInt();
 
 			TransactionRecord record = (McpeInventoryTransaction.InventorySourceType) sourceType switch
 			{
@@ -1014,9 +1021,9 @@ namespace MiNET.Net
 				_ => throw new Exception($"Unknown inventory source type={sourceType}")
 			};
 
-			record.Slot = packet.ReadVarInt();
-			record.OldItem = packet.ReadItem();
-			record.NewItem = packet.ReadItem();
+			record.Slot = (int) packet.ReadUnsignedVarInt();
+			record.OldItem = packet.ReadNetworkItemStackDescriptor();
+			record.NewItem = packet.ReadNetworkItemStackDescriptor();
 
 			return record;
 		}
@@ -1028,16 +1035,20 @@ namespace MiNET.Net
 
 		protected override void WriteData(Packet packet)
 		{
-			packet.WriteVarInt((int) McpeInventoryTransaction.InventorySourceType.Container);
-			packet.WriteSignedVarInt(InventoryId);
+			packet.WriteUnsignedVarInt((int) McpeInventoryTransaction.InventorySourceType.Container);
+			packet.Write(true);
+			packet.Write(true);
+			packet.Write((byte) InventoryId);
+			packet.Write(true);
+			packet.Write(false);
 		}
 
 		internal static ContainerTransactionRecord ReadData(Packet packet)
 		{
-			return new ContainerTransactionRecord() 
-			{ 
-				InventoryId = packet.ReadSignedVarInt() 
-			};
+			var hasContainer = packet.ReadBool() && packet.ReadBool();
+			var inventoryId = hasContainer ? packet.ReadByte() : 0;
+			if (packet.ReadBool() && packet.ReadBool()) packet.ReadUnsignedVarInt();
+			return new ContainerTransactionRecord { InventoryId = inventoryId };
 		}
 	}
 
@@ -1045,11 +1056,17 @@ namespace MiNET.Net
 	{
 		protected override void WriteData(Packet packet)
 		{
-			packet.WriteVarInt((int) McpeInventoryTransaction.InventorySourceType.Global);
+			packet.WriteUnsignedVarInt((int) McpeInventoryTransaction.InventorySourceType.Global);
+			packet.Write(true);
+			packet.Write(false);
+			packet.Write(true);
+			packet.Write(false);
 		}
 
 		internal static GlobalTransactionRecord ReadData(Packet packet)
 		{
+			if (packet.ReadBool() && packet.ReadBool()) packet.ReadByte();
+			if (packet.ReadBool() && packet.ReadBool()) packet.ReadUnsignedVarInt();
 			return new GlobalTransactionRecord();
 		}
 	}
@@ -1060,16 +1077,19 @@ namespace MiNET.Net
 
 		protected override void WriteData(Packet packet)
 		{
-			packet.WriteVarInt((int) McpeInventoryTransaction.InventorySourceType.WorldInteraction);
-			packet.WriteVarInt(Flags);
+			packet.WriteUnsignedVarInt((int) McpeInventoryTransaction.InventorySourceType.WorldInteraction);
+			packet.Write(true);
+			packet.Write(false);
+			packet.Write(true);
+			packet.Write(true);
+			packet.WriteUnsignedVarInt((uint) Flags);
 		}
 
 		internal static WorldInteractionTransactionRecord ReadData(Packet packet)
 		{
-			return new WorldInteractionTransactionRecord()
-			{
-				Flags = packet.ReadVarInt()
-			};
+			if (packet.ReadBool() && packet.ReadBool()) packet.ReadByte();
+			var hasFlags = packet.ReadBool() && packet.ReadBool();
+			return new WorldInteractionTransactionRecord { Flags = hasFlags ? (int) packet.ReadUnsignedVarInt() : 0 };
 		}
 	}
 
@@ -1079,15 +1099,18 @@ namespace MiNET.Net
 
 		protected override void WriteData(Packet packet)
 		{
-			packet.WriteVarInt((int) McpeInventoryTransaction.InventorySourceType.Creative);
+			packet.WriteUnsignedVarInt((int) McpeInventoryTransaction.InventorySourceType.Creative);
+			packet.Write(true);
+			packet.Write(false);
+			packet.Write(true);
+			packet.Write(false);
 		}
 
 		internal static CreativeTransactionRecord ReadData(Packet packet)
 		{
-			return new CreativeTransactionRecord() 
-			{ 
-				InventoryId = 0x79 
-			};
+			if (packet.ReadBool() && packet.ReadBool()) packet.ReadByte();
+			if (packet.ReadBool() && packet.ReadBool()) packet.ReadUnsignedVarInt();
+			return new CreativeTransactionRecord { InventoryId = 0x79 };
 		}
 	}
 
@@ -1097,16 +1120,20 @@ namespace MiNET.Net
 
 		protected override void WriteData(Packet packet)
 		{
-			packet.WriteVarInt((int) McpeInventoryTransaction.InventorySourceType.Crafting);
-			packet.WriteVarInt((int) Action);
+			packet.WriteUnsignedVarInt((int) McpeInventoryTransaction.InventorySourceType.Crafting);
+			packet.Write(true);
+			packet.Write(true);
+			packet.Write((byte) Action);
+			packet.Write(true);
+			packet.Write(false);
 		}
 
 		internal static CraftTransactionRecord ReadData(Packet packet)
 		{
-			return new CraftTransactionRecord() 
-			{ 
-				Action = (McpeInventoryTransaction.CraftingAction) packet.ReadVarInt() 
-			};
+			var hasAction = packet.ReadBool() && packet.ReadBool();
+			var action = hasAction ? (sbyte) packet.ReadByte() : (sbyte) 0;
+			if (packet.ReadBool() && packet.ReadBool()) packet.ReadUnsignedVarInt();
+			return new CraftTransactionRecord { Action = (McpeInventoryTransaction.CraftingAction) action };
 		}
 	}
 

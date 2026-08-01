@@ -4,11 +4,44 @@ using System.Text;
 using fNbt;
 using MiNET.Items;
 using MiNET.Utils.Nbt;
+using MiNET.Utils.Vectors;
 
 namespace MiNET.Net;
 
 public abstract partial class Packet
 {
+	public void WriteFixedBlockCoordinates(BlockCoordinates coordinates)
+	{
+		Write(coordinates.X);
+		Write(coordinates.Y);
+		Write(coordinates.Z);
+	}
+
+	public BlockCoordinates ReadFixedBlockCoordinates()
+	{
+		return new BlockCoordinates(ReadInt(), ReadInt(), ReadInt());
+	}
+
+	public void WriteNetworkItemStacks(ItemStacks stacks)
+	{
+		WriteLength(stacks.Length);
+		for (var index = 0; index < stacks.Length; index++)
+		{
+			WriteNetworkItemStackDescriptor(stacks[index]);
+		}
+	}
+
+	public ItemStacks ReadNetworkItemStacks()
+	{
+		var stacks = new ItemStacks(ReadLength());
+		for (var index = 0; index < stacks.Length; index++)
+		{
+			stacks[index] = ReadNetworkItemStackDescriptor();
+		}
+
+		return stacks;
+	}
+
 	public void WriteNetworkItemStackDescriptor(Item stack)
 	{
 		var air = stack == null || stack is ItemAir;

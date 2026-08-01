@@ -285,5 +285,10 @@ namespace MiNET.Players
 		{
 			// Data-driven UI screens are not currently managed by MiNET.
 		}
+
+		public virtual void HandleMcpePartyDestinationCookieResponse(McpePartyDestinationCookieResponse message)
+		{
+			// Party destination hand-off is not currently managed by MiNET.
+		}
 	}
 }
