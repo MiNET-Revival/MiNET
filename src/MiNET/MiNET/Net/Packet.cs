@@ -1019,6 +1019,16 @@ namespace MiNET.Net
 			return GraphicsOverrideParameters.Read(this);
 		}
 
+		public ServerboundDiagnosticsTail ReadServerboundDiagnosticsTail()
+		{
+			return ServerboundDiagnosticsTail.Read(this);
+		}
+
+		public AttributeLayerSyncData ReadAttributeLayerSyncData()
+		{
+			return AttributeLayerSyncData.Read(this);
+		}
+
 		public DataStoreEntries ReadDataStoreEntries()
 		{
 			return DataStoreEntries.Read(this);

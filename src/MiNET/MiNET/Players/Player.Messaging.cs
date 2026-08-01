@@ -384,7 +384,7 @@ namespace MiNET.Players
 		{
 			Log.Debug($"BossEvent: bossEntityId={message.bossEntityId}, eventType={message.eventType}, " +
 				$"playerId={message.playerId}, title={message.title}, " +
-				$"unknown6={message.darkenScreen}, healthPercent={message.healthPercent}, " +
+				$"healthPercent={message.healthPercent}, " +
 				$"overlay={message.overlay}, color={message.color}");
 		}
 

@@ -311,6 +311,12 @@ foreach (XmlNode pdu in doc.SelectNodes("//pdu"))
 				case "NetworkItemStackDescriptor":
 					WriteLine($"WriteNetworkItemStackDescriptor({codedFieldName}{optionalValuePart});");
 					break;
+				case "NetworkItemStacks":
+					WriteLine($"WriteNetworkItemStacks({codedFieldName}{optionalValuePart});");
+					break;
+				case "FixedBlockCoordinates":
+					WriteLine($"WriteFixedBlockCoordinates({codedFieldName}{optionalValuePart});");
+					break;
 				default:
 					WriteLine($"Write({codedFieldName}{optionalValuePart});");
 					break;
@@ -384,6 +390,12 @@ foreach (XmlNode pdu in doc.SelectNodes("//pdu"))
 					break;
 				case "NetworkItemStackDescriptor":
 					WriteLine($"{codedFieldName} = ReadNetworkItemStackDescriptor();");
+					break;
+				case "NetworkItemStacks":
+					WriteLine($"{codedFieldName} = ReadNetworkItemStacks();");
+					break;
+				case "FixedBlockCoordinates":
+					WriteLine($"{codedFieldName} = ReadFixedBlockCoordinates();");
 					break;
 				default:
 					WriteLine($"{codedFieldName} = Read{UpperInitial(field.Attributes["type"].Value)}({safeToString});");
@@ -537,6 +549,10 @@ private string GetFieldType(string formatFieldType)
 			return "string";
 		case "NetworkItemStackDescriptor":
 			return "Item";
+		case "NetworkItemStacks":
+			return "ItemStacks";
+		case "FixedBlockCoordinates":
+			return "BlockCoordinates";
 		default:
 			return formatFieldType;
 	}

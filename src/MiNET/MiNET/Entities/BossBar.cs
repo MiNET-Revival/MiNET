@@ -102,7 +102,7 @@ namespace MiNET.Entities
 
 			var bossEvent = McpeBossEvent.CreateObject();
 			bossEvent.bossEntityId = EntityId;
-			bossEvent.eventType = (uint) (IsVisible ? 0 : 2);
+			bossEvent.eventType = (byte) (IsVisible ? 0 : 2);
 			bossEvent.title = NameTag;
 			bossEvent.healthPercent = (float)Progress / MaxProgress;
 			Level?.RelayBroadcast(players, bossEvent);

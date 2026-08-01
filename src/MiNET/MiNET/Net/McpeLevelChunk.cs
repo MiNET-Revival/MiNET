@@ -113,17 +113,16 @@ namespace MiNET.Net
 		partial void AfterEncode()
 		{
 			WriteUnsignedVarInt((uint) hashMisses.Length);
-			WriteUnsignedVarInt((uint) hashHits.Length);
 			WriteSpecial(hashMisses);
+			WriteUnsignedVarInt((uint) hashHits.Length);
 			WriteSpecial(hashHits);
 		}
 
 		partial void AfterDecode()
 		{
 			var lenMisses = ReadUnsignedVarInt();
-			var lenHits = ReadUnsignedVarInt();
-
 			hashMisses = ReadUlongsSpecial(lenMisses);
+			var lenHits = ReadUnsignedVarInt();
 			hashHits = ReadUlongsSpecial(lenHits);
 		}
 

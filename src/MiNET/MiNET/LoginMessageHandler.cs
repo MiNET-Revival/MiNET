@@ -899,6 +899,10 @@ namespace MiNET
 		{
 		}
 
+		public void HandleMcpePartyDestinationCookieResponse(McpePartyDestinationCookieResponse message)
+		{
+		}
+
 		public void HandleMcpeEmoteList(McpeEmoteList message)
 		{
 		}

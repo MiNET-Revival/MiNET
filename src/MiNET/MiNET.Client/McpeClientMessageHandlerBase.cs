@@ -829,6 +829,14 @@ namespace MiNET.Client
 		{
 		}
 
+		public virtual void HandleMcpeClientboundUpdateSoundData(McpeClientboundUpdateSoundData message)
+		{
+		}
+
+		public virtual void HandleMcpeSendPartyDestinationCookie(McpeSendPartyDestinationCookie message)
+		{
+		}
+
 		public void HandleMcpeServerboundLoadingScreen(McpeServerboundLoadingScreen message)
 		{
 			

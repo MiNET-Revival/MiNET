@@ -32,7 +32,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Numerics;
-using System.Threading;
 using fNbt;
 using log4net;
 using MiNET.BlockEntities;
@@ -95,7 +94,7 @@ namespace MiNET.Players
 			var inventoryContent = McpeInventoryContent.CreateObject();
 			inventoryContent.inventoryId = (byte) WindowId.Inventory;
 			inventoryContent.input = Inventory.GetSlots();
-			inventoryContent.containerName = FullContainerName.Unknown;
+			inventoryContent.containerName = new FullContainerName { ContainerId = ContainerId.AnvilInput };
 			SendPacket(inventoryContent);
 
 			SendPlayerArmor();
@@ -103,13 +102,13 @@ namespace MiNET.Players
 			var uiContent = McpeInventoryContent.CreateObject();
 			uiContent.inventoryId = (byte) WindowId.UI;
 			uiContent.input = Inventory.UiInventory.GetSlots();
-			uiContent.containerName = FullContainerName.Unknown;
+			uiContent.containerName = new FullContainerName { ContainerId = ContainerId.AnvilInput };
 			SendPacket(uiContent);
 
 			var offHandContent = McpeInventoryContent.CreateObject();
 			offHandContent.inventoryId = (byte) WindowId.Offhand;
 			offHandContent.input = Inventory.GetOffHand();
-			offHandContent.containerName = FullContainerName.Unknown;
+			offHandContent.containerName = new FullContainerName { ContainerId = ContainerId.AnvilInput };
 			SendPacket(offHandContent);
 
 			var mobEquipment = McpeMobEquipment.CreateObject();
@@ -125,7 +124,7 @@ namespace MiNET.Players
 			var armorContent = McpeInventoryContent.CreateObject();
 			armorContent.inventoryId = (byte) WindowId.Armor;
 			armorContent.input = Inventory.GetArmor();
-			armorContent.containerName = FullContainerName.Unknown;
+			armorContent.containerName = new FullContainerName { ContainerId = ContainerId.AnvilInput };
 			SendPacket(armorContent);
 		}
 

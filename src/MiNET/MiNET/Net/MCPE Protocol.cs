@@ -1,4 +1,4 @@
-﻿#region LICENSE
+#region LICENSE
 
 // The contents of this file are subject to the Common Public Attribution// The contents of this file are subject to the Common Public Attribution
 // License Version 1.0. (the "License"); you may not use this file except in
@@ -45,8 +45,8 @@ namespace MiNET.Net
 {
 	public class McpeProtocolInfo
 	{
-		public const int ProtocolVersion = 975;
-		public const string GameVersion = "1.26.20";
+		public const int ProtocolVersion = 1001;
+		public const string GameVersion = "1.26.30";
 	}
 
 	public interface IMcpeMessageHandler
@@ -118,6 +118,7 @@ namespace MiNET.Net
 		void HandleMcpeResourcePacksReadyForValidation(McpeResourcePacksReadyForValidation message);
 		void HandleMcpePartyChanged(McpePartyChanged message);
 		void HandleMcpeServerboundDataDrivenScreenClosed(McpeServerboundDataDrivenScreenClosed message);
+		void HandleMcpePartyDestinationCookieResponse(McpePartyDestinationCookieResponse message);
 	}
 
 	public interface IMcpeClientMessageHandler
@@ -284,6 +285,8 @@ namespace MiNET.Net
 		void HandleMcpeClientboundAttributeLayerSync(McpeClientboundAttributeLayerSync message);
 		void HandleMcpeServerStoreInfo(McpeServerStoreInfo message);
 		void HandleMcpeServerPresenceInfo(McpeServerPresenceInfo message);
+		void HandleMcpeClientboundUpdateSoundData(McpeClientboundUpdateSoundData message);
+		void HandleMcpeSendPartyDestinationCookie(McpeSendPartyDestinationCookie message);
 		void HandleMcpeAlexEntityAnimation(McpeAlexEntityAnimation message);
 		void HandleFtlCreatePlayer(FtlCreatePlayer message);
 	}
@@ -787,6 +790,12 @@ namespace MiNET.Net
 				case McpeServerPresenceInfo msg:
 					_messageHandler.HandleMcpeServerPresenceInfo(msg);
 					break;
+				case McpeClientboundUpdateSoundData msg:
+					_messageHandler.HandleMcpeClientboundUpdateSoundData(msg);
+					break;
+				case McpeSendPartyDestinationCookie msg:
+					_messageHandler.HandleMcpeSendPartyDestinationCookie(msg);
+					break;
 				case McpeAlexEntityAnimation msg:
 					_messageHandler.HandleMcpeAlexEntityAnimation(msg);
 					break;
@@ -1242,6 +1251,12 @@ namespace MiNET.Net
 						return McpeServerStoreInfo.CreateObject().Decode(buffer);
 					case 0x15b:
 						return McpeServerPresenceInfo.CreateObject().Decode(buffer);
+					case 0x15c:
+						return McpeClientboundUpdateSoundData.CreateObject().Decode(buffer);
+					case 0x15d:
+						return McpeSendPartyDestinationCookie.CreateObject().Decode(buffer);
+					case 0x15e:
+						return McpePartyDestinationCookieResponse.CreateObject().Decode(buffer);
 					case 0xe0:
 						return McpeAlexEntityAnimation.CreateObject().Decode(buffer);
 				}
@@ -4085,11 +4100,11 @@ namespace MiNET.Net
 			BeforeEncode();
 
 			WriteUnsignedVarLong(runtimeEntityId);
-			Write(helmet);
-			Write(chestplate);
-			Write(leggings);
-			Write(boots);
-			Write(body);
+			WriteNetworkItemStackDescriptor(helmet);
+			WriteNetworkItemStackDescriptor(chestplate);
+			WriteNetworkItemStackDescriptor(leggings);
+			WriteNetworkItemStackDescriptor(boots);
+			WriteNetworkItemStackDescriptor(body);
 
 			AfterEncode();
 		}
@@ -4104,11 +4119,11 @@ namespace MiNET.Net
 			BeforeDecode();
 
 			runtimeEntityId = ReadUnsignedVarLong();
-			helmet = ReadItem();
-			chestplate = ReadItem();
-			leggings = ReadItem();
-			boots = ReadItem();
-			body = ReadItem();
+			helmet = ReadNetworkItemStackDescriptor();
+			chestplate = ReadNetworkItemStackDescriptor();
+			leggings = ReadNetworkItemStackDescriptor();
+			boots = ReadNetworkItemStackDescriptor();
+			body = ReadNetworkItemStackDescriptor();
 
 			AfterDecode();
 		}
@@ -5048,9 +5063,9 @@ namespace MiNET.Net
 			BeforeEncode();
 
 			WriteUnsignedVarInt(inventoryId);
-			Write(input);
+			WriteNetworkItemStacks(input);
 			Write(containerName);
-			Write(storage);
+			WriteNetworkItemStackDescriptor(storage);
 
 			AfterEncode();
 		}
@@ -5065,9 +5080,9 @@ namespace MiNET.Net
 			BeforeDecode();
 
 			inventoryId = ReadUnsignedVarInt();
-			input = ReadItemStacks();
+			input = ReadNetworkItemStacks();
 			containerName = ReadFullContainerName();
-			storage = ReadItem();
+			storage = ReadNetworkItemStackDescriptor();
 
 			AfterDecode();
 		}
@@ -6300,7 +6315,7 @@ namespace MiNET.Net
 		}
 
 		public long bossEntityId;
-		public uint eventType;
+		public byte eventType;
 
 		public McpeBossEvent()
 		{
@@ -6315,7 +6330,7 @@ namespace MiNET.Net
 			BeforeEncode();
 
 			WriteSignedVarLong(bossEntityId);
-			WriteUnsignedVarInt(eventType);
+			Write(eventType);
 
 			AfterEncode();
 		}
@@ -6330,7 +6345,7 @@ namespace MiNET.Net
 			BeforeDecode();
 
 			bossEntityId = ReadSignedVarLong();
-			eventType = ReadUnsignedVarInt();
+			eventType = ReadByte();
 
 			AfterDecode();
 		}
@@ -8870,7 +8885,7 @@ namespace MiNET.Net
 	public partial class McpeLevelSoundEvent : Packet<McpeLevelSoundEvent>
 	{
 
-		public uint soundId;
+		public string soundId;
 		public Vector3 position;
 		public int blockId;
 		public string entityType;
@@ -8891,7 +8906,7 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
-			WriteUnsignedVarInt(soundId);
+			Write(soundId);
 			Write(position);
 			WriteSignedVarInt(blockId);
 			Write(entityType);
@@ -8916,7 +8931,7 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
-			soundId = ReadUnsignedVarInt();
+			soundId = ReadString();
 			position = ReadVector3();
 			blockId = ReadSignedVarInt();
 			entityType = ReadString();
@@ -10310,8 +10325,8 @@ namespace MiNET.Net
 	{
 
 		public int dimension;
-		public BlockCoordinates basePosition;
 		public SubChunkPositionOffset[] offsets;
+		public BlockCoordinates basePosition;
 
 		public McpeSubChunkRequestPacket()
 		{
@@ -10326,8 +10341,8 @@ namespace MiNET.Net
 			BeforeEncode();
 
 			WriteVarInt(dimension);
-			Write(basePosition);
 			Write(offsets);
+			WriteFixedBlockCoordinates(basePosition);
 
 			AfterEncode();
 		}
@@ -10342,8 +10357,8 @@ namespace MiNET.Net
 			BeforeDecode();
 
 			dimension = ReadVarInt();
-			basePosition = ReadBlockCoordinates();
 			offsets = ReadSubChunkPositionOffsets();
+			basePosition = ReadFixedBlockCoordinates();
 
 			AfterDecode();
 		}
@@ -10356,8 +10371,8 @@ namespace MiNET.Net
 			base.ResetPacket();
 
 			dimension = default;
-			basePosition = default;
 			offsets = default;
+			basePosition = default;
 		}
 
 	}
@@ -11306,6 +11321,7 @@ namespace MiNET.Net
 		public float avgEndFrameTimeMs;
 		public float avgRemainderTimePercent;
 		public float avgUnaccountedTimePercent;
+		public ServerboundDiagnosticsTail diagnosticsTail;
 
 		public McpeServerboundDiagnostics()
 		{
@@ -11328,6 +11344,7 @@ namespace MiNET.Net
 			Write(avgEndFrameTimeMs);
 			Write(avgRemainderTimePercent);
 			Write(avgUnaccountedTimePercent);
+			Write(diagnosticsTail);
 
 			AfterEncode();
 		}
@@ -11350,6 +11367,7 @@ namespace MiNET.Net
 			avgEndFrameTimeMs = ReadFloat();
 			avgRemainderTimePercent = ReadFloat();
 			avgUnaccountedTimePercent = ReadFloat();
+			diagnosticsTail = ReadServerboundDiagnosticsTail();
 
 			AfterDecode();
 		}
@@ -11370,6 +11388,7 @@ namespace MiNET.Net
 			avgEndFrameTimeMs = default;
 			avgRemainderTimePercent = default;
 			avgUnaccountedTimePercent = default;
+			diagnosticsTail = default;
 		}
 
 	}
@@ -12790,6 +12809,7 @@ namespace MiNET.Net
 	public partial class McpeClientboundAttributeLayerSync : Packet<McpeClientboundAttributeLayerSync>
 	{
 
+		public AttributeLayerSyncData payload;
 
 		public McpeClientboundAttributeLayerSync()
 		{
@@ -12803,6 +12823,7 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
+			Write(payload);
 
 			AfterEncode();
 		}
@@ -12816,6 +12837,7 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
+			payload = ReadAttributeLayerSyncData();
 
 			AfterDecode();
 		}
@@ -12827,6 +12849,7 @@ namespace MiNET.Net
 		{
 			base.ResetPacket();
 
+			payload = default;
 		}
 
 	}
@@ -12886,8 +12909,8 @@ namespace MiNET.Net
 	public partial class McpeServerPresenceInfo : Packet<McpeServerPresenceInfo>
 	{
 
-		public string experienceName;
-		public string worldName;
+		public string? experienceName;
+		public string? worldName;
 
 		public McpeServerPresenceInfo()
 		{
@@ -12901,8 +12924,16 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
-			Write(experienceName);
-			Write(worldName);
+			Write(experienceName != null); // is optional
+			if (experienceName != null)
+			{
+				Write(experienceName);
+			}
+			Write(worldName != null); // is optional
+			if (worldName != null)
+			{
+				Write(worldName);
+			}
 
 			AfterEncode();
 		}
@@ -12916,8 +12947,14 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
-			experienceName = ReadString();
-			worldName = ReadString();
+			if (ReadBool())
+			{
+				experienceName = ReadString();
+			}
+			if (ReadBool())
+			{
+				worldName = ReadString();
+			}
 
 			AfterDecode();
 		}
@@ -12931,6 +12968,166 @@ namespace MiNET.Net
 
 			experienceName = default;
 			worldName = default;
+		}
+
+	}
+
+	public partial class McpeClientboundUpdateSoundData : Packet<McpeClientboundUpdateSoundData>
+	{
+
+		public long serverSoundHandle;
+		public string soundType;
+
+		public McpeClientboundUpdateSoundData()
+		{
+			Id = 0x15c;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(serverSoundHandle);
+			Write(soundType);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			serverSoundHandle = ReadLong();
+			soundType = ReadString();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			serverSoundHandle = default;
+			soundType = default;
+		}
+
+	}
+
+	public partial class McpeSendPartyDestinationCookie : Packet<McpeSendPartyDestinationCookie>
+	{
+
+		public string cookie;
+		public string intent;
+		public string destinationName;
+
+		public McpeSendPartyDestinationCookie()
+		{
+			Id = 0x15d;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(cookie);
+			Write(intent);
+			Write(destinationName);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			cookie = ReadString();
+			intent = ReadString();
+			destinationName = ReadString();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			cookie = default;
+			intent = default;
+			destinationName = default;
+		}
+
+	}
+
+	public partial class McpePartyDestinationCookieResponse : Packet<McpePartyDestinationCookieResponse>
+	{
+
+		public string cookie;
+		public bool accepted;
+
+		public McpePartyDestinationCookieResponse()
+		{
+			Id = 0x15e;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(cookie);
+			Write(accepted);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			cookie = ReadString();
+			accepted = ReadBool();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			cookie = default;
+			accepted = default;
 		}
 
 	}
