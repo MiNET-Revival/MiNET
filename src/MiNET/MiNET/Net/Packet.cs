@@ -560,13 +560,13 @@ namespace MiNET.Net
 		public void Write(BlockCoordinates coord)
 		{
 			WriteSignedVarInt(coord.X);
-			WriteUnsignedVarInt((uint) coord.Y);
+			WriteSignedVarInt(coord.Y);
 			WriteSignedVarInt(coord.Z);
 		}
 
 		public BlockCoordinates ReadBlockCoordinates()
 		{
-			return new BlockCoordinates(ReadSignedVarInt(), (int) ReadUnsignedVarInt(), ReadSignedVarInt());
+			return new BlockCoordinates(ReadSignedVarInt(), ReadSignedVarInt(), ReadSignedVarInt());
 		}
 
 		public PlayerRecords ReadPlayerRecords()

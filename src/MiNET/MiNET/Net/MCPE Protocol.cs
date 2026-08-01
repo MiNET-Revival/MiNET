@@ -1,4 +1,4 @@
-#region LICENSE
+﻿#region LICENSE
 
 // The contents of this file are subject to the Common Public Attribution// The contents of this file are subject to the Common Public Attribution
 // License Version 1.0. (the "License"); you may not use this file except in
@@ -45,8 +45,8 @@ namespace MiNET.Net
 {
 	public class McpeProtocolInfo
 	{
-		public const int ProtocolVersion = 944;
-		public const string GameVersion = "1.26.10";
+		public const int ProtocolVersion = 975;
+		public const string GameVersion = "1.26.20";
 	}
 
 	public interface IMcpeMessageHandler
@@ -282,6 +282,8 @@ namespace MiNET.Net
 		void HandleMcpeLocatorBar(McpeLocatorBar message);
 		void HandleMcpeSyncWorldClocks(McpeSyncWorldClocks message);
 		void HandleMcpeClientboundAttributeLayerSync(McpeClientboundAttributeLayerSync message);
+		void HandleMcpeServerStoreInfo(McpeServerStoreInfo message);
+		void HandleMcpeServerPresenceInfo(McpeServerPresenceInfo message);
 		void HandleMcpeAlexEntityAnimation(McpeAlexEntityAnimation message);
 		void HandleFtlCreatePlayer(FtlCreatePlayer message);
 	}
@@ -779,6 +781,12 @@ namespace MiNET.Net
 				case McpeClientboundAttributeLayerSync msg:
 					_messageHandler.HandleMcpeClientboundAttributeLayerSync(msg);
 					break;
+				case McpeServerStoreInfo msg:
+					_messageHandler.HandleMcpeServerStoreInfo(msg);
+					break;
+				case McpeServerPresenceInfo msg:
+					_messageHandler.HandleMcpeServerPresenceInfo(msg);
+					break;
 				case McpeAlexEntityAnimation msg:
 					_messageHandler.HandleMcpeAlexEntityAnimation(msg);
 					break;
@@ -1230,6 +1238,10 @@ namespace MiNET.Net
 						return McpeSyncWorldClocks.CreateObject().Decode(buffer);
 					case 0x159:
 						return McpeClientboundAttributeLayerSync.CreateObject().Decode(buffer);
+					case 0x15a:
+						return McpeServerStoreInfo.CreateObject().Decode(buffer);
+					case 0x15b:
+						return McpeServerPresenceInfo.CreateObject().Decode(buffer);
 					case 0xe0:
 						return McpeAlexEntityAnimation.CreateObject().Decode(buffer);
 				}
@@ -3451,7 +3463,8 @@ namespace MiNET.Net
 			Neighbors = 1,
 			Network = 2,
 			Nographic = 4,
-			Priority = 8,
+			Unused = 8,
+			Priority = 16,
 			All = (Neighbors | Network),
 			AllPriority = (All | Priority),
 		}
@@ -3695,6 +3708,7 @@ namespace MiNET.Net
 		public long runtimeEntityId;
 		public byte eventId;
 		public int data;
+		public Vector3? fireAtPosition;
 
 		public McpeEntityEvent()
 		{
@@ -3711,6 +3725,11 @@ namespace MiNET.Net
 			WriteUnsignedVarLong(runtimeEntityId);
 			Write(eventId);
 			WriteSignedVarInt(data);
+			Write(fireAtPosition.HasValue); // is optional
+			if (fireAtPosition.HasValue)
+			{
+				Write(fireAtPosition.Value);
+			}
 
 			AfterEncode();
 		}
@@ -3727,6 +3746,10 @@ namespace MiNET.Net
 			runtimeEntityId = ReadUnsignedVarLong();
 			eventId = ReadByte();
 			data = ReadSignedVarInt();
+			if (ReadBool())
+			{
+				fireAtPosition = ReadVector3();
+			}
 
 			AfterDecode();
 		}
@@ -3741,6 +3764,7 @@ namespace MiNET.Net
 			runtimeEntityId = default;
 			eventId = default;
 			data = default;
+			fireAtPosition = default;
 		}
 
 	}
@@ -3996,7 +4020,7 @@ namespace MiNET.Net
 			BeforeEncode();
 
 			WriteUnsignedVarLong(runtimeEntityId);
-			Write(item);
+			WriteNetworkItemStackDescriptor(item);
 			Write(slot);
 			Write(selectedSlot);
 			Write(windowsId);
@@ -4014,7 +4038,7 @@ namespace MiNET.Net
 			BeforeDecode();
 
 			runtimeEntityId = ReadUnsignedVarLong();
-			item = ReadItem();
+			item = ReadNetworkItemStackDescriptor();
 			slot = ReadByte();
 			selectedSlot = ReadByte();
 			windowsId = ReadByte();
@@ -5068,8 +5092,8 @@ namespace MiNET.Net
 
 		public uint inventoryId;
 		public uint slot;
-		public FullContainerName containerName;
-		public Item storage;
+		public FullContainerName? containerName;
+		public Item? storage;
 		public Item item;
 
 		public McpeInventorySlot()
@@ -5086,9 +5110,17 @@ namespace MiNET.Net
 
 			WriteUnsignedVarInt(inventoryId);
 			WriteUnsignedVarInt(slot);
-			Write(containerName);
-			Write(storage);
-			Write(item);
+			Write(containerName != null); // is optional
+			if (containerName != null)
+			{
+				Write(containerName);
+			}
+			Write(storage != null); // is optional
+			if (storage != null)
+			{
+				WriteNetworkItemStackDescriptor(storage);
+			}
+			WriteNetworkItemStackDescriptor(item);
 
 			AfterEncode();
 		}
@@ -5104,9 +5136,15 @@ namespace MiNET.Net
 
 			inventoryId = ReadUnsignedVarInt();
 			slot = ReadUnsignedVarInt();
-			containerName = ReadFullContainerName();
-			storage = ReadItem();
-			item = ReadItem();
+			if (ReadBool())
+			{
+				containerName = ReadFullContainerName();
+			}
+			if (ReadBool())
+			{
+				storage = ReadNetworkItemStackDescriptor();
+			}
+			item = ReadNetworkItemStackDescriptor();
 
 			AfterDecode();
 		}
@@ -8839,6 +8877,7 @@ namespace MiNET.Net
 		public bool isBabyMob;
 		public bool isGlobal;
 		public long runtimeEntityId;
+		public Vector3? fireAtPosition;
 
 		public McpeLevelSoundEvent()
 		{
@@ -8859,6 +8898,11 @@ namespace MiNET.Net
 			Write(isBabyMob);
 			Write(isGlobal);
 			Write(runtimeEntityId);
+			Write(fireAtPosition.HasValue); // is optional
+			if (fireAtPosition.HasValue)
+			{
+				Write(fireAtPosition.Value);
+			}
 
 			AfterEncode();
 		}
@@ -8879,6 +8923,10 @@ namespace MiNET.Net
 			isBabyMob = ReadBool();
 			isGlobal = ReadBool();
 			runtimeEntityId = ReadLong();
+			if (ReadBool())
+			{
+				fireAtPosition = ReadVector3();
+			}
 
 			AfterDecode();
 		}
@@ -8897,6 +8945,7 @@ namespace MiNET.Net
 			isBabyMob = default;
 			isGlobal = default;
 			runtimeEntityId = default;
+			fireAtPosition = default;
 		}
 
 	}
@@ -11608,6 +11657,7 @@ namespace MiNET.Net
 			RayTraced = 3,
 		}
 
+		public bool filterProfanity;
 		public byte? graphicsMode;
 
 		public McpeUpdateClientOptions()
@@ -11622,6 +11672,7 @@ namespace MiNET.Net
 
 			BeforeEncode();
 
+			Write(filterProfanity);
 			Write(graphicsMode.HasValue); // is optional
 			if (graphicsMode.HasValue)
 			{
@@ -11640,6 +11691,7 @@ namespace MiNET.Net
 
 			BeforeDecode();
 
+			filterProfanity = ReadBool();
 			if (ReadBool())
 			{
 				graphicsMode = ReadByte();
@@ -11655,6 +11707,7 @@ namespace MiNET.Net
 		{
 			base.ResetPacket();
 
+			filterProfanity = default;
 			graphicsMode = default;
 		}
 
@@ -12583,6 +12636,7 @@ namespace MiNET.Net
 	{
 
 		public string? partyId;
+		public bool isPartyLeader;
 
 		public McpePartyChanged()
 		{
@@ -12601,6 +12655,7 @@ namespace MiNET.Net
 			{
 				Write(partyId);
 			}
+			Write(isPartyLeader);
 
 			AfterEncode();
 		}
@@ -12618,6 +12673,7 @@ namespace MiNET.Net
 			{
 				partyId = ReadString();
 			}
+			isPartyLeader = ReadBool();
 
 			AfterDecode();
 		}
@@ -12630,6 +12686,7 @@ namespace MiNET.Net
 			base.ResetPacket();
 
 			partyId = default;
+			isPartyLeader = default;
 		}
 
 	}
@@ -12770,6 +12827,110 @@ namespace MiNET.Net
 		{
 			base.ResetPacket();
 
+		}
+
+	}
+
+	public partial class McpeServerStoreInfo : Packet<McpeServerStoreInfo>
+	{
+
+		public string storeId;
+		public string storeName;
+
+		public McpeServerStoreInfo()
+		{
+			Id = 0x15a;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(storeId);
+			Write(storeName);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			storeId = ReadString();
+			storeName = ReadString();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			storeId = default;
+			storeName = default;
+		}
+
+	}
+
+	public partial class McpeServerPresenceInfo : Packet<McpeServerPresenceInfo>
+	{
+
+		public string experienceName;
+		public string worldName;
+
+		public McpeServerPresenceInfo()
+		{
+			Id = 0x15b;
+			IsMcpe = true;
+		}
+
+		protected override void EncodePacket()
+		{
+			base.EncodePacket();
+
+			BeforeEncode();
+
+			Write(experienceName);
+			Write(worldName);
+
+			AfterEncode();
+		}
+
+		partial void BeforeEncode();
+		partial void AfterEncode();
+
+		protected override void DecodePacket()
+		{
+			base.DecodePacket();
+
+			BeforeDecode();
+
+			experienceName = ReadString();
+			worldName = ReadString();
+
+			AfterDecode();
+		}
+
+		partial void BeforeDecode();
+		partial void AfterDecode();
+
+		protected override void ResetPacket()
+		{
+			base.ResetPacket();
+
+			experienceName = default;
+			worldName = default;
 		}
 
 	}

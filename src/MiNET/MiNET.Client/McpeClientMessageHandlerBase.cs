@@ -821,6 +821,14 @@ namespace MiNET.Client
 		{
 		}
 
+		public virtual void HandleMcpeServerStoreInfo(McpeServerStoreInfo message)
+		{
+		}
+
+		public virtual void HandleMcpeServerPresenceInfo(McpeServerPresenceInfo message)
+		{
+		}
+
 		public void HandleMcpeServerboundLoadingScreen(McpeServerboundLoadingScreen message)
 		{
 			

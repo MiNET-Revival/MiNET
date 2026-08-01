@@ -201,7 +201,8 @@ var valueTypes = new List<string>()
 	"float",
 	"decimal",
 	"double",
-	"char"
+	"char",
+	"Vector3"
 };
 
 PrintConstants(doc.SelectNodes("/protocol/enums"));
@@ -307,6 +308,9 @@ foreach (XmlNode pdu in doc.SelectNodes("//pdu"))
 				case "FixedString":
 					WriteLine($"Write{fieldType}({codedFieldName}{optionalValuePart});");
 					break;
+				case "NetworkItemStackDescriptor":
+					WriteLine($"WriteNetworkItemStackDescriptor({codedFieldName}{optionalValuePart});");
+					break;
 				default:
 					WriteLine($"Write({codedFieldName}{optionalValuePart});");
 					break;
@@ -377,6 +381,9 @@ foreach (XmlNode pdu in doc.SelectNodes("//pdu"))
 				case "ByteArray":
 				case "FixedString":
 					WriteLine($"{codedFieldName} = Read{fieldType}({safeToString});");
+					break;
+				case "NetworkItemStackDescriptor":
+					WriteLine($"{codedFieldName} = ReadNetworkItemStackDescriptor();");
 					break;
 				default:
 					WriteLine($"{codedFieldName} = Read{UpperInitial(field.Attributes["type"].Value)}({safeToString});");
@@ -528,6 +535,8 @@ private string GetFieldType(string formatFieldType)
 				return "byte[]";
 		case "FixedString":
 			return "string";
+		case "NetworkItemStackDescriptor":
+			return "Item";
 		default:
 			return formatFieldType;
 	}

@@ -73,8 +73,21 @@ namespace MiNET.Inventories
 			if (itemData.BlockStates != null && item is ItemBlock itemBlock)
 			{
 				var compound = NbtExtensions.ReadNbtCompound(itemData.BlockStates, NbtFlavor.BedrockNoVarInt);
+				var blockWithCreativeStates = itemBlock.Block.Clone() as Block;
+				blockWithCreativeStates?.SetStates(BlockUtils.GetBlockStates(compound));
 
-				itemBlock.Block.SetStates(BlockUtils.GetBlockStates(compound));
+				// Creative inventory data may lag behind the current block palette. Keep the
+				// palette-resolved default state instead of creating an unplaceable ghost block.
+				if (blockWithCreativeStates?.RuntimeId != Block.UnknownRuntimeId)
+				{
+					itemBlock.SetBlock(blockWithCreativeStates);
+				}
+			}
+
+			if (item is ItemBlock { Block: not null } invalidBlockItem &&
+				invalidBlockItem.BlockRuntimeId == Block.UnknownRuntimeId)
+			{
+				return false;
 			}
 
 			if (itemData.ExtraData != null)

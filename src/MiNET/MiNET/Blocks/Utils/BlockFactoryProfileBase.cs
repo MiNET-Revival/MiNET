@@ -162,6 +162,7 @@ namespace MiNET.Blocks.Utils
 		public Block GetBlockById(string id, short metadata)
 		{
 			var block = GetBlockById(id);
+			if (block == null) return null;
 
 			if (!MetaBlockNameToState.TryGetValue(BlockUtils.GetMetaBlockName(id, metadata), out var map))
 			{
@@ -177,7 +178,14 @@ namespace MiNET.Blocks.Utils
 		{
 			if (string.IsNullOrEmpty(id)) return null;
 
-			return IdToFactory.GetValueOrDefault(id)?.Invoke();
+			var block = IdToFactory.GetValueOrDefault(id)?.Invoke();
+			if (block?.RuntimeId == Block.UnknownRuntimeId)
+			{
+				var defaultState = BlockPalette.FirstOrDefault(state => state.Id == id);
+				if (defaultState != null) block.SetStates(defaultState.States);
+			}
+
+			return block;
 		}
 
 		public Block GetBlockByRuntimeId(int runtimeId)

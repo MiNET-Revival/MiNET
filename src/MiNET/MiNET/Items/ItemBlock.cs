@@ -94,6 +94,11 @@ namespace MiNET.Items
 			newBlock.Coordinates = currentBlock.IsReplaceable ? targetCoordinates : GetNewCoordinatesFromFace(targetCoordinates, face);
 
 			newBlock.SetStates(Block);
+			if (newBlock.RuntimeId == Block.UnknownRuntimeId)
+			{
+				Log.Warn($"Refusing to place block {newBlock.Id} with invalid states (runtime ID {Block.UnknownRuntimeId})");
+				return false;
+			}
 
 			if (!newBlock.CanPlace(world, player, targetCoordinates, face))
 			{
