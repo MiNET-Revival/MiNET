@@ -43,12 +43,12 @@ namespace MiNET.Items
 				case ItemDamageReason.BlockBreak:
 				{
 					Metadata += 2;
-					return Metadata >= GetMaxUses() - 1;
+					return Metadata >= GetMaxUses();
 				}
 				case ItemDamageReason.EntityAttack:
 				{
 					Metadata++;
-					return Metadata >= GetMaxUses() - 1;
+					return Metadata >= GetMaxUses();
 				}
 				default:
 					return false;

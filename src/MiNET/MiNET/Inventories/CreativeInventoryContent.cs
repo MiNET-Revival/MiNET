@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using fNbt;
 using MiNET.Items;
 using MiNET.Net;
 
@@ -7,14 +8,13 @@ namespace MiNET.Inventories
 {
 	public class CreativeInventoryContent : IPacketDataObject
 	{
-		private int _runtimeIdCounter = 1;
+		private int _runtimeIdCounter = 0;
 		private uint _groupIdCounter = 0;
 		private List<CreativeInventoryGroupItem> _items = new List<CreativeInventoryGroupItem>();
 		private Dictionary<CreativeInventoryCategoryType, CreativeInventoryCategory> _creativeInventoryCategories = new();
 
 		public CreativeInventoryContent()
 		{
-			_items.Add(new CreativeInventoryGroupItem() { Item = new ItemAir() });
 		}
 
 		public void AppendCategory(CreativeInventoryCategoryType type, ExternalDataCategory data)
@@ -37,6 +37,11 @@ namespace MiNET.Inventories
 					}
 
 					group.IconItem = iconItem;
+					// Network item NBT uses an unnamed root compound. PocketMine applies the
+					// same group workaround without changing the root name.
+					group.IconItem.ExtraData ??= new NbtCompound(string.Empty);
+					group.IconItem.ExtraData["___GroupBugWorkaround___"] =
+						new NbtInt("___GroupBugWorkaround___", (int) _groupIdCounter);
 				}
 
 				foreach (var dataItem in dataGroup.Items)
@@ -87,8 +92,8 @@ namespace MiNET.Inventories
 				}
 			}
 
-			packet.WriteLength(_items.Count - 1);
-			foreach (var item in _items.Skip(1))
+			packet.WriteLength(_items.Count);
+			foreach (var item in _items)
 			{
 				packet.Write(item);
 			}

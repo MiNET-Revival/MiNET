@@ -87,14 +87,14 @@ namespace MiNET.Items
 					if (block is GrassBlock || block is Dirt || block is GrassPath)
 					{
 						Metadata++;
-						return Metadata >= GetMaxUses() - 1;
+						return Metadata >= GetMaxUses();
 					}
 					return false;
 				}
 				case ItemDamageReason.EntityAttack:
 				{
 					Metadata++;
-					return Metadata >= GetMaxUses() - 1;
+					return Metadata >= GetMaxUses();
 				}
 				default:
 					return false;

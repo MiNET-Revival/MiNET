@@ -107,7 +107,7 @@ namespace MiNET.Players
 
 		protected virtual int CalculateDamage(Entity target)
 		{
-			int damage = Inventory.GetItemInHand().GetDamage(); //Item Damage.
+			int damage = (int) Inventory.GetItemInHand().GetAttackDamage(this, target); // Item damage.
 
 			damage = (int) Math.Floor(damage * (1.0));
 

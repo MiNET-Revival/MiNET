@@ -422,7 +422,37 @@ namespace MiNET.Inventories
 
 		public virtual bool Open()
 		{
-			return base.Open(Player);
+			var openedInventory = Player.GetOpenInventory();
+			if (openedInventory == this) return true;
+			if (openedInventory != null)
+			{
+				Player.CloseOpenedInventory();
+			}
+
+			var open = !IsOpen;
+			if (!OnInventoryOpen(Player, open)) return false;
+
+			// The main inventory is normally synchronised through reserved window 0.
+			// When the client explicitly opens its UI, Bedrock expects a transient
+			// window in the 1..99 range and only a ContainerOpen handshake. Re-sending
+			// InventoryContent here caused the 1.26 client to crash while constructing UI.
+			WindowId = GetNewWindowId();
+			Player.SetOpenInventory(this);
+			SendOpen(Player);
+			OnInventoryOpened(Player, open);
+
+			return true;
+		}
+
+		public override bool Close(Player player, bool closedByPlayer = false)
+		{
+			var closed = base.Close(player, closedByPlayer);
+			if (closed)
+			{
+				WindowId = WindowId.Inventory;
+			}
+
+			return closed;
 		}
 
 		internal void CloseUiInventory()

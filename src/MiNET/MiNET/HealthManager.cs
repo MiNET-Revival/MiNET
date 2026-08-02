@@ -129,7 +129,12 @@ namespace MiNET
 			TakeHit(source, null, damage, cause);
 		}
 
-		public virtual void TakeHit(Entity source, Item tool, int damage = 1, DamageCause cause = DamageCause.Unknown)
+		public virtual void TakeHit(
+			Entity source,
+			Item tool,
+			int damage = 1,
+			DamageCause cause = DamageCause.Unknown,
+			bool applyKnockback = true)
 		{
 			var player = Entity as Player;
 			if (player != null && player.GameMode != GameMode.Survival) return;
@@ -181,7 +186,7 @@ namespace MiNET
 
 			Entity.BroadcastEntityEvent();
 
-			if (source != null)
+			if (source != null && applyKnockback)
 			{
 				DoKnockback(source, tool);
 			}

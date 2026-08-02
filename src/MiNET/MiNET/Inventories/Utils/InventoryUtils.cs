@@ -26,7 +26,6 @@ namespace MiNET.Inventories
 		static InventoryUtils()
 		{
 			_isEduEnabled = Config.GetProperty("EnableEdu", false);
-
 			foreach (var category in DefaultCategories)
 			{
 				var data = ResourceUtil.ReadResource<ExternalDataCategory>($"{category.ToString().ToLower()}.json", typeof(InventoryUtils), "Data");
@@ -65,7 +64,6 @@ namespace MiNET.Inventories
 			result = null;
 
 			if (string.IsNullOrEmpty(itemData.Id)) return false;
-
 			var item = ItemFactory.GetItem(itemData.Id, itemData.Metadata, (byte) itemData.Count);
 			if (item is ItemAir) return false;
 			if (item.Edu && !_isEduEnabled) return false;
@@ -84,8 +82,11 @@ namespace MiNET.Inventories
 				}
 			}
 
+			// A non-air block item must resolve to a positive palette runtime ID. Runtime ID 0
+			// represents air, and sending it for another item can crash the client while it
+			// builds the creative inventory UI.
 			if (item is ItemBlock { Block: not null } invalidBlockItem &&
-				invalidBlockItem.BlockRuntimeId == Block.UnknownRuntimeId)
+				invalidBlockItem.BlockRuntimeId <= 0)
 			{
 				return false;
 			}

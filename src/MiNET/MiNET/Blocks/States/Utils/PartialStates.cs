@@ -1,4 +1,4 @@
-﻿namespace MiNET.Blocks.States
+namespace MiNET.Blocks.States
 {
 
 	public partial class Active : BlockStateByte
@@ -1475,6 +1475,34 @@
 
 	} // class
 
+	public partial class PotentSulfurState : BlockStateString
+	{
+		public override string Name => "potent_sulfur_state";
+
+		protected PotentSulfurState(string value)
+		{
+			Value = value;
+		}
+
+		protected const string DryValue = "dry";
+		protected const string WetValue = "wet";
+		protected const string DormantValue = "dormant";
+		protected const string EruptingValue = "erupting";
+		protected const string ContinuousValue = "continuous";
+
+		public static readonly PotentSulfurState Dry = new PotentSulfurState(DryValue);
+		public static readonly PotentSulfurState Wet = new PotentSulfurState(WetValue);
+		public static readonly PotentSulfurState Dormant = new PotentSulfurState(DormantValue);
+		public static readonly PotentSulfurState Erupting = new PotentSulfurState(EruptingValue);
+		public static readonly PotentSulfurState Continuous = new PotentSulfurState(ContinuousValue);
+
+		public static PotentSulfurState[] Values()
+		{
+			return [Dry, Wet, Dormant, Erupting, Continuous];
+		}
+
+	} // class
+
 	public partial class PoweredBit : BlockStateByte
 	{
 		public override string Name => "powered_bit";
@@ -1484,6 +1512,28 @@
 		public static byte[] Values()
 		{
 			return [0, 1];
+		}
+
+	} // class
+
+	public partial class PoweredShelfType : BlockStateInt
+	{
+		public override string Name => "powered_shelf_type";
+
+		public const int MaxValue = 3;
+
+		public static int[] Values()
+		{
+			return [0, 1, 2, 3];
+		}
+
+
+		protected override void ValidateValue(int value)
+		{
+			if (value < 0 || value > MaxValue)
+			{
+				ThrowArgumentException(value);
+			}
 		}
 
 	} // class
@@ -1554,6 +1604,28 @@
 		public static int[] Values()
 		{
 			return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+		}
+
+
+		protected override void ValidateValue(int value)
+		{
+			if (value < 0 || value > MaxValue)
+			{
+				ThrowArgumentException(value);
+			}
+		}
+
+	} // class
+
+	public partial class RehydrationLevel : BlockStateInt
+	{
+		public override string Name => "rehydration_level";
+
+		public const int MaxValue = 3;
+
+		public static int[] Values()
+		{
+			return [0, 1, 2, 3];
 		}
 
 

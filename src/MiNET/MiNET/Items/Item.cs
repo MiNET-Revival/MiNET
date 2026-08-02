@@ -115,10 +115,14 @@ namespace MiNET.Items
 					return 33;
 				case ItemMaterial.Stone:
 					return 132;
+				case ItemMaterial.Copper:
+					return 191;
 				case ItemMaterial.Iron:
 					return 251;
 				case ItemMaterial.Diamond:
 					return 1562;
+				case ItemMaterial.Netherite:
+					return 2032;
 				default:
 					return 0;
 			}
@@ -150,12 +154,14 @@ namespace MiNET.Items
 			}
 		}
 
-		public int GetDamage()
+		public virtual int GetDamage()
 		{
 			switch (ItemType)
 			{
 				case ItemType.Sword:
 					return GetSwordDamage(ItemMaterial);
+				case ItemType.Spear:
+					return GetSpearDamage(ItemMaterial);
 				case ItemType.Item:
 					return 1;
 				case ItemType.Axe:
@@ -169,6 +175,11 @@ namespace MiNET.Items
 			}
 		}
 
+		public virtual double GetAttackDamage(Player attacker, Entity target)
+		{
+			return GetDamage();
+		}
+
 		protected int GetSwordDamage(ItemMaterial itemMaterial)
 		{
 			switch (itemMaterial)
@@ -179,13 +190,32 @@ namespace MiNET.Items
 					return 5;
 				case ItemMaterial.Stone:
 					return 6;
+				case ItemMaterial.Copper:
+					return 6;
 				case ItemMaterial.Iron:
 					return 7;
 				case ItemMaterial.Diamond:
 					return 8;
+				case ItemMaterial.Netherite:
+					return 9;
 				default:
 					return 1;
 			}
+		}
+
+		private static int GetSpearDamage(ItemMaterial itemMaterial)
+		{
+			return itemMaterial switch
+			{
+				ItemMaterial.Wood => 1,
+				ItemMaterial.Gold => 1,
+				ItemMaterial.Stone => 2,
+				ItemMaterial.Copper => 2,
+				ItemMaterial.Iron => 3,
+				ItemMaterial.Diamond => 4,
+				ItemMaterial.Netherite => 5,
+				_ => 1
+			};
 		}
 
 		private int GetAxeDamage(ItemMaterial itemMaterial)
@@ -293,7 +323,32 @@ namespace MiNET.Items
 		Iron = 4,
 		Diamond = 5,
 		Netherite = 6,
-		Turtle = 7
+		Turtle = 7,
+		Copper = 8
+	}
+
+	public static class ItemMaterialExtensions
+	{
+		/// <summary>
+		/// Returns MiNET's legacy harvest rank independently from the material identifier.
+		/// Copper shares gold's former rank so it can harvest stone-tier ores but not
+		/// iron-tier ores, while still remaining distinguishable in item statistics.
+		/// </summary>
+		public static int GetHarvestLevel(this ItemMaterial material)
+		{
+			return material switch
+			{
+				ItemMaterial.Wood => 1,
+				ItemMaterial.Stone => 2,
+				ItemMaterial.Gold => 3,
+				ItemMaterial.Copper => 3,
+				ItemMaterial.Iron => 4,
+				ItemMaterial.Diamond => 5,
+				ItemMaterial.Netherite => 6,
+				ItemMaterial.Turtle => 7,
+				_ => 0
+			};
+		}
 	}
 
 	public enum ItemType
@@ -310,6 +365,7 @@ namespace MiNET.Items
 		FlintAndSteel,
 		Elytra,
 		Trident,
+		Spear,
 		CarrotOnAStick,
 		FishingRod,
 		Book,

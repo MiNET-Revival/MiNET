@@ -80,7 +80,7 @@ namespace MiNET.Entities
 				Entity.DespawnEntity();
 			}
 
-			public override void TakeHit(Entity source, Item tool, int damage = 1, DamageCause cause = DamageCause.Unknown)
+			public override void TakeHit(Entity source, Item tool, int damage = 1, DamageCause cause = DamageCause.Unknown, bool applyKnockback = true)
 			{
 				Entity.DespawnEntity();
 			}

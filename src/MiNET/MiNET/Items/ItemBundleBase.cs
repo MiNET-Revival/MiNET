@@ -4,7 +4,9 @@
 	{
 		public ItemBundleBase()
 		{
-			Edu = true;
+			// Bundles are vanilla items. They used to be hidden while experimental,
+			// but must no longer be filtered with Education Edition content.
+			Edu = false;
 		}
 	}
 }

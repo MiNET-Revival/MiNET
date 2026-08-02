@@ -74,7 +74,14 @@ namespace MiNET.Items
 			{
 				if (_nbt == null)
 				{
-					_nbt = NbtData == null ? EmptyNbt : NbtExtensions.ReadNbtCompound(NbtData);
+					// required_item_list.json stores the vanilla component payloads using
+					// LittleEndianNbtSerializer (fixed-width integers). The ItemRegistry
+					// packet itself uses Network NBT, which Packet.Write(Nbt) applies later.
+					// Reading the stored bytes as Network NBT stops at the root compound
+					// name and silently produces an empty tag, removing icon/display_name.
+					_nbt = NbtData == null
+						? EmptyNbt
+						: NbtExtensions.ReadNbtCompound(NbtData, NbtFlavor.BedrockNoVarInt);
 				}
 
 				return _nbt;
@@ -82,7 +89,7 @@ namespace MiNET.Items
 			set
 			{
 				_nbt = value;
-				NbtData = _nbt.Any() ? NbtExtensions.ToBytes(_nbt, NbtFlavor.Bedrock) : null;
+				NbtData = _nbt.Any() ? NbtExtensions.ToBytes(_nbt, NbtFlavor.BedrockNoVarInt) : null;
 			}
 		}
 

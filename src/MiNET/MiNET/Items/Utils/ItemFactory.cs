@@ -32,10 +32,14 @@ namespace MiNET.Items
 			ItemTags = BuildItemTags();
 			ItemStates = ResourceUtil.ReadResource<ItemStates>("required_item_list.json", typeof(ItemFactory), "Data");
 
-			var maxRuntimeId = ItemStates.Max(state => state.Value.RuntimeId);
-			foreach (var blockId in BlockFactory.FactoryProfile.ItemIdToBlockId.Values)
+			var missingBlockItems = BlockFactory.FactoryProfile.ItemIdToBlockId.Keys
+				.Where(blockItemId => !ItemStates.ContainsKey(blockItemId))
+				.Distinct()
+				.ToArray();
+			if (missingBlockItems.Length != 0)
 			{
-				ItemStates.TryAdd(blockId, new ItemState() { RuntimeId = ++maxRuntimeId });
+				throw new InvalidOperationException(
+					$"The item registry is inconsistent with the block-item map: {string.Join(", ", missingBlockItems)}");
 			}
 
 			RuntimeIdToId = BuildRuntimeIdToId();
@@ -48,18 +52,10 @@ namespace MiNET.Items
 				Log.Debug($"Detected {missingItemCount} item registry entries without a dedicated MiNET implementation.");
 			}
 
-			if (!Config.GetProperty("EnableEdu", false))
-			{
-				foreach (var factory in IdToFactory.Values)
-				{
-					var item = factory();
-					if (item.Edu)
-					{
-						ItemStates.Remove(item.Id);
-						ItemStates.Remove(item.Id.Replace("minecraft:", "minecraft:item."));
-					}
-				}
-			}
+			// The item registry is a protocol dictionary, not the creative inventory.
+			// It must remain identical to the client's dictionary even when Education
+			// Edition content is hidden. Filtering entries here leaves holes in the
+			// runtime-ID map and crashes recent Bedrock clients when they build the UI.
 		}
 
 		public static string GetIdByType<T>()

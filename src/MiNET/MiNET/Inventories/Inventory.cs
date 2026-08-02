@@ -319,7 +319,13 @@ namespace MiNET.Inventories
 			var containerSetContent = McpeInventoryContent.CreateObject();
 			containerSetContent.inventoryId = (byte) WindowId;
 			containerSetContent.input = Slots;
-			containerSetContent.containerName = FullContainerName.Unknown;
+			// FullContainerName is mandatory in InventoryContent and ContainerId.Unknown
+			// serializes as 255, outside the protocol's ContainerSlotType range. Bedrock's
+			// own inventory sync uses the neutral container ID 0 for regular windows.
+			containerSetContent.containerName = new FullContainerName
+			{
+				ContainerId = ContainerId.AnvilInput
+			};
 			player.SendPacket(containerSetContent);
 		}
 
@@ -389,7 +395,7 @@ namespace MiNET.Inventories
 
 		private static byte _lastWindowId;
 
-		private static WindowId GetNewWindowId()
+		protected static WindowId GetNewWindowId()
 		{
 			return (WindowId) (_lastWindowId = (byte) Math.Max((byte) WindowId.First, ++_lastWindowId % (byte) WindowId.Last));
 		}

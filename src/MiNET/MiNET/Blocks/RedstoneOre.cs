@@ -39,7 +39,7 @@ namespace MiNET.Blocks
 
 		public override Item[] GetDrops(Level world, Item tool)
 		{
-			if (tool.ItemMaterial < ItemMaterial.Iron) return new Item[0];
+			if (tool.ItemMaterial.GetHarvestLevel() < ItemMaterial.Iron.GetHarvestLevel()) return new Item[0];
 
 			var rnd = new Random();
 			return new[] { new ItemRedstone() { Count = (byte) (4 + rnd.Next(1)) } };

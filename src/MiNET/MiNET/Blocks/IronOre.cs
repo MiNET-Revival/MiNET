@@ -38,7 +38,7 @@ namespace MiNET.Blocks
 
 		public override Item[] GetDrops(Level world, Item tool)
 		{
-			if (tool.ItemMaterial < ItemMaterial.Stone) return new Item[0];
+			if (tool.ItemMaterial.GetHarvestLevel() < ItemMaterial.Stone.GetHarvestLevel()) return new Item[0];
 
 			return new[] { new ItemRawIron() }; 
 		}

@@ -77,13 +77,14 @@ namespace MiNET.Items
 				ItemMaterial.Gold => 7,
 				ItemMaterial.Chain => 15,
 				ItemMaterial.Iron => 15,
+				ItemMaterial.Copper => 11,
 				ItemMaterial.Turtle => 25,
 				ItemMaterial.Diamond => 33,
 				ItemMaterial.Netherite => 37,
 				_ => 0
 			};
 
-			return armor * material;
+			return material == 0 ? 0 : armor * material + 1;
 		}
 
 		private void SwithItem(Player player)
@@ -105,6 +106,7 @@ namespace MiNET.Items
 				(ItemMaterial.Chain, _) => LevelSoundEventType.EquipChain,
 				(ItemMaterial.Gold, _) => LevelSoundEventType.EquipGold,
 				(ItemMaterial.Iron, _) => LevelSoundEventType.EquipIron,
+				(ItemMaterial.Copper, _) => LevelSoundEventType.EquipCopper,
 				(ItemMaterial.Diamond, _) => LevelSoundEventType.EquipDiamond,
 				(ItemMaterial.Netherite, _) => LevelSoundEventType.EquipNetherite,
 				(_, ItemType.Elytra) => LevelSoundEventType.EquipElytra,

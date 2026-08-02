@@ -163,6 +163,8 @@ namespace MiNET.Players
 			catch (Exception e)
 			{
 				Log.Error(e);
+				Disconnect("Server failed to complete player initialization");
+				return;
 			}
 			finally
 			{

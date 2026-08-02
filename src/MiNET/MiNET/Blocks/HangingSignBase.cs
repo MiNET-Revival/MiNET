@@ -36,7 +36,8 @@ namespace MiNET.Blocks
 					}
 				}
 				else if (targetBlock is EndRod endRod && (endRod.FacingDirection == OldFacingDirection3.Down || endRod.FacingDirection == OldFacingDirection3.Up)
-					|| targetBlock is Chain chain && chain.PillarAxis == PillarAxis.Y
+					|| targetBlock is IronChain ironChain && ironChain.PillarAxis == PillarAxis.Y
+					|| targetBlock is CopperChain copperChain && copperChain.PillarAxis == PillarAxis.Y
 					|| targetBlock is HangingSignBase)
 				{
 					if (targetBlock is not HangingSignBase || player.IsSneaking || groundSignDirection % 4 != 0)

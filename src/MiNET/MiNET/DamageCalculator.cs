@@ -41,7 +41,7 @@ namespace MiNET
 
 		public virtual double CalculateItemDamage(Player player, Item item, Player target)
 		{
-			double damage = item.GetDamage();
+			double damage = item.GetAttackDamage(player, target);
 
 			var enchantings = item.GetEnchantings();
 
@@ -171,6 +171,9 @@ namespace MiNET
 						case ItemMaterial.Iron:
 							armorValue += 2;
 							break;
+						case ItemMaterial.Copper:
+							armorValue += 2;
+							break;
 						case ItemMaterial.Diamond:
 							armorValue += 3;
 							break;
@@ -193,6 +196,9 @@ namespace MiNET
 							break;
 						case ItemMaterial.Iron:
 							armorValue += 6;
+							break;
+						case ItemMaterial.Copper:
+							armorValue += 4;
 							break;
 						case ItemMaterial.Diamond:
 							armorValue += 8;
@@ -217,6 +223,9 @@ namespace MiNET
 						case ItemMaterial.Iron:
 							armorValue += 5;
 							break;
+						case ItemMaterial.Copper:
+							armorValue += 3;
+							break;
 						case ItemMaterial.Diamond:
 							armorValue += 6;
 							break;
@@ -239,6 +248,9 @@ namespace MiNET
 							break;
 						case ItemMaterial.Iron:
 							armorValue += 2;
+							break;
+						case ItemMaterial.Copper:
+							armorValue += 1;
 							break;
 						case ItemMaterial.Diamond:
 							armorValue += 3;

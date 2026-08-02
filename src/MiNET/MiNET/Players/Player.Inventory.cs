@@ -198,10 +198,21 @@ namespace MiNET.Players
 
 			LastAttackTarget = target;
 
+			SpearAttackResult spearAttack = default;
+			var spear = itemInHand as ItemSpearBase;
+			var isSpearAttack = spear != null;
+			if (isSpearAttack && !spear.TryResolveAttack(this, target, out spearAttack))
+			{
+				spear.PlayAttackSound(this, false);
+				return;
+			}
+
 			Player player = target as Player;
 			if (player != null)
 			{
-				double damage = DamageCalculator.CalculateItemDamage(this, itemInHand, player);
+				double damage = isSpearAttack
+					? spearAttack.Damage
+					: DamageCalculator.CalculateItemDamage(this, itemInHand, player);
 
 				if (IsFalling)
 				{
@@ -214,7 +225,12 @@ namespace MiNET.Players
 
 				damage += DamageCalculator.CalculateDamageIncreaseFromEnchantments(this, itemInHand, player);
 				var reducedDamage = (int) DamageCalculator.CalculatePlayerDamage(this, player, itemInHand, damage, DamageCause.EntityAttack);
-				player.HealthManager.TakeHit(this, itemInHand, reducedDamage, DamageCause.EntityAttack);
+				player.HealthManager.TakeHit(
+					this,
+					itemInHand,
+					reducedDamage,
+					DamageCause.EntityAttack,
+					!isSpearAttack || spearAttack.ShouldKnockback);
 				if (reducedDamage < damage)
 				{
 					player.Inventory.DamageArmor();
@@ -228,7 +244,23 @@ namespace MiNET.Players
 			else
 			{
 				// This is totally wrong. Need to merge with the above damage calculation
-				target.HealthManager.TakeHit(this, itemInHand, CalculateDamage(target), DamageCause.EntityAttack);
+				var damage = isSpearAttack ? spearAttack.Damage : CalculateDamage(target);
+				target.HealthManager.TakeHit(
+					this,
+					itemInHand,
+					damage,
+					DamageCause.EntityAttack,
+					!isSpearAttack || spearAttack.ShouldKnockback);
+			}
+
+			if (isSpearAttack)
+			{
+				spear.PlayAttackSound(this, true);
+				if (spearAttack.ShouldDismount && target is Player mountedTarget && mountedTarget.Vehicle != 0
+					&& Level.TryGetEntity(mountedTarget.Vehicle, out Entity vehicle))
+				{
+					vehicle.Unmount(mountedTarget);
+				}
 			}
 
 			Inventory.DamageItemInHand(ItemDamageReason.EntityAttack, target, null);

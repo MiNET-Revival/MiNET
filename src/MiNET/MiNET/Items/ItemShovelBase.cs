@@ -64,21 +64,21 @@ namespace MiNET.Items
 				case ItemDamageReason.BlockBreak:
 				{
 					Metadata++;
-					return Metadata >= GetMaxUses() - 1;
+					return Metadata >= GetMaxUses();
 				}
 				case ItemDamageReason.BlockInteract:
 				{
 					if (block is GrassBlock)
 					{
 						Metadata++;
-						return Metadata >= GetMaxUses() - 1;
+						return Metadata >= GetMaxUses();
 					}
 					return false;
 				}
 				case ItemDamageReason.EntityAttack:
 				{
 					Metadata += 2;
-					return Metadata >= GetMaxUses() - 1;
+					return Metadata >= GetMaxUses();
 				}
 				default:
 					return false;
